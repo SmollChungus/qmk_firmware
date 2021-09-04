@@ -17,3 +17,6 @@ NKRO_ENABLE = no		# USB Nkey Rollover - if this doesn't work, see here: https://
 BACKLIGHT_ENABLE = no  # Enable keyboard backlight functionality
 AUDIO_ENABLE = no
 RGBLIGHT_ENABLE = no
+
+OLED_ENABLE = yes
+OLED_DRIVER = SDD1306;;
