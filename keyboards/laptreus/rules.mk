@@ -5,13 +5,6 @@ MCU = atmega32u4
 F_CPU = 8000000
 
 # Bootloader selection
-#   Teensy       halfkay
-#   Pro Micro    caterina
-#   Atmel DFU    atmel-dfu
-#   LUFA DFU     lufa-dfu
-#   QMK DFU      qmk-dfu
-#   ATmega32A    bootloadHID
-#   ATmega328P   USBasp
 BOOTLOADER = caterina
 
 # Build Options
@@ -27,7 +20,6 @@ NKRO_ENABLE = no            # Nkey Rollover - if this doesn't work, see here: ht
 #BACKLIGHT_ENABLE = no      # Enable keyboard backlight functionality
 UNICODE_ENABLE = no         # Unicode
 KEY_LOCK_ENABLE = no
-TAP_DANCE_ENABLE = no
 
 # Do not enable SLEEP_LED_ENABLE. it uses the same timer as BACKLIGHT_ENABLE
 SLEEP_LED_ENABLE = no       # Breathing sleep LED during USB suspend
