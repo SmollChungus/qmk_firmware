@@ -18,7 +18,8 @@ enum custom_keycodes {
     KC_SCROLL = SAFE_RANGE,
     KC_CPI_1,
     KC_CPI_2,
-    KC_CPI_3
+    KC_CPI_3,
+    KC_MNT
 };
 
 typedef union {
