@@ -1,0 +1,2 @@
+# Pro micro
+BOOTLOADER = caterina
