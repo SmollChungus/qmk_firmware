@@ -2,19 +2,21 @@
 
 #include "config_common.h"
 
-/* USB Device descriptor parameter */
-#define VENDOR_ID       0xFEED
-#define PRODUCT_ID      0x6060
-#define DEVICE_VER      0x0001
-#define MANUFACTURER    qmkbuilder
-#define PRODUCT         keyboard
-#define DESCRIPTION     Keyboard
 
-/* key matrix size */
+
+/* USB Device descriptor parameter */
+#define VENDOR_ID       0x5363 // Sc for Smollchungus
+#define PRODUCT_ID      0x0002
+#define DEVICE_VER      0x0001
+#define MANUFACTURER    smollchungus
+#define PRODUCT         acidalia
+
+/* Key matrix size */
 #define MATRIX_ROWS 4
 #define MATRIX_COLS 4
 
-
+/* Laser sensor unit */
+#define ADNS_9800
 
 /* COL2ROW or ROW2COL */
 #define DIODE_DIRECTION COL2ROW
@@ -32,7 +34,7 @@
 #define NO_ACTION_MACRO
 #define NO_ACTION_FUNCTION
 
-/* optical sensor settings */
+/* Optical sensor settings */
 #define SCROLL_DIVIDER 12
 #define CPI_1 2000
 #define CPI_2 4000
