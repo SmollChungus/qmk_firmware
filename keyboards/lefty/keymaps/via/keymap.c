@@ -40,26 +40,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_LOWER] = LAYOUT_all(
-		____, ____, ____, ____, ____, ____, ____, ____,
-		____, ____, ____, ____, ____, ____, ____,
-		____, ____, ____, ____, ____, ____, ____,
-		      ____, ____, ____, ____, ____, ____,
-		      ____,       ____, ____,       ____
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		      KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		      KC_TRNS,       KC_TRNS, KC_TRNS,       KC_TRNS
 ),
 
 [_RAISE] = LAYOUT_all(
-		____, ____, ____, ____, ____, ____, ____, ____,
-		____, ____, ____, ____, ____, ____, ____,
-		____, ____, ____, ____, ____, ____, ____,
-		      ____, ____, ____, ____, ____, ____,
-		      ____,       ____, ____,       ____
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		      KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		      KC_TRNS,       KC_TRNS, KC_TRNS,       KC_TRNS
 ),
 
 [_SPECIAL] = LAYOUT_all(
-		____, ____, ____, ____, ____, ____, ____, ____,
-		____, ____, ____, ____, ____, ____, ____,
-		____, ____, ____, ____, ____, ____, ____,
-		      ____, ____, ____, ____, ____, ____,
-		      ____,       ____, ____,       ____
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		      KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+		      KC_TRNS,       KC_TRNS, KC_TRNS,       KC_TRNS
 )
 };
