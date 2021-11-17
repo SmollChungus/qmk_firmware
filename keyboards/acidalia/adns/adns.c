@@ -77,6 +77,8 @@
 #define US_BETWEEN_READS 20
 #define US_BEFORE_MOTION 100
 #define MSB1 0x80
+#undef SPI_SS_PIN
+#define SPI_SS_PIN F7
 
 extern const uint16_t adns_firmware_length;
 extern const uint8_t adns_firmware_data[];
