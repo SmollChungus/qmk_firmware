@@ -2,12 +2,12 @@
 MCU = atmega32u4
 
 # Bootloader selection
-BOOTLOADER = caterina
+BOOTLOADER = atmel-dfu
 
 # Build Options
 #   change yes to no to disable
 #
-BOOTMAGIC_ENABLE = no       # Virtual DIP switch configuration
+BOOTMAGIC_ENABLE = lite      # Virtual DIP switch configuration
 MOUSEKEY_ENABLE = no        # Mouse keys
 EXTRAKEY_ENABLE = yes       # Audio control and System control
 CONSOLE_ENABLE = no         # Console for debug
@@ -24,9 +24,9 @@ AUDIO_ENABLE = no           # Audio output on port C6
 
 POINTING_DEVICE_ENABLE = yes
 
-DEFAULT_FOLDER = acidalia/rev1
+DEFAULT_FOLDER = acidalia/rev2
 
 SRC += spi_master.c
-SRC += adns/adns.c
+SRC += drivers/sensors/adns9800.c
 SRC += pmw/pmw.c
 

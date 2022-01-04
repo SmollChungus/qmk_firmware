@@ -18,6 +18,9 @@
 #include "pointing_device.h"
 #include "optical_sensor/optical_sensor.h"
 
+#undef SPI_SS_PIN
+#define SPI_SS_PIN F7
+
 #define CLAMP_HID(value) value < -127 ? -127 : value > 127 ? 127 : value
 
 static bool scroll_pressed;
