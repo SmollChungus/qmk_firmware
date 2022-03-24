@@ -14,24 +14,39 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include QMK_KEYBOARD_H
 
-#include "quantum.h"
+enum layers {
+    _QWERTY,
+    _LOWER,
+    _RAISE,
+    _SPECIAL,
+};
 
-// keymap
-#define LAYOUT_all( \
-	K00, K01, K02, K03, K04, K05, K06, K07, \
-	K10, K11, K12,      K14, K15, K16, K17, \
-	K20, K21, K22,      K24, K25, K26, K27, \
-	     K31, K32,      K34, K35, K36, K37, \
-	     K41,           K44, K45,      K47 \
-) \
-{ \
-	{ K00,   K01,   K02,   K03,     K04,   K05,   K06,   K07 }, \
-	{ K10,   K11,   K12,   KC_NO,   K14,   K15,   K16,   K17 }, \
-	{ K20,   K21,   K22,   KC_NO,   K24,   K25,   K26,   K27 }, \
-	{ KC_NO, K31,   K32,   KC_NO,   K34,   K35,   K36,   K37 }, \
-	{ KC_NO, K41,   KC_NO, KC_NO,   K44,   K45,   KC_NO, K47 }  \
-}
+#define LOWER MO(_LOWER)
+#define RAISE MO(_RAISE)
+#define SPECIAL MO(_SPECIAL)
 
-#define LAYOUT LAYOUT
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+
+[_QWERTY] = LAYOUT_all(
+		KC_F1,    KC_F2,
+		KC_F3
+),
+
+[_LOWER] = LAYOUT_all(
+		_______, _______,
+		_______
+),
+
+[_RAISE] = LAYOUT_all(
+		_______, _______,
+		_______
+),
+
+[_SPECIAL] = LAYOUT_all(
+		_______, _______,
+		_______
+)
+};

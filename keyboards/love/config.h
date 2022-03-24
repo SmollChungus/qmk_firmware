@@ -16,22 +16,33 @@
 
 #pragma once
 
-#include "quantum.h"
+#include "config_common.h"
 
-// keymap
-#define LAYOUT_all( \
-	K00, K01, K02, K03, K04, K05, K06, K07, \
-	K10, K11, K12,      K14, K15, K16, K17, \
-	K20, K21, K22,      K24, K25, K26, K27, \
-	     K31, K32,      K34, K35, K36, K37, \
-	     K41,           K44, K45,      K47 \
-) \
-{ \
-	{ K00,   K01,   K02,   K03,     K04,   K05,   K06,   K07 }, \
-	{ K10,   K11,   K12,   KC_NO,   K14,   K15,   K16,   K17 }, \
-	{ K20,   K21,   K22,   KC_NO,   K24,   K25,   K26,   K27 }, \
-	{ KC_NO, K31,   K32,   KC_NO,   K34,   K35,   K36,   K37 }, \
-	{ KC_NO, K41,   KC_NO, KC_NO,   K44,   K45,   KC_NO, K47 }  \
+/* USB Device descriptor parameter */
+#define VENDOR_ID       0x5363 // Sc for Smollchungus
+#define PRODUCT_ID      0x0003
+#define DEVICE_VER      0x0001
+#define MANUFACTURER    SmollChungus
+#define PRODUCT         love
+
+/* key matrix size */
+#define MATRIX_ROWS 2
+#define MATRIX_COLS 2
+
+#define DIRECT_PINS { \
+    { C5, C4}, \
+    { D5 } \
 }
 
-#define LAYOUT LAYOUT
+#define NO_ACTION_MACRO
+#define NO_ACTION_FUNCTION
+
+
+
+// disable for via
+
+#define NO_ACTION_TAPPING
+#define NO_ACTION_ONESHOT
+#define IGNORE_MOD_TAP_INTERRUPT
+
+#define TAPPING_FORCE_HOLD

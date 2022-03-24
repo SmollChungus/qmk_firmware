@@ -20,10 +20,11 @@
 
 /* USB Device descriptor parameter */
 #define VENDOR_ID       0x5363 // Sc for Smollchungus
-#define PRODUCT_ID      0x0001
+#define PRODUCT_ID      0x5363 // Lt for Lefty
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    SmollChungus
-#define PRODUCT         Lefty
+#define PRODUCT         SmollChungus Lefty
+#define DESCRIPTION     SmollChungus Lefty
 
 /* key matrix size */
 #define MATRIX_ROWS 5
@@ -42,3 +43,4 @@
 
 /* Locking resynchronize hack */
 #define LOCKING_RESYNC_ENABLE
+

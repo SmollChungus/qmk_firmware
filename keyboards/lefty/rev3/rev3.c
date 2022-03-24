@@ -14,24 +14,4 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "quantum.h"
-
-// keymap
-#define LAYOUT_all( \
-	K00, K01, K02, K03, K04, K05, K06, K07, \
-	K10, K11, K12,      K14, K15, K16, K17, \
-	K20, K21, K22,      K24, K25, K26, K27, \
-	     K31, K32,      K34, K35, K36, K37, \
-	     K41,           K44, K45,      K47 \
-) \
-{ \
-	{ K00,   K01,   K02,   K03,     K04,   K05,   K06,   K07 }, \
-	{ K10,   K11,   K12,   KC_NO,   K14,   K15,   K16,   K17 }, \
-	{ K20,   K21,   K22,   KC_NO,   K24,   K25,   K26,   K27 }, \
-	{ KC_NO, K31,   K32,   KC_NO,   K34,   K35,   K36,   K37 }, \
-	{ KC_NO, K41,   KC_NO, KC_NO,   K44,   K45,   KC_NO, K47 }  \
-}
-
-#define LAYOUT LAYOUT
+#include "lefty.h"
