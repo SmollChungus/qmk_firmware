@@ -24,14 +24,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
 
-
+/* base layer*/
 
 [0] = LAYOUT_all(
-      KC_1,       KC_2,   KC_3, KC_4,   KC_5,
-      LCTL(KC_S), KC_SPC, KC_R,         KC_P,
-                          KC_F5,        KC_B,
-      KC_F6,              KC_F8, KC_F9, KC_S,
-      KC_F7,                            KC_C
+      KC_LCTL,      RSFT(RALT(KC_BTN1)), RSFT(KC_BTN3),   KC_LALT, LCTL(KC_B),
+      LCTL(KC_S),          LSFT(KC_SPC),  KC_R,                KC_P,
+                                          KC_F5,               KC_B,
+      KC_F6,                              KC_F8,       KC_F9,  KC_S,
+      KC_F7,                                                   KC_C
 ),
 
 [1] = LAYOUT_all(
