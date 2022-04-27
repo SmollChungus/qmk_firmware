@@ -23,7 +23,7 @@
 #define PRODUCT_ID      0x5136 // Q6
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    smollchungus
-#define PRODUCT         smollchungus Quantum60
+#define PRODUCT         Quantum60
 
 
 /* Matrix  */
