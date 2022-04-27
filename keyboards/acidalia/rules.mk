@@ -25,6 +25,7 @@ AUDIO_ENABLE = no           # Audio output on port C6
 POINTING_DEVICE_ENABLE = yes
 POINTING_DEVICE_DRIVER = adns9800
 
+
 DEFAULT_FOLDER = acidalia/rev1
 
 # SRC += acidalia.c

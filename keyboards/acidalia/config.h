@@ -33,6 +33,7 @@
 #define DIODE_DIRECTION COL2ROW
 
 #define ADNS9800_CS_PIN B0
+#define POINTING_DEVICE_INVERT_Y
 
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
