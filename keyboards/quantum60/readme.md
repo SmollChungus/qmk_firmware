@@ -1,10 +1,10 @@
 # SmollChungus Quantum60
 
-![SmollChungus Quantum60](https://.jpg)
+![ Quantum60](https://i.imgur.com/YOtElpi.png)
 
-Quantum60 PCB, 60% layout with double south;aw macro culumns
+Quantum60 PCB, 60% layout with double southpaw macro-columns
 
-* Keyboard Maintainer: [Matthijs Muller](https://github.com/SmollChungus)
+* Keyboard Maintainer: [Matthijs Muller](https://github.com/smollchungus)
 * Hardware Supported: Quantum60
 * Hardware Availability: TBA
 Make example for this keyboard (after setting up your build environment):
@@ -13,7 +13,7 @@ Make example for this keyboard (after setting up your build environment):
     
 Flashing example for this keyboard:
 
-    make %KEYBOARD%:default:flash
+    make quantum60:default:flash
 
 See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_tools) and the [make instructions](https://docs.qmk.fm/#/getting_started_make_guide) for more information. Brand new to QMK? Start with our [Complete Newbs Guide](https://docs.qmk.fm/#/newbs).
 
