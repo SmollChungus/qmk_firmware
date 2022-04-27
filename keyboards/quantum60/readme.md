@@ -1,4 +1,4 @@
-# SmollChungus Quantum60
+# Quantum60
 
 ![ Quantum60](https://i.imgur.com/YOtElpi.png)
 
@@ -7,6 +7,7 @@ Quantum60 PCB, 60% layout with double southpaw macro-columns
 * Keyboard Maintainer: [Matthijs Muller](https://github.com/smollchungus)
 * Hardware Supported: Quantum60
 * Hardware Availability: TBA
+
 Make example for this keyboard (after setting up your build environment):
 
     make quantum60:default
