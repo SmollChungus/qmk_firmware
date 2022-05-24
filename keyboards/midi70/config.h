@@ -31,6 +31,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MATRIX_ROWS 6
 #define MATRIX_COLS 14
 
+#define BOOTMAGIC_LITE_ROW 0
+#define BOOTMAGIC_LITE_COLUMN 1
+
 /* Keyboard Matrix Assignments */
 #define MATRIX_ROW_PINS { F1, F0, F7, F6, F5, F4  }
 #define MATRIX_COL_PINS { C7, C6, B6, B5, B4, D7, D6, D4, D5, D3, D2, D1, D0, B7 }
@@ -40,9 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
 #define DEBOUNCE 5
 
-#pragma once
-
 #undef TAPPING_TERM
 #define TAPPING_TERM 190
 
 #define MIDI_ADVANCED
+
