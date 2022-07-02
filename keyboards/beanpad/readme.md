@@ -2,7 +2,7 @@
 
 ![beanpad](https://i.imgur.com/placeholder.jpeg)
 
-Half an alice used as a macropad.
+Double ISO-enter macropad.
 
 * Keyboard Maintainer: [SmollChungus](https://github.com/smollchungus/)
 
