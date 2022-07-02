@@ -33,10 +33,6 @@
     { C5, C4} \
 }
 
-#define NO_ACTION_MACRO
-#define NO_ACTION_FUNCTION
-
-
 
 // disable for via
 
