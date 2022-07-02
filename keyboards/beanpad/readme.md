@@ -1,6 +1,6 @@
-# beanpad
+# Beanpad
 
-![beanpad](https://i.imgur.com/placeholder.jpeg)
+![Beanpad](https://i.imgur.com/placeholder.jpeg)
 
 Double ISO-enter macropad.
 
