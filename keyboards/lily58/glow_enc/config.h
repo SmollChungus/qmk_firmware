@@ -39,17 +39,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Set 0 if debouncing isn't needed */
 #define DEBOUNCE 5
 
+/* encoder volume fix */
+#define TAP_CODE_DELAY 10
+
+
 #define SOFT_SERIAL_PIN D2
 
-#define RGB_DI_PIN F4
+#define RGB_DI_PIN D3
 
-#define RGBLED_NUM 72    // Number of LEDs
+#define RGBLED_NUM 24    // Number of LEDs
 
-#define RGBLED_SPLIT { 36, 36 }
+#define RGBLED_SPLIT { 12, 12 }
 #define RGBLIGHT_SPLIT
 #define RGBLIGHT_LIMIT_VAL 120
 
-#define ENCODERS_PAD_A { F5 }
-#define ENCODERS_PAD_B { D4 }
-#define ENCODERS_PAD_A_RIGHT { D4 }
+#define ENCODERS_PAD_A { F4 }
+#define ENCODERS_PAD_B { F5 }
+#define ENCODERS_PAD_A_RIGHT { F4 }
 #define ENCODERS_PAD_B_RIGHT { F5 }
