@@ -26,14 +26,14 @@
 #define PRODUCT         keiko46
 
 /* key matrix size */
-#define MATRIX_ROWS 1
-#define MATRIX_COLS 1
+#define MATRIX_ROWS 8
+#define MATRIX_COLS 7
 
 #pragma once
 
 /* key matrix pins */
-#define MATRIX_ROW_PINS { B2 }
-#define MATRIX_COL_PINS { D4 }
+#define MATRIX_ROW_PINS { F4, F5, F6, F7, B1, B3, B2, B6 }
+#define MATRIX_COL_PINS { D0, D4, C6, D7, E6, B4, B5  }
 
 /* key matrix pins are in subfolders v1/v2 */
 
@@ -48,3 +48,18 @@
 
 /* Locking resynchronize hack */
 #define LOCKING_RESYNC_ENABLE
+
+#define ENCODERS_PAD_A { D1 }
+#define ENCODERS_PAD_B { D2 }
+
+/*
+#define ENCODER_DIRECTION_FLIP
+#define ENCODER_RESOLUTION 4
+*/
+
+/* RGB */
+#define RGB_DI_PIN D3
+
+#define RGBLED_NUM 12
+
+#define RGBLIGHT_LED_MAP { 0, 1, 2, 3, 4, 5, 11, 10, 9, 8, 7, 6 }
