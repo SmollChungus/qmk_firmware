@@ -17,3 +17,6 @@ void render_animation(uint8_t frame) {
 void oled_task_user(void) {
     render_animation((timer_read() / 60) % 8);
 }
+
+
+// needs fixing
