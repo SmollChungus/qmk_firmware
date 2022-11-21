@@ -1,1 +1,1 @@
-DEFAULT_FOLDER = handwired/onekey/promicro
+DEFAULT_FOLDER = handwired/onekey/rp2040
