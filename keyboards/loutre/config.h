@@ -19,12 +19,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "config_common.h"
 
+/*
 #define VENDOR_ID       0x5363 // Sc for Smollchungus
 #define PRODUCT_ID      0x4C74 // Lt for Lefty
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    Trailblazer
 #define PRODUCT         Loutre
 #define DESCRIPTION     Loutre
+
+*/
 
 /* key matrix size */
 #define MATRIX_ROWS 6
@@ -51,5 +54,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #define LOCKING_RESYNC_ENABLE
 
 /* encoders */
+
 #define ENCODERS_PAD_A { F4 }
 #define ENCODERS_PAD_B { F5 }
