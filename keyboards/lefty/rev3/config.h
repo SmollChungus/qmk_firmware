@@ -19,3 +19,5 @@
 /* key matrix pins */
 #define MATRIX_ROW_PINS { F5, B1, F7, F4, F6 }
 #define MATRIX_COL_PINS { D1, D0, E6, B4, B5, B6, B2, B3 }
+
+#define UNICODE_SELECTED_MODES UNICODE_MODE_WINCOMPOSE
