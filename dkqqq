@@ -1,0 +1,147 @@
+  0a                                                                          [m 14d6c0b441 dactyl_manuform/3x5_3: fix layout (#16944)
+  0r                                                                          [m 14d6c0b441 dactyl_manuform/3x5_3: fix layout (#16944)
+  0v                                                                          [m 18d2503e3d init
+  acidalia                                                                    [m 76fe597863 unicode testing, failed btw <3
+  ataraxia                                                                    [m 6c2aaf5178 add via
+  cosplay_tkl                                                                 [m 9b4eb174fc [ahead 1] update
+  keiko46                                                                     [m a3438de79a update oled
+  lefty                                                                       [m 5249ced0a3 update keymap
+  loutre                                                                      [m a75f562c64 Encoder update
+* [32mmaster                                                                      [m 3f2cbc9e68 Pr/reorder docker podman check (#19561)
+  midi70                                                                      [m d11b07c866 [behind 2] add kc_lock for MI_SUS, no succes yet
+  rgboled                                                                     [m 4b40538e64 [ahead 1] no fix
+  [31mremotes/origin/HEAD                                                         [m -> origin/master
+  [31mremotes/origin/SmollChungus-patch-1                                         [m 2b5c10958b Update rules.mk
+  [31mremotes/origin/acidalia                                                     [m 76fe597863 unicode testing, failed btw <3
+  [31mremotes/origin/aon                                                          [m cf9b7a337f enable mousekeys for advanced keymapping
+  [31mremotes/origin/arm-dac-work                                                 [m f52faeb5d6 add sample and wavetable examples, parsers for both
+  [31mremotes/origin/arm_rgb                                                      [m e917fa2eb4 adds rgb to preonic
+  [31mremotes/origin/ataraxia                                                     [m 6c2aaf5178 add via
+  [31mremotes/origin/audio_out                                                    [m ad982e39d6 implement new features for arm
+  [31mremotes/origin/b6_b7_audio                                                  [m 5cc7df8750 try out b6 and b7 audio
+  [31mremotes/origin/beanpad                                                      [m 9522868447 typo
+  [31mremotes/origin/better_chibios_wait                                          [m 699e6b229b Update tmk_core/common/wait.h
+  [31mremotes/origin/changelog                                                    [m 4cfe36d6d0 Generate an initial changelog and a script to generate it
+  [31mremotes/origin/clockworkpi                                                  [m 50fa02ad58 initial files
+  [31mremotes/origin/core/default_layer_eeconfig                                  [m e6c2ae8c6d Add check for split boards, and comments
+  [31mremotes/origin/cosplay_tkl                                                  [m 6ed605a614 Fix annepro2/c18:iso_default (#19147)
+  [31mremotes/origin/dependabot/github_actions/anothrNick/github-tag-action-1.45.0[m 4247c2d030 Bump anothrNick/github-tag-action from 1.39.0 to 1.45.0
+  [31mremotes/origin/dependabot/github_actions/anothrNick/github-tag-action-1.54.0[m 584c8c47c6 Bump anothrNick/github-tag-action from 1.52.0 to 1.54.0
+  [31mremotes/origin/dev_acidalia                                                 [m 6387575250 rev2
+  [31mremotes/origin/dev_branch                                                   [m 813323151b Merge branch 'qmk:master' into dev_branch
+  [31mremotes/origin/dev_lefty                                                    [m efc5178be2 Update keyboards/lefty/readme.md  fixed link
+  [31mremotes/origin/develop                                                      [m 5bb9da6bca Merge remote-tracking branch 'origin/master' into develop
+  [31mremotes/origin/direct_pins                                                  [m 0c3495909c add docs for easy maker
+  [31mremotes/origin/docker_changes                                               [m f78fbd1188 move everything from qmkfm/base_container to qmkfm/qmk_cli
+  [31mremotes/origin/edez2                                                        [m 7e839c9ba6 rgb hooked-up
+  [31mremotes/origin/eeprom_update                                                [m 4f71243453 line endings
+  [31mremotes/origin/encoder_matrix                                               [m 9e64d5f6c2 add encoder matrix functionality
+  [31mremotes/origin/fix_arm_ws2812spi_divisor                                    [m 7dd524f641 fix arm ws2812 spi divisor
+  [31mremotes/origin/fix_generate_api                                             [m 13a8e93f13 fix the aozora/hotswap vendor id
+  [31mremotes/origin/fix_layout_elements                                          [m d701e9e15a spacey: best guess at fixing info.json
+  [31mremotes/origin/fix_qmk_lint_automagic                                       [m d58f660a1b fix automatic directory for qmk lint
+  [31mremotes/origin/fix_virtualenv_installs                                      [m 568b25166d ensure that the directory for sys.executable is in the user's path
+  [31mremotes/origin/gb_port                                                      [m 4a42e10ccd add gb port
+  [31mremotes/origin/gc_switch                                                    [m d2123f3c07 remove some outdated changes
+  [31mremotes/origin/gh-pages                                                     [m b9ffd82ba6 Deploying to gh-pages from master @ bb356a1584aa30020744432b87304ba912079ee7 🚀
+  [31mremotes/origin/hira                                                         [m bb1edf6676 [Userspace] Add Nasu to userspace code (#17524)
+  [31mremotes/origin/keiko46                                                      [m a3438de79a update oled
+  [31mremotes/origin/keymap_folders                                               [m 1b7efbc03b Merge branch 'muon_light' of github.com:qmk/qmk_firmware into keymap_folders
+  [31mremotes/origin/kle2json_hyper                                               [m 69e5e15ccc use unix lineendings even on windows
+  [31mremotes/origin/led_matrix_direct                                            [m f8896d8b92 Directly connected LED Matrix support.
+  [31mremotes/origin/lefty                                                        [m 5249ced0a3 update keymap
+  [31mremotes/origin/lily58E                                                      [m 81e989fa94 kenjiro lily updae
+  [31mremotes/origin/loutre                                                       [m a75f562c64 Encoder update
+  [31mremotes/origin/make_cli_parsing                                             [m a380937f1f wip
+  [31mremotes/origin/master                                                       [m 3f2cbc9e68 Pr/reorder docker podman check (#19561)
+  [31mremotes/origin/midi70                                                       [m d8bfaccce2 add bootmagic on 0,1
+  [31mremotes/origin/muon_light                                                   [m 47c27bb6b9 Merge pull request #3264 from fredizzimo/multimatrix
+  [31mremotes/origin/muon_light_dc                                                [m ec0f9db8ad separate commands, m/s updates
+  [31mremotes/origin/olkb_vendor_folder                                           [m dfb7ce7f41 Update keyboard tracking references
+  [31mremotes/origin/patch-1                                                      [m 0728e4bea6 Typo fix in documentation
+  [31mremotes/origin/peasy                                                        [m 631cd6bfb0 mess around with the length to fix pitches
+  [31mremotes/origin/peb                                                          [m 71436db957 rgb working, configd
+  [31mremotes/origin/pjrc_hid                                                     [m df0d2af961 adds documentation for console in
+  [31mremotes/origin/planck-ez-a5-high                                            [m fbb056c502 make a5 high when not in use
+  [31mremotes/origin/planck_ez_wdg                                                [m c012d715bf add watchdog timer to planck ez
+  [31mremotes/origin/planck_ez_with_5372                                          [m 9c0137f954 correct rgb config
+  [31mremotes/origin/planck_light_rev2                                            [m a6afb16c90 fix assembly errors with hal
+  [31mremotes/origin/planck_thk                                                   [m 21c2324c3e Merge branch 'master' into planck_thk
+  [31mremotes/origin/pre-develop-merge-nov20                                      [m 9b851ea9c2 Merge point for 2020 Nov 28 Breaking Change
+  [31mremotes/origin/python_optimizations                                         [m e293bf243d refactor doctor.py into a directory
+  [31mremotes/origin/qmk_compile_build_keyboard                                   [m b8f6536b29 Rework `qmk compile` to bypass `Makefile`. Add new --filter option.
+  [31mremotes/origin/qmk_compile_improvements                                     [m a25c8a00ac log output tweaks
+  [31mremotes/origin/quantum60                                                    [m ab3777832d fix q60 via issue
+  [31mremotes/origin/qwiic_hub                                                    [m c8e29bc7f1 working led via A3
+  [31mremotes/origin/qwiic_hud                                                    [m 4582dfb103 clean-up
+  [31mremotes/origin/qwiic_joystiic                                               [m 531387c01c encoder display
+  [31mremotes/origin/refactor_process_record_kb_user                              [m 8b4d28f6fb Fix omnikeyish
+  [31mremotes/origin/remove_console                                               [m 3fa161f1ce remove qmk console, which is now part of the global cli
+  [31mremotes/origin/rgb7seg                                                      [m 471722f495 wip
+  [31mremotes/origin/rgboled                                                      [m def50ef193 Init test - failed (:
+  [31mremotes/origin/robust_json                                                  [m 025c9724b5 make json imports more robust
+  [31mremotes/origin/rules_post_rules                                             [m 649c5325a5 Revert "handwired/symmetric70_proto: move non-assignment code to post_rules.mk"
+  [31mremotes/origin/schema_improvements                                          [m 7a5f286e3d fix ploopyco/trackball_nano/rev1_001
+  [31mremotes/origin/subatomic                                                    [m 852d94f4e6 add keys
+  [31mremotes/origin/subatomic_encoders                                           [m 22789a4409 Update keyboards/subatomic/config.h
+  [31mremotes/origin/subvendor_ids                                                [m 522876dc5a Update subvendor_ids.md
+  [31mremotes/origin/taichi                                                       [m 013b12a2df oled for mochi
+  [31mremotes/origin/titmlb                                                       [m 0a7efccdc6 update rgb config
+  [31mremotes/origin/unorthodox                                                   [m 20e27feb7d Initial unorthodox support
+  [31mremotes/origin/xap                                                          [m eba91c6e28 Initial implementation of XAP protocol.
+  [31mremotes/origin/xmega_support                                                [m ea948a1f2c trying out some different stuff
+  [31mremotes/upstream/arm-dac-work                                               [m f52faeb5d6 add sample and wavetable examples, parsers for both
+  [31mremotes/upstream/audio_out                                                  [m ad982e39d6 implement new features for arm
+  [31mremotes/upstream/b6_b7_audio                                                [m 5cc7df8750 try out b6 and b7 audio
+  [31mremotes/upstream/better_chibios_wait                                        [m 699e6b229b Update tmk_core/common/wait.h
+  [31mremotes/upstream/changelog                                                  [m 4cfe36d6d0 Generate an initial changelog and a script to generate it
+  [31mremotes/upstream/clockworkpi                                                [m 50fa02ad58 initial files
+  [31mremotes/upstream/develop                                                    [m 45851a10f6 Add RGB565 and RGB888 color support to Quantum Painter (#19382)
+  [31mremotes/upstream/edez2                                                      [m 7e839c9ba6 rgb hooked-up
+  [31mremotes/upstream/eeprom_update                                              [m 4f71243453 line endings
+  [31mremotes/upstream/encoder_matrix                                             [m 9e64d5f6c2 add encoder matrix functionality
+  [31mremotes/upstream/fix/get_report                                             [m 4a62ff5f9a unify blank reports into one case
+  [31mremotes/upstream/fix/just_return_false                                      [m 832661f6b0 return false to stall correctly
+  [31mremotes/upstream/gb_port                                                    [m 4a42e10ccd add gb port
+  [31mremotes/upstream/gc_switch                                                  [m d2123f3c07 remove some outdated changes
+  [31mremotes/upstream/gh-pages                                                   [m e3a95cdc6b Deploying to gh-pages from @ qmk/qmk_firmware@b756c53c7b7fb314136571bc1dabe4947554e702 🚀
+  [31mremotes/upstream/json_audio                                                 [m c13ce5479c wip
+  [31mremotes/upstream/json_custom_keycodes                                       [m 9eaee65ac3 make custom keycodes actually work
+  [31mremotes/upstream/keyboard_overrides                                         [m 4821b3c3a1 support config as an alias of keyboard_overrides
+  [31mremotes/upstream/keymap_folders                                             [m 1b7efbc03b Merge branch 'muon_light' of github.com:qmk/qmk_firmware into keymap_folders
+  [31mremotes/upstream/kle2json_hyper                                             [m 69e5e15ccc use unix lineendings even on windows
+  [31mremotes/upstream/led_matrix_direct                                          [m f8896d8b92 Directly connected LED Matrix support.
+  [31mremotes/upstream/list_maintainers                                           [m 295cb5c60a fix stacktrace
+  [31mremotes/upstream/make_cli_parsing                                           [m a380937f1f wip
+  [31mremotes/upstream/master                                                     [m 3f2cbc9e68 Pr/reorder docker podman check (#19561)
+  [31mremotes/upstream/muon_light                                                 [m 47c27bb6b9 Merge pull request #3264 from fredizzimo/multimatrix
+  [31mremotes/upstream/muon_light_dc                                              [m ec0f9db8ad separate commands, m/s updates
+  [31mremotes/upstream/olkb_vendor_folder                                         [m dfb7ce7f41 Update keyboard tracking references
+  [31mremotes/upstream/peasy                                                      [m 631cd6bfb0 mess around with the length to fix pitches
+  [31mremotes/upstream/peb                                                        [m 71436db957 rgb working, configd
+  [31mremotes/upstream/pjrc_hid                                                   [m df0d2af961 adds documentation for console in
+  [31mremotes/upstream/planck-ez-a5-high                                          [m fbb056c502 make a5 high when not in use
+  [31mremotes/upstream/planck_ez_wdg                                              [m c012d715bf add watchdog timer to planck ez
+  [31mremotes/upstream/planck_ez_with_5372                                        [m 9c0137f954 correct rgb config
+  [31mremotes/upstream/planck_light_rev2                                          [m a6afb16c90 fix assembly errors with hal
+  [31mremotes/upstream/planck_thk                                                 [m 21c2324c3e Merge branch 'master' into planck_thk
+  [31mremotes/upstream/pre-develop-merge-nov20                                    [m 9b851ea9c2 Merge point for 2020 Nov 28 Breaking Change
+  [31mremotes/upstream/python_optimizations                                       [m e293bf243d refactor doctor.py into a directory
+  [31mremotes/upstream/qmk_compile_build_keyboard                                 [m b8f6536b29 Rework `qmk compile` to bypass `Makefile`. Add new --filter option.
+  [31mremotes/upstream/qmk_compile_improvements                                   [m 81b17125eb fix after rebase
+  [31mremotes/upstream/qmk_keymap                                                 [m ed5f523690 docs shuffle
+  [31mremotes/upstream/qwiic_hub                                                  [m c8e29bc7f1 working led via A3
+  [31mremotes/upstream/qwiic_hud                                                  [m 4582dfb103 clean-up
+  [31mremotes/upstream/qwiic_joystiic                                             [m 531387c01c encoder display
+  [31mremotes/upstream/refactor_process_record_kb_user                            [m 8b4d28f6fb Fix omnikeyish
+  [31mremotes/upstream/revert-17693-fix/pmw33xx-correct-angle-tune                [m cc7444f520 Revert "Use correct angle tune range of +/-30 on PMW33XX (#17693)"
+  [31mremotes/upstream/rgb7seg                                                    [m 471722f495 wip
+  [31mremotes/upstream/subatomic                                                  [m 852d94f4e6 add keys
+  [31mremotes/upstream/subatomic_encoders                                         [m 22789a4409 Update keyboards/subatomic/config.h
+  [31mremotes/upstream/subvendor_ids                                              [m 522876dc5a Update subvendor_ids.md
+  [31mremotes/upstream/titmlb                                                     [m 0a7efccdc6 update rgb config
+  [31mremotes/upstream/unorthodox                                                 [m 20e27feb7d Initial unorthodox support
+  [31mremotes/upstream/wsl_flashers                                               [m 62aedca2bc fix
+  [31mremotes/upstream/xap                                                        [m 5594a5153b Merge remote-tracking branch 'origin/develop' into xap
+  [31mremotes/upstream/xap-layout-consolidation                                   [m d9850984a7 Consolidate layouts to minimise XAP info.json output.
+  [31mremotes/upstream/xmega_support                                              [m ea948a1f2c trying out some different stuff

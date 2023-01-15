@@ -1,0 +1,14 @@
+{
+  "keyboard_name": "love",
+  "url": "https://github.com/smollchungus",
+  "maintainer": "smollchungus",
+  "layouts": {
+    "LAYOUT_all": {
+        "layout": [
+          {"label":"F1", "x":0, "y":0},
+          {"label":"F2", "x":1, "y":0},
+          {"label":"F3", "x":0.5, "y":1}
+      ]
+    }
+  }
+}
