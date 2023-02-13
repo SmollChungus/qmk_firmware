@@ -18,12 +18,7 @@
 
 #include "config_common.h"
 
-/* USB Device descriptor parameter */
-#define VENDOR_ID       0x5363 // Sc for Smollchungus
-#define PRODUCT_ID      0x0003
-#define DEVICE_VER      0x0001
-#define MANUFACTURER    SmollChungus
-#define PRODUCT         love
+
 
 /* key matrix size */
 #define MATRIX_ROWS 2
@@ -33,10 +28,6 @@
     { C5, C4}, \
     { D5 } \
 }
-
-#define NO_ACTION_MACRO
-#define NO_ACTION_FUNCTION
-
 
 
 // disable for via

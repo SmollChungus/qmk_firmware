@@ -2,12 +2,18 @@
   "keyboard_name": "love",
   "url": "https://github.com/smollchungus",
   "maintainer": "smollchungus",
+  "usb": {
+    "vid": "0x5363",
+    "pid": "0x0003",
+    "device_version": "0.0.2"
+  },
+  "manufacturer": "smollchungus",
   "layouts": {
     "LAYOUT_all": {
         "layout": [
-          {"label":"F1", "x":0, "y":0},
-          {"label":"F2", "x":1, "y":0},
-          {"label":"F3", "x":0.5, "y":1}
+          {"label":"1", "x":0, "y":0},
+          {"label":"2", "x":1, "y":0},
+          {"label":"3", "x":0.5, "y":1}
       ]
     }
   }
