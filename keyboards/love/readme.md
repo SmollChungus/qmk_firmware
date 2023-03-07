@@ -1,12 +1,12 @@
 # love
 
-![love](https://i.imgur.com/nMmJCJMh.jpeg)
+![love](https://i.imgur.com/LGyedtq.jpg)
 
-Half an alice used as a macropad.
+3 Key macropad
 
 * Keyboard Maintainer: [SmollChungus](https://github.com/smollchungus/)
 
-* Hardware Supported: love PCB rev1 and rev2
+* Hardware Supported: love PCB
 
 Make example for this keyboard (after setting up your build environment):
 

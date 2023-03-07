@@ -30,7 +30,7 @@
 }
 
 
-// disable for via
+// Crunches firmware to support VIA, disable lines if not intending to use VIA
 
 #define NO_ACTION_TAPPING
 #define NO_ACTION_ONESHOT
