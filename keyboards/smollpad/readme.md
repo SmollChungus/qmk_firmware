@@ -1,6 +1,6 @@
 # smollpad
 
-![smollpad](https://i.imgur.com/nMmJCJMh.jpeg)
+![smollpad](https://i.imgur.com/kPiQN6J.jpeg)
 
 Half an alice used as a macropad.
 
