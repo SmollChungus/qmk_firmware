@@ -18,12 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-/* USB Device descriptor parameter */
-#define VENDOR_ID       0x5363 /* "Sc" */
-#define PRODUCT_ID      0x4370 /* "Cp" */
-#define DEVICE_VER      0x0001
-#define MANUFACTURER    Smoll
-#define PRODUCT         cosplay_tkl
+
 
 /* key matrix size */
 #define MATRIX_ROWS 6
@@ -35,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* COL2ROW or ROW2COL */
 #define DIODE_DIRECTION COL2ROW
 
+
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */
 #define LOCKING_SUPPORT_ENABLE
 /* Locking resynchronize hack */
@@ -42,3 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* Use 1000hz polling */
 #define USB_POLLING_INTERVAL_MS 1
+
+#define WS2812_PIO_USE_PIO1 // Force the usage of PIO1 peripheral, by default the WS2812 implementation uses the PIO0 peripheral
+
+#define RGBLED_NUM 34
+#define RGBLIGHT_LIMIT_VAL 100
