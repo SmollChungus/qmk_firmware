@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Smoll
+Copyright 2023 Smoll
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
