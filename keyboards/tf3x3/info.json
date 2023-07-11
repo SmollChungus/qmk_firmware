@@ -1,0 +1,62 @@
+{
+    "manufacturer": "Smollchungus",
+    "keyboard_name": "tf3x3",
+    "maintainer": "Smollchungus",
+    "usb": {
+        "vid": "0x5363",
+        "pid": "0x3333",
+        "device_version": "0.0.1"
+    },
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+    "diode_direction": "COL2ROW",
+    "matrix_pins": {
+        "rows": ["GP10", "GP9",  "GP23"],
+        "cols": ["GP25", "GP26", "GP24"]
+    },
+    "url": "https://github.com/smollchungus",
+    "features": {
+        "bootmagic": true,
+        "command": false,
+        "console": false,
+        "extrakey": true,
+        "mousekey": true,
+        "nkro": true
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                { "matrix": [0, 0], "x": 0, "y": 0 },
+                { "matrix": [0, 1], "x": 1, "y": 0 },
+                { "matrix": [0, 2], "x": 2, "y": 0 },
+                { "matrix": [1, 0], "x": 0, "y": 1 },
+                { "matrix": [1, 1], "x": 1, "y": 1 },
+                { "matrix": [1, 2], "x": 2, "y": 1 },
+                { "matrix": [2, 0], "x": 0, "y": 2 },
+                { "matrix": [2, 1], "x": 1, "y": 2 },
+                { "matrix": [2, 2], "x": 2, "y": 2 }
+            ]
+        }
+    },
+    "rgb_light": {
+        "led_count": 9,
+        "max_brightness": 128
+    },
+    "ws2812": {
+        "pin": "GP8"
+    },
+    "rgb_matrix": {
+        "driver": "WS2812",
+        "layout": [
+            {"matrix": [0, 0], "flags": 4, "x": 0,   "y": 0 },
+            {"matrix": [0, 1], "flags": 4, "x": 112, "y": 0 },
+            {"matrix": [0, 2], "flags": 4, "x": 224, "y": 0 },
+            {"matrix": [1, 2], "flags": 4, "x": 224, "y": 32},
+            {"matrix": [1, 1], "flags": 4, "x": 112, "y": 32},
+            {"matrix": [1, 0], "flags": 4, "x": 0,   "y": 32},
+            {"matrix": [2, 0], "flags": 4, "x": 0,   "y": 64},
+            {"matrix": [2, 1], "flags": 4, "x": 112, "y": 64},
+            {"matrix": [2, 2], "flags": 4, "x": 224, "y": 64}
+        ]
+    }
+}
