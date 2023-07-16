@@ -29,7 +29,6 @@
 #define MATRIX_ROWS 8
 #define MATRIX_COLS 7
 
-#pragma once
 
 /* key matrix pins */
 #define MATRIX_ROW_PINS { F4, F5, F6, F7, B1, B3, B2, B6 }
@@ -49,8 +48,8 @@
 /* Locking resynchronize hack */
 #define LOCKING_RESYNC_ENABLE
 
-#define ENCODERS_PAD_A { D1 }
-#define ENCODERS_PAD_B { D2 }
+// #define ENCODERS_PAD_A { D1 }
+// #define ENCODERS_PAD_B { D2 }
 
 /*
 #define ENCODER_DIRECTION_FLIP
