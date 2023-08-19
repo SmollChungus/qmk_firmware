@@ -1,10 +1,11 @@
 {
-    "manufacturer": "MANUFACTURER",
+    "manufacturer": "Matthijs Muller",
     "keyboard_name": "tf75iso",
-    "maintainer": "qmk",
+    "maintainer": "Smollchungus",
+    "url": "https://github.com/smollchungus",
     "usb": {
-        "vid": "0xFEED",
-        "pid": "0x0001",
+        "vid": "0x5363",
+        "pid": "0x7501",
         "device_version": "0.0.1"
     },
     "processor": "RP2040",
