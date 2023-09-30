@@ -1,0 +1,16 @@
+{
+  "name": "Keyboard",
+  "vendorId": "0x5363",
+  "productId": "0x0001",
+  "matrix": {
+    "rows": 1,
+    "cols": 1
+  },
+  "layouts": {
+    "keymap": [
+      [
+        "0,0"
+      ]
+    ]
+  }
+}

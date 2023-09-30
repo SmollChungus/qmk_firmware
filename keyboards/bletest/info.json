@@ -1,0 +1,24 @@
+{
+    "manufacturer": "MANUFACTURER",
+    "keyboard_name": "BLE Test",
+    "maintainer": "qmk",
+    "usb": {
+        "vid": "0x5363",
+        "pid": "0x0001",
+        "device_version": "0.0.1"
+    },
+    "processor": "atmega32u4",
+    "bootloader": "atmel-dfu",
+    "diode_direction": "COL2ROW",
+    "matrix_pins": {
+        "rows": ["C7"],
+        "cols": ["D6"]
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                { "label": "A", "matrix": [0, 0], "x": 0, "y": 0 }
+            ]
+        }
+    }
+}
