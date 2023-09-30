@@ -23,7 +23,7 @@
     "diode_direction": "COL2ROW",
     "matrix_pins": {
         "rows": ["GP25", "GP22", "GP28", "GP23", "GP1"],
-        "cols": ["GP24", "GP19", "GP18", "GP17", "GP29", "GP0", "GP12", "GP11", "GP10", "GP7", "GP7", "GP5", "GP4", "GP3", "GP2"]
+        "cols": ["GP24", "GP19", "GP18", "GP17", "GP29", "GP0", "GP12", "GP11", "GP10", "GP7", "GP6", "GP5", "GP4", "GP3", "GP2"]
     },
     "encoder": {
         "rotary": [
