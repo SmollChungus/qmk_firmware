@@ -22,7 +22,7 @@
         "driver": "vendor"
     },
     "rgblight": {
-        "led_count": 34,
+        "led_count": 24,
         "layers": {
              "enabled": true
         },
