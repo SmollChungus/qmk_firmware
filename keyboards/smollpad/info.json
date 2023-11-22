@@ -1,0 +1,40 @@
+{
+    "manufacturer": "Matthijs Muller",
+    "keyboard_name": "smollpad",
+    "maintainer": "Smollchungus",
+    "processor": "atmega16u2",
+    "bootloader": "atmel-dfu",
+    "url": "https://github.com/Smollchungus",
+    "usb": {
+        "vid": "0x5363",
+        "pid": "0x5370",
+        "device_version": "0.0.3"
+    },
+    "features": {
+        "bootmagic": true,
+        "extrakey": true,
+        "mousekey": true,
+        "nkro": false
+    },
+    "matrix_size": {
+        "rows": 1,
+        "cols": 5
+    },
+    "matrix_pins": {
+        "direct":
+        [
+            [ "B4", "B5", "B6", "B7", "B3" ]
+        ]
+        },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                { "matrix":[0,0], "label":"1", "x": 0, "y": 0 },
+                { "matrix":[0,1], "label":"2", "x": 1, "y": 0 },
+                { "matrix":[0,2], "label":"3", "x": 2, "y": 0 },
+                { "matrix":[0,3], "label":"4", "x": 3, "y": 0 },
+                { "matrix":[0,4], "label":"5", "x": 4, "y": 0 }
+            ]
+        }
+    }
+}
