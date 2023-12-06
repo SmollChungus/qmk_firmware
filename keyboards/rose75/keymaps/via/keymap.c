@@ -23,22 +23,3 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 };
 
-
-/*
-#include "quantum.h"
-
-bool led_matrix_indicators_user(void) {
-    // Check Caps Lock state
-    if (host_keyboard_leds() & (1 << USB_LED_CAPS_LOCK)) {
-        // Caps Lock is on, set the first and second LEDs to red (255, 0, 0)
-        led_matrix_set_value(0, RGB_RED); // Index 0
-        led_matrix_set_value(1, RGB_RED); // Index 1
-        return true;
-    } else {
-        // Caps Lock is off, turn off the first and second LEDs
-        led_matrix_set_value(0, 0); // Index 0 (off)
-        led_matrix_set_value(1, 0); // Index 1 (off)
-        return false;
-    }
-}
-*/
