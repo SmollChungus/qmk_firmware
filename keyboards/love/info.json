@@ -5,7 +5,7 @@
   "usb": {
     "vid": "0x5363",
     "pid": "0x0003",
-    "device_version": "0.0.2"
+    "device_version": "0.0.1"
   },
   "manufacturer": "smollchungus",
   "layouts": {
