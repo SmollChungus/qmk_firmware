@@ -1,0 +1,107 @@
+{
+    "manufacturer": "Matthijs Muller",
+    "keyboard_name": "HE65",
+    "maintainer": "Matthijs Muller",
+    "bootloader": "stm32-dfu",
+    "build": {
+        "lto": false
+    },
+    "diode_direction": "COL2ROW",
+    "features": {
+        "audio": false,
+        "backlight": false,
+        "bootmagic": true,
+        "command": false,
+        "console": true,
+        "extrakey": true,
+        "nkro": true,
+        "rgblight": false
+    },
+    "mouse_key": {
+        "enabled": false
+    },
+    "processor": "STM32F401",
+    "url": "https://www.github.com/SmollChungus",
+    "usb": {
+        "device_version": "0.0.1",
+        "pid": "0x0009",
+        "shared_endpoint": {
+            "keyboard": true
+        },
+
+        "vid": "0x5363"
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                {"label": "esc", "matrix": [0, 0], "x": 0.0, "y": 0.0},
+                {"label": "1", "matrix": [0, 1], "x": 1.0, "y": 0.0},
+                {"label": "2", "matrix": [0, 2], "x": 2.0, "y": 0.0},
+                {"label": "3", "matrix": [0, 3], "x": 3.0, "y": 0.0},
+                {"label": "4", "matrix": [0, 4], "x": 4.0, "y": 0.0},
+                {"label": "5", "matrix": [0, 5], "x": 5.0, "y": 0.0},
+                {"label": "6", "matrix": [0, 6], "x": 6.0, "y": 0.0},
+                {"label": "7", "matrix": [0, 7], "x": 7.0, "y": 0.0},
+                {"label": "8", "matrix": [0, 8], "x": 8.0, "y": 0.0},
+                {"label": "9", "matrix": [0, 9], "x": 9.0, "y": 0.0},
+                {"label": "0", "matrix": [0, 10], "x": 10.0, "y": 0.0},
+                {"label": "-", "matrix": [0, 11], "x": 11.0, "y": 0.0},
+                {"label": "=", "matrix": [0, 12], "x": 12.0, "y": 0.0},
+                {"label": "bsps", "matrix": [0, 13], "x": 13.0, "y": 0.0},
+                {"label": "del", "matrix": [0, 14], "x": 14.0, "y": 0.0},
+                {"label": "tab", "matrix": [1, 0], "w": 1.5, "x": 0.0, "y": 1.0},
+                {"label": "q", "matrix": [1, 1], "x": 1.5, "y": 1.0},
+                {"label": "w", "matrix": [1, 2], "x": 2.5, "y": 1.0},
+                {"label": "e", "matrix": [1, 3], "x": 3.5, "y": 1.0},
+                {"label": "r", "matrix": [1, 4], "x": 4.5, "y": 1.0},
+                {"label": "t", "matrix": [1, 5], "x": 5.5, "y": 1.0},
+                {"label": "y", "matrix": [1, 6], "x": 6.5, "y": 1.0},
+                {"label": "u", "matrix": [1, 7], "x": 7.5, "y": 1.0},
+                {"label": "i", "matrix": [1, 8], "x": 8.5, "y": 1.0},
+                {"label": "o", "matrix": [1, 9], "x": 9.5, "y": 1.0},
+                {"label": "p", "matrix": [1, 10], "x": 10.5, "y": 1.0},
+                {"label": "[", "matrix": [1, 11], "x": 11.5, "y": 1.0},
+                {"label": "]", "matrix": [1, 12], "x": 12.5, "y": 1.0},
+                {"label": "nubs", "matrix": [1, 13], "w": 1.5, "x": 13.5, "y": 1.0},
+                {"label": "pgdn", "matrix": [1, 14], "x": 15, "y": 1.0},
+                {"label": "caps", "matrix": [2, 0], "w": 1.75, "x": 0.0, "y": 2.0},
+                {"label": "a", "matrix": [2, 1], "x": 1.75, "y": 2.0},
+                {"label": "s", "matrix": [2, 2], "x": 2.75, "y": 2.0},
+                {"label": "d", "matrix": [2, 3], "x": 3.75, "y": 2.0},
+                {"label": "f", "matrix": [2, 4], "x": 4.75, "y": 2.0},
+                {"label": "g", "matrix": [2, 5], "x": 5.75, "y": 2.0},
+                {"label": "h", "matrix": [2, 6], "x": 6.75, "y": 2.0},
+                {"label": "j", "matrix": [2, 7], "x": 7.75, "y": 2.0},
+                {"label": "k", "matrix": [2, 8], "x": 8.75, "y": 2.0},
+                {"label": "l", "matrix": [2, 9], "x": 9.75, "y": 2.0},
+                {"label": ";", "matrix": [2, 10], "x": 10.75, "y": 2.0},
+                {"label": "'", "matrix": [2, 11], "x": 11.75, "y": 2.0},
+                {"label": "ent", "matrix": [2, 12], "x": 12.75, "y": 2.0},
+                {"label": "pgup", "matrix": [2, 13], "x": 13.75, "y": 2.0},
+                {"label": "lsft", "matrix": [3, 0], "w": 1.25, "x": 0.0, "y": 3.0},
+                {"label": "z", "matrix": [3, 1], "x": 1.25, "y": 3.0},
+                {"label": "x", "matrix": [3, 2], "x": 2.25, "y": 3.0},
+                {"label": "c", "matrix": [3, 3], "x": 3.25, "y": 3.0},
+                {"label": "v", "matrix": [3, 4], "x": 4.25, "y": 3.0},
+                {"label": "b", "matrix": [3, 5], "x": 5.25, "y": 3.0},
+                {"label": "n", "matrix": [3, 6], "x": 6.25, "y": 3.0},
+                {"label": "m", "matrix": [3, 7], "x": 7.25, "y": 3.0},
+                {"label": ",", "matrix": [3, 8], "x": 8.25, "y": 3.0},
+                {"label": ",", "matrix": [3, 9], "x": 9.25, "y": 3.0},
+                {"label": "/", "matrix": [3, 10], "x": 10.25, "y": 3.0},
+                {"label": "rsft", "matrix": [3, 11], "x": 11.25, "y": 3.0},
+                {"label": "up", "matrix": [3, 12], "x": 12.25, "y": 3.0},
+                {"label": "ins", "matrix": [3, 13], "x": 13.25, "y": 3.0},
+                {"label": "lctl", "matrix": [4, 0], "w": 1.5, "x": 0.0, "y": 4.0},
+                {"label": "lwin", "matrix": [4, 1], "x": 1.5, "y": 4.0},
+                {"label": "lalt", "matrix": [4, 2], "w": 1.5, "x": 2.5, "y": 4.0},
+                {"label": "space", "matrix": [4, 3], "w": 1.5, "x": 4.0, "y": 4.0},
+                {"label": "ralt", "matrix": [4, 4], "w": 1.25, "x": 5.5, "y": 4.0},
+                {"label": "rwin", "matrix": [4, 5], "w": 1.25, "x": 6.75, "y": 4.0},
+                {"label": "left", "matrix": [4, 6], "w": 1.5, "x": 8.0, "y": 4.0},
+                {"label": "down", "matrix": [4, 7], "x": 9.5, "y": 4.0},
+                {"label": "right", "matrix": [4,8], "x":10.5, "y":4.0}
+                    ]
+                    }
+                }
+    }
