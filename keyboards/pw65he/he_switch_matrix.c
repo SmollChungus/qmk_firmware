@@ -63,6 +63,7 @@ static inline void init_mux_sel(void) {
 int hesm_init(hesm_config_t const* const hesm_config) {
     config = *hesm_config;
 
+    palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
     adcMux = pinToMux(ANALOG_PORT);
     adc_read(adcMux);
 
