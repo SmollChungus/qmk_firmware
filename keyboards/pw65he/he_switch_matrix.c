@@ -22,7 +22,7 @@
 #include "wait.h"
 
 const key_to_sensor_map_t key_to_sensor_map[] = {
-    {0,0,0},{0,1,1},{0,2,2},{0,3,3},{0,4,4},{0,5,5},{0,6,6},{0,7,7},{0,8,8},{0,9,9},{0,10,10},{0,11,11},{0,12,12},{0,13,13},{0,14,14},
+    {0,0,0}, {0,1,1}, {0,2,2}, {0,3,3}, {0,4,4}, {0,5,5}, {0,6,6}, {0,7,7}, {0,8,8}, {0,9,9}, {0,10,10},{0,11,11},{0,12,12},{0,13,13},{0,14,14},
     {1,0,15},{1,1,16},{1,2,17},{1,3,18},{1,4,19},{1,5,20},{1,6,21},{1,7,22},{1,8,23},{1,9,24},{1,10,25},{1,11,26},{1,12,27},{1,13,28},{1,14,63},
     {2,0,29},{2,1,30},{2,2,31},{2,3,32},{2,4,33},{2,5,34},{2,6,35},{2,7,36},{2,8,37},{2,9,38},{2,10,39},{2,11,41},{2,12,64},{2,13,65},
     {3,0,42},{3,1,43},{3,2,44},{3,3,45},{3,4,46},{3,5,47},{3,6,48},{3,7,49},{3,8,50},{3,9,51},{3,10,52},{3,11,53},{3,12,66},
@@ -176,7 +176,13 @@ bool hesm_matrix_scan(void) {
 void hesm_print_matrix(void) {
     for (int row = 0; row < MATRIX_ROWS; row++) {
         for (int col = 0; col < MATRIX_COLS; col++) {
-            uprintf("test");
+            uint8_t sensorId = get_sensor_id_from_row_col(row, col);
+            if (sensorId != 0xFF) { // Valid sensor ID
+                uint16_t sensorValue = hesm_readkey_raw(sensorId); // Read the sensor value
+                uprintf("%u", sensorValue); // Print the sensor value
+            } else {
+                uprintf("NA"); // Print NA for invalid sensor IDs
+            }
             if (col < (MATRIX_COLS - 1)) {
                 print(",");
             }
