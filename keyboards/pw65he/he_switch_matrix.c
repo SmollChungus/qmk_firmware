@@ -13,11 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-//he_switch_matrix.c
 
+/* he_switch_matrix.c - #include "matrix.h" tasks are delegated to he_switch_matrix.*/
 #include "he_switch_matrix.h"
 #include "analog.h"
-//#include "atomic_util.h"
+//#include "atomic_util.h" no need so far, needs testing
 #include "print.h"
 #include "wait.h"
 
@@ -128,29 +128,28 @@ int hesm_update(hesm_config_t const* const hesm_config) {
 // Read the HE sensor value - replace matrix with direct pin
 // Function to read HE sensor value directly through MUX and ADC
 uint16_t hesm_readkey_raw(uint8_t sensorIndex) {
-    uint16_t sensorValue = 0;
+    uint16_t sensor_value = 0;
 
     select_mux(sensorIndex);
-    sensorValue = adc_read(adcMux); // Read the ADC value for the selected sensor
-    return sensorValue; // Return the sensor value
+    sensor_value = adc_read(adcMux); // Read the ADC value for the selected sensor
+    return sensor_value; // Return the sensor value
 }
 
 // Update press/release state of a single key # CURRENT_SENSOR_VALUE SHOULD BE sw_value right?
-bool hesm_update_key(matrix_row_t* current_sensor_state, uint16_t sensorValue) {
+bool hesm_update_key(matrix_row_t* current_sensor_state, uint16_t sensor_value) {
     bool current_state = *current_sensor_state & 1; // Assuming current_sensor_state tracks the state of a single sensor
 
-    // Determine the new state based on sensorValue and thresholds
-    if (current_state && sensorValue < config.hesm_actuation_threshold) {
+    // Determine the new state based on sensor_value and thresholds
+    if (current_state && sensor_value < config.hesm_actuation_threshold) {
         *current_sensor_state = 0; // Key released
         return true;
-    } else if (!current_state && sensorValue > config.hesm_release_threshold) {
+    } else if (!current_state && sensor_value > config.hesm_release_threshold) {
         *current_sensor_state = 1; // Key pressed
         return true;
     }
 
     return false; // No change in state
 }
-
 
 bool hesm_matrix_scan(void) {
     bool updated = false;
@@ -159,9 +158,9 @@ bool hesm_matrix_scan(void) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
                 select_mux(sensorId);
-                uint16_t sensorValue = hesm_readkey_raw(sensorId);
+                uint16_t sensor_value = hesm_readkey_raw(sensorId);
                 // Assume matrix is a global matrix state accessible here
-                if (hesm_update_key(&matrix[row], sensorValue)) {
+                if (hesm_update_key(&matrix[row], sensor_value)) {
                     updated = true;
                 }
             }
@@ -170,17 +169,14 @@ bool hesm_matrix_scan(void) {
     return updated;
 }
 
-
-
-
 // Debug print key values
 void hesm_print_matrix(void) {
     for (int row = 0; row < MATRIX_ROWS; row++) {
         for (int col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
-                uint16_t sensorValue = hesm_readkey_raw(sensorId); // Read the sensor value
-                uprintf("%u", sensorValue); // Print the sensor value
+                uint16_t sensor_value = hesm_readkey_raw(sensorId); // Read the sensor value
+                uprintf("%u", sensor_value); // Print the sensor value
             } else {
                 uprintf("NA"); // Print NA for invalid sensor IDs
             }

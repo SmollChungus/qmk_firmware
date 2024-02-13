@@ -102,6 +102,6 @@ int      hesm_init(hesm_config_t const* const hesm_config);
 int      hesm_update(hesm_config_t const* const hesm_config);
 bool     hesm_matrix_scan(void);
 uint16_t hesm_readkey_raw(uint8_t sensorIndex);
-bool     hesm_update_key(matrix_row_t* current_sensor_state, uint16_t sensorValue);
+bool     hesm_update_key(matrix_row_t* current_sensor_state, uint16_t sensor_value);
 void     hesm_print_matrix(void);
 extern matrix_row_t matrix[MATRIX_ROWS];
