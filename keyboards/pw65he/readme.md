@@ -1,6 +1,6 @@
 # PW65HE
 
-![PW65HE PCB](placeholder)
+![PW65HE PCB](https://i.imgur.com/tDT7JU1.png)
 
 HE 65% 
 
