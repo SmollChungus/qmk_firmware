@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+//Credit to Cipulot's EC boards as a foundation for HE VIA intergration
 
 #include "he_switch_matrix.h"
 #include "action.h"
