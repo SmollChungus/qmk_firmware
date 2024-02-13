@@ -1,6 +1,6 @@
 # PW65HE
 
-![PW65HE PCB](https://i.imgur.com/tDT7JU1.png)
+![PW65HE PCB](too mch)
 
 HE 65% 
 
