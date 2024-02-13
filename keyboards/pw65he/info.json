@@ -3,6 +3,7 @@
     "keyboard_name": "HE65",
     "maintainer": "Matthijs Muller",
     "bootloader": "stm32-dfu",
+    "board": "BLACKPILL_STM32_F411",
     "build": {
         "lto": false
     },
@@ -20,7 +21,7 @@
     "mouse_key": {
         "enabled": false
     },
-    "processor": "STM32F401",
+    "processor": "STM32F411",
     "url": "https://www.github.com/SmollChungus",
     "usb": {
         "device_version": "0.0.1",
