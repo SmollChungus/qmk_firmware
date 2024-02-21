@@ -1,0 +1,45 @@
+{
+    "manufacturer": "Matthijs Muller",
+    "keyboard_name": "2x2he",
+    "maintainer": "Matthijs Muller",
+    "bootloader": "stm32-dfu",
+    "board": "BLACKPILL_STM32_F411",
+    "build": {
+        "lto": false
+    },
+    "diode_direction": "COL2ROW",
+    "features": {
+        "audio": false,
+        "backlight": false,
+        "bootmagic": false,
+        "command": false,
+        "console": true,
+        "extrakey": true,
+        "nkro": true,
+        "rgblight": false
+    },
+    "mouse_key": {
+        "enabled": false
+    },
+    "processor": "STM32F411",
+    "url": "https://www.github.com/SmollChungus",
+    "usb": {
+        "device_version": "0.0.1",
+        "pid": "0x0009",
+        "shared_endpoint": {
+            "keyboard": true
+        },
+
+        "vid": "0x5363"
+    },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+                {"label": "esc", "matrix": [0, 0], "x": 0.0, "y": 0.0},
+                {"label": "1", "matrix": [0, 1], "x": 1.0, "y": 0.0},
+                {"label": "2", "matrix": [1, 0], "x": 0.0, "y": 1.0},
+                {"label": "3", "matrix": [1, 1], "x": 1.0, "y": 1.0}
+                    ]
+                    }
+                }
+    }

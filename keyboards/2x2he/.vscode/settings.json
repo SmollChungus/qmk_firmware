@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "compare": "c",
+        "array": "cpp",
+        "functional": "cpp",
+        "ratio": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "matrix.h": "c",
+        "stdbool.h": "c",
+        "he_switch_matrix.h": "c"
+    }
+}
