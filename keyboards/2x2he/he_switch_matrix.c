@@ -192,7 +192,7 @@ void hesm_print_matrix(void) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
                 uint16_t sensor_value = hesm_readkey_raw(sensorId); // Read the sensor value
-                uprintf(" (%d,%d,%d): %u", row, col, hesm_config.hesm_actuation_threshold, sensor_value);
+                uprintf(" (%d,%d): %u", row, col, sensor_value);
             } else {
                 uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
             }
