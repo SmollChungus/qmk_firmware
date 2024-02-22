@@ -1,4 +1,4 @@
-/* Copyright 2024 Matthijs Muller
+/* Copyright 2023 Cipulot
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,13 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-//Credit to Cipulot's EC boards as a foundation for HE VIA intergration
 
 #include "he_switch_matrix.h"
 #include "action.h"
 #include "via.h"
-#include "config.h"
-#include "print.h"
 
 void apc_init_thresholds(void);
 void apc_set_threshold(bool is_for_actuation);
@@ -51,8 +48,6 @@ void eeconfig_init_user(void) {
     apc.release_threshold   = DEFAULT_RELEASE_LEVEL;
     // Write default value to EEPROM now
     eeconfig_update_user_datablock(&apc);
-    uprintf("eeconfig_init_user called\n");
-
 }
 
 // On Keyboard startup
@@ -141,21 +136,21 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
 
 // Initialize the thresholds
 void apc_init_thresholds(void) {
-    hesm_config.hesm_actuation_threshold = apc.actuation_threshold;
-    hesm_config.hesm_release_threshold   = apc.release_threshold;
+    ecsm_config.ecsm_actuation_threshold = apc.actuation_threshold;
+    ecsm_config.ecsm_release_threshold   = apc.release_threshold;
 
     // Update the ecsm_config
-    hesm_update(&hesm_config);
+    ecsm_update(&ecsm_config);
 }
 
 // Set the thresholds
 void apc_set_threshold(bool is_for_actuation) {
     if (is_for_actuation) {
-        hesm_config.hesm_actuation_threshold = apc.actuation_threshold;
+        ecsm_config.ecsm_actuation_threshold = apc.actuation_threshold;
 
     } else {
-        hesm_config.hesm_release_threshold = apc.release_threshold;
+        ecsm_config.ecsm_release_threshold = apc.release_threshold;
     }
     // Update the ecsm_config
-    hesm_update(&hesm_config);
+    ecsm_update(&ecsm_config);
 }
