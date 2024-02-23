@@ -1,3 +1,3 @@
+# keymaps/via/rules.mk
 VIA_ENABLE = yes
 
-SRC += via_apc.c

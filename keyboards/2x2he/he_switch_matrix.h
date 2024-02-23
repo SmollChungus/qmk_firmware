@@ -1,18 +1,3 @@
-/* Copyright 2024 Matthijs Muller
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 //he_switch_matrix.h
 
 #pragma once
@@ -21,6 +6,8 @@
 #include <stdbool.h>
 //#include "matrix.h"
 #include "gpio.h"
+#include "eeconfig.h"
+#include "print.h"
 
 
 
@@ -74,16 +61,31 @@ void matrix_scan_user(void);
 }
 #endif
 
-
-
-
 typedef struct {
-    uint16_t hesm_actuation_threshold;
-    uint16_t hesm_release_threshold;
-    uint8_t num_multiplexers;
-} hesm_config_t;
+    uint16_t actuation_threshold;                  // Key press threshold
+    uint16_t release_threshold;                    // Key release threshold
+    uint16_t bottoming_reading[MATRIX_ROWS][MATRIX_COLS]; // Bottoming reading
+    uint16_t noise_floor[MATRIX_ROWS][MATRIX_COLS];       // Detected noise floor
+    bool     bottoming_calibration;                                             // calibration mode for bottoming out values (true: calibration mode, false: normal mode)
+    bool     bottoming_calibration_starter[MATRIX_ROWS][MATRIX_COLS];           // calibration mode for bottoming out values (true: calibration mode, false: normal mode)
+    uint16_t rescaled_actuation_threshold[MATRIX_ROWS][MATRIX_COLS];     // threshold for key press in mode 0 rescaled to actual scale
+    uint16_t rescaled_release_threshold[MATRIX_ROWS][MATRIX_COLS];       // threshold for key release in mode 0 rescaled to actual scale
+} he_config_t;
+
+// For EEPROM
+typedef struct PACKED {
+    uint16_t actuation_threshold;
+    uint16_t release_threshold;
+    uint16_t bottoming_reading[MATRIX_ROWS][MATRIX_COLS];
+} eeprom_he_config_t;
 
 
+_Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+extern eeprom_he_config_t eeprom_he_config;
+
+extern he_config_t he_config;
+
+// merge maps some time
 typedef struct {
     uint8_t row;
     uint8_t col;
@@ -96,18 +98,21 @@ typedef struct {
     uint8_t channel;
 } sensor_to_mux_map_t;
 
-//db
+//debounce
 typedef struct {
     uint8_t debounced_state; // The stable state of the key
     uint8_t debounce_counter; // Counter for debouncing
 } key_debounce_t;
 
-hesm_config_t hesm_config;
 
-int      hesm_init(hesm_config_t const* const hesm_config);
-int      hesm_update(hesm_config_t const* const hesm_config);
-bool     hesm_matrix_scan(void);
-uint16_t hesm_readkey_raw(uint8_t sensorIndex);
-bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
-void     hesm_print_matrix(void);
-extern matrix_row_t matrix[MATRIX_ROWS];
+
+int      he_init(void);
+int      he_update(he_config_t const* const he_config);
+bool     he_matrix_scan(matrix_row_t current_matrix[]);
+uint16_t he_readkey_raw(uint8_t sensorIndex);
+bool     he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
+void     he_print_matrix(void);
+extern   matrix_row_t matrix[MATRIX_ROWS];
+
+//via slider rescale
+uint16_t rescale(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max);

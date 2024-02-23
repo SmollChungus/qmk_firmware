@@ -1,32 +1,21 @@
-/* Copyright 2024 Matthijs Muller
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 /* he_switch_matrix.c - #include "matrix.h" tasks are delegated to he_switch_matrix.*/
 #include "he_switch_matrix.h"
 #include "analog.h"
 //#include "atomic_util.h" no need so far, needs testing
 #include "print.h"
 #include "wait.h"
+#include "math.h"
 
+eeprom_he_config_t eeprom_he_config;
+he_config_t he_config;
+
+// map = row, col, sensor_id
 const key_to_sensor_map_t key_to_sensor_map[] = {
     {0,0,0}, {0,1,1},
     {1,0,2}, {1,1,3}
 };
 
-//id,muxId,channelId
+// map = sensor_id, mux_id, mux_channel
 const sensor_to_mux_map_t sensor_to_mux_map[] = {
     {0,0,4},  {1,0,3},
     {2,0,12},  {3,0,13}
@@ -44,9 +33,11 @@ matrix_row_t matrix_get_row(uint8_t row) {
 static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
 #define DEBOUNCE_THRESHOLD 5 // Number of scans to validate a state change
 
-const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
+static he_config_t config;
 
-static hesm_config_t config;
+
+
+const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 
 static adc_mux adcMux;
 
@@ -58,9 +49,25 @@ static inline void init_mux_sel(void) {
 }
 
 /* Initialize the peripherals pins */
-int hesm_init(hesm_config_t const* const hesm_config) {
-    config = *hesm_config;
+int he_init(void) {
+    // Assuming eeprom_he_config is a global variable holding the EEPROM data
 
+    // Initialize from EEPROM if available, otherwise use defaults
+    if (eeconfig_is_enabled()) {
+        // Read the block of data from EEPROM into he_config
+        eeprom_read_block((void*)&he_config, (const void*)&eeprom_he_config, sizeof(he_config_t));
+    } else {
+        // EEPROM not set up, use default values
+        he_config.actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+        he_config.release_threshold = DEFAULT_RELEASE_LEVEL;
+        // Potentially set other default values here
+
+        // Save the default config to EEPROM
+        eeprom_update_block((const void*)&he_config, (void*)&eeprom_he_config, sizeof(he_config_t));
+    }
+
+    // The rest of your initialization code...
+    // Replace he_config-> with he_config. in these lines
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
     adcMux = pinToMux(ANALOG_PORT);
     adc_read(adcMux);
@@ -74,6 +81,7 @@ int hesm_init(hesm_config_t const* const hesm_config) {
 
     return 0;
 }
+
 
 static inline void select_mux(uint8_t sensorId) {
     // Look up the multiplexer and channel directly from the sensor ID
@@ -117,15 +125,15 @@ uint8_t get_sensor_id_from_row_col(uint8_t row, uint8_t col) {
 
 
  // why is this deleted in gtp4?
-int hesm_update(hesm_config_t const* const hesm_config) {
+int he_update(he_config_t const* const he_config) {
     // Save config
-    config = *hesm_config;
+    config = *he_config;
     return 0;
 }
 
 // Read the HE sensor value - replace matrix with direct pin
 // Function to read HE sensor value directly through MUX and ADC
-uint16_t hesm_readkey_raw(uint8_t sensorIndex) {
+uint16_t he_readkey_raw(uint8_t sensorIndex) {
     uint16_t sensor_value = 0;
 
     select_mux(sensorIndex);
@@ -138,8 +146,8 @@ uint16_t hesm_readkey_raw(uint8_t sensorIndex) {
 
 // Update press/release state of a single key # CURRENT_SENSOR_VALUE SHOULD BE sw_value right?
 // Assume row and col are available and correctly identify the key's position
-bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
-    bool new_state = sensor_value > config.hesm_actuation_threshold;
+bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
+    bool new_state = sensor_value > config.actuation_threshold;
     key_debounce_t *key_info = &debounce_matrix[row][col];
 
     if (new_state != key_info->debounced_state) {
@@ -147,7 +155,7 @@ bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uin
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
             // If the debounce threshold is reached, update the debounced state
             key_info->debounced_state = new_state;
-            key_info->debounce_counter = 0; // Reset counter
+            key_info->debounce_counter = 0;
 
             // Update the actual matrix state
             if (new_state) {
@@ -166,41 +174,105 @@ bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uin
     return false; // No change in stable state
 }
 
-bool hesm_matrix_scan(void) {
+// Get the noise floor
+void he_noise_floor(void) {
+    he_init();
+    // Reset the noise floor values to expected
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+            he_config.noise_floor[row][col] = EXPECTED_NOISE_FLOOR;
+            uprintf("%d", he_config.noise_floor[row][col]);
+        }
+    }
+
+    // Take multiple samples to average out the noise floor
+    for (uint8_t i = 0; i < DEFAULT_NOISE_FLOOR_SAMPLING_COUNT; i++) {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+            for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+                uint8_t sensorId = get_sensor_id_from_row_col(row, col);
+                if (sensorId != 0xFF) { // Check if valid sensor ID
+                    select_mux(sensorId);
+                    he_config.noise_floor[row][col] += he_readkey_raw(sensorId);
+                }
+            }
+        }
+        wait_ms(5); // Wait a bit between samples
+    }
+
+    // Calculate the average noise floor
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+            he_config.noise_floor[row][col] /= DEFAULT_NOISE_FLOOR_SAMPLING_COUNT;
+        }
+    }
+}
+
+bool he_matrix_scan(matrix_row_t current_matrix[]) {
     bool updated = false;
+
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
-            if (sensorId != 0xFF) { // Valid sensor ID
+            if (sensorId != 0xFF) { // Check for valid sensor ID
                 select_mux(sensorId);
-                uint16_t sensor_value = hesm_readkey_raw(sensorId);
-                // Assume matrix is a global matrix state accessible here
-                if (hesm_update_key(matrix, row, col, sensor_value)) {
-                    updated = true;
-                }
+                uint16_t sensor_value = he_readkey_raw(sensorId);
 
+                // Handle noise floor calibration
+                //if (sensor_value < (he_config.noise_floor[row][col] - NOISE_FLOOR_THRESHOLD)) {
+                  //  // Adjust the noise floor based on the current reading
+                    //he_config.noise_floor[row][col] = sensor_value;
+               // }
+
+                // Update the key state based on thresholds
+                updated |= he_update_key(&current_matrix[row], row, col, sensor_value);
             }
         }
     }
+
     return updated;
 }
 
+
 // Debug print key values
-void hesm_print_matrix(void) {
+void he_print_matrix(void) {
     for (int row = 0; row < MATRIX_ROWS; row++) {
         for (int col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
-                uint16_t sensor_value = hesm_readkey_raw(sensorId); // Read the sensor value
-                uprintf(" (%d,%d): %u", row, col, sensor_value);
+                uint16_t raw_sensor_value = he_readkey_raw(sensorId); // Read the raw sensor value
+                bool debounced_state = debounce_matrix[row][col].debounced_state;
+                uint16_t noise_floor = he_config.noise_floor[row][col];
+                uint16_t actuation_threshold = he_config.actuation_threshold;
+                uint16_t release_threshold = he_config.release_threshold;
+
+                // Add detailed debugging info
+                uprintf("R%dC%d: Sensor ID=%u, Raw Value=%u, Debounced State=%s, Noise Floor=%u, Actuation Thresh=%u, Release Thresh=%u\n",
+                        row, col, sensorId, raw_sensor_value,
+                        debounced_state ? "PRESSED" : "RELEASED",
+                        noise_floor, actuation_threshold, release_threshold);
+
+                // Check if the current sensor value is above or below the noise floor and thresholds
+                if(raw_sensor_value > noise_floor) {
+                    if(raw_sensor_value >= actuation_threshold) {
+                        uprintf("R%dC%d: ABOVE actuation threshold\n", row, col);
+                    } else if(raw_sensor_value <= release_threshold) {
+                        uprintf("R%dC%d: BELOW release threshold\n", row, col);
+                    } else {
+                        uprintf("R%dC%d: BETWEEN thresholds\n", row, col);
+                    }
+                } else {
+                    uprintf("R%dC%d: BELOW noise floor\n", row, col);
+                }
             } else {
-                uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
-            }
-            if (col < (MATRIX_COLS - 1)) {
-                print(" , ");
+                uprintf("R%dC%d: Sensor ID Invalid\n", row, col);
             }
         }
-        print("\n");
     }
-    print("\n");
+}
+
+
+
+// Rescale the value to a different range
+uint16_t rescale(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
