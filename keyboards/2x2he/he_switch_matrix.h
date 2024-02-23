@@ -107,7 +107,6 @@ typedef struct {
 
 
 int      he_init(void);
-int      he_update(he_config_t const* const he_config);
 bool     he_matrix_scan(matrix_row_t current_matrix[]);
 uint16_t he_readkey_raw(uint8_t sensorIndex);
 bool     he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);

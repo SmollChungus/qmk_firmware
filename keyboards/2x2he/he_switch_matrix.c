@@ -6,9 +6,13 @@
 #include "wait.h"
 #include "math.h"
 
+
 eeprom_he_config_t eeprom_he_config;
 he_config_t he_config;
+static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
+void he_noise_floor(void);
 
+//MAPS
 // map = row, col, sensor_id
 const key_to_sensor_map_t key_to_sensor_map[] = {
     {0,0,0}, {0,1,1},
@@ -30,12 +34,6 @@ matrix_row_t matrix_get_row(uint8_t row) {
 }
 
 
-static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
-#define DEBOUNCE_THRESHOLD 5 // Number of scans to validate a state change
-
-static he_config_t config;
-
-
 
 const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 
@@ -50,7 +48,9 @@ static inline void init_mux_sel(void) {
 
 /* Initialize the peripherals pins */
 int he_init(void) {
-    // Assuming eeprom_he_config is a global variable holding the EEPROM data
+    init_mux_sel();
+    palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
+    adcMux = pinToMux(ANALOG_PORT);
 
     // Initialize from EEPROM if available, otherwise use defaults
     if (eeconfig_is_enabled()) {
@@ -65,19 +65,15 @@ int he_init(void) {
         // Save the default config to EEPROM
         eeprom_update_block((const void*)&he_config, (void*)&eeprom_he_config, sizeof(he_config_t));
     }
-
-    // The rest of your initialization code...
-    // Replace he_config-> with he_config. in these lines
-    palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
-    adcMux = pinToMux(ANALOG_PORT);
     adc_read(adcMux);
-
-    init_mux_sel();
 
     setPinOutput(APLEX_EN_PIN_0);
     writePinLow(APLEX_EN_PIN_0);
     setPinOutput(APLEX_EN_PIN_1);
     writePinLow(APLEX_EN_PIN_1);
+
+    he_noise_floor();
+
 
     return 0;
 }
@@ -99,9 +95,7 @@ static inline void select_mux(uint8_t sensorId) {
             } else if (muxIndex == 1) {
                 writePinHigh(APLEX_EN_PIN_1);
             }
-            // Set the correct channel on the activated multiplexer
-            // This part depends on your specific multiplexer selection mechanism
-            // Example for a 4-channel selection:
+            // mux 4-channel selection:
             for (int j = 0; j < 4; j++) {
                 if (channel & (1 << j)) {
                     writePinHigh(mux_sel_pins[j]);
@@ -124,12 +118,6 @@ uint8_t get_sensor_id_from_row_col(uint8_t row, uint8_t col) {
 }
 
 
- // why is this deleted in gtp4?
-int he_update(he_config_t const* const he_config) {
-    // Save config
-    config = *he_config;
-    return 0;
-}
 
 // Read the HE sensor value - replace matrix with direct pin
 // Function to read HE sensor value directly through MUX and ADC
@@ -147,7 +135,7 @@ uint16_t he_readkey_raw(uint8_t sensorIndex) {
 // Update press/release state of a single key # CURRENT_SENSOR_VALUE SHOULD BE sw_value right?
 // Assume row and col are available and correctly identify the key's position
 bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
-    bool new_state = sensor_value > config.actuation_threshold;
+    bool new_state = sensor_value > he_config.actuation_threshold;
     key_debounce_t *key_info = &debounce_matrix[row][col];
 
     if (new_state != key_info->debounced_state) {
@@ -176,12 +164,11 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint1
 
 // Get the noise floor
 void he_noise_floor(void) {
-    he_init();
     // Reset the noise floor values to expected
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             he_config.noise_floor[row][col] = EXPECTED_NOISE_FLOOR;
-            uprintf("%d", he_config.noise_floor[row][col]);
+            uprintf("Expected Noise Floor: %d", he_config.noise_floor[row][col]);
         }
     }
 
@@ -192,7 +179,9 @@ void he_noise_floor(void) {
                 uint8_t sensorId = get_sensor_id_from_row_col(row, col);
                 if (sensorId != 0xFF) { // Check if valid sensor ID
                     select_mux(sensorId);
-                    he_config.noise_floor[row][col] += he_readkey_raw(sensorId);
+                    uint8_t rawValue = he_readkey_raw(sensorId);
+                    uprintf("Raw Value: %d", rawValue);
+                    he_config.noise_floor[row][col] += rawValue;
                 }
             }
         }
@@ -203,6 +192,7 @@ void he_noise_floor(void) {
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             he_config.noise_floor[row][col] /= DEFAULT_NOISE_FLOOR_SAMPLING_COUNT;
+            uprintf("Average Noise Floor: %d", he_config.noise_floor[row][col]);
         }
     }
 }
@@ -249,7 +239,7 @@ void he_print_matrix(void) {
                 uprintf("R%dC%d: Sensor ID=%u, Raw Value=%u, Debounced State=%s, Noise Floor=%u, Actuation Thresh=%u, Release Thresh=%u\n",
                         row, col, sensorId, raw_sensor_value,
                         debounced_state ? "PRESSED" : "RELEASED",
-                        noise_floor, actuation_threshold, release_threshold);
+                        he_config.noise_floor[row][col], actuation_threshold, release_threshold);
 
                 // Check if the current sensor value is above or below the noise floor and thresholds
                 if(raw_sensor_value > noise_floor) {
@@ -268,6 +258,7 @@ void he_print_matrix(void) {
             }
         }
     }
+
 }
 
 
