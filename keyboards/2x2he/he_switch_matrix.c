@@ -168,7 +168,7 @@ void he_print_matrix(void) {
                 uint16_t actuation_threshold = he_config.he_actuation_threshold;
                 uint16_t release_threshold = he_config.he_release_threshold;
                  // Read the sensor value
-                uprintf(" (%d,%d): %u \n (Actuation: %d Release: %d)", row, col, sensor_value, actuation_threshold, release_threshold);
+                uprintf(" (%d,%d): %u \n (Actuation: %d Release: %d \n)", row, col, sensor_value, actuation_threshold, release_threshold);
             } else {
                 uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
             }
