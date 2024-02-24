@@ -79,8 +79,9 @@ typedef struct {
     uint8_t debounce_counter; // Counter for debouncing
 } key_debounce_t;
 
-he_config_t he_config;
-eeprom_he_config_t eeprom_he_config;
+extern he_config_t he_config;
+extern eeprom_he_config_t eeprom_he_config;
+extern via_he_config_t via_he_config;
 
 _Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
 
@@ -91,4 +92,5 @@ bool     he_matrix_scan(void);
 uint16_t he_readkey_raw(uint8_t sensorIndex);
 bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
 void     he_print_matrix(void);
+void     via_update_config(void);
 extern matrix_row_t matrix[MATRIX_ROWS];

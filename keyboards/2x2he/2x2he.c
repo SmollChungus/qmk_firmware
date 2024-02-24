@@ -2,6 +2,10 @@
 
 #include "he_switch_matrix.h"
 
+#ifdef VIA_ENABLE
+
+eeprom_he_config_t eeprom_he_config;
+via_he_config_t via_he_config;
 
 void keyboard_post_init_kb(void) {
     // Load from EEPROM
@@ -26,10 +30,10 @@ void keyboard_post_init_kb(void) {
         keyboard_post_init_user();
 }
 
-void via_update_config(const via_he_config_t* via_he_config) {
+void via_update_config(void) {
     // Update runtime configuration
-    he_config.he_actuation_threshold = via_he_config->he_actuation_threshold;
-    he_config.he_release_threshold = via_he_config->he_release_threshold;
+    he_config.he_actuation_threshold = via_he_config.he_actuation_threshold;
+    he_config.he_release_threshold = via_he_config.he_release_threshold;
     // Optionally, update other runtime config fields...
 
     // Convert runtime config to EEPROM format and save
@@ -37,3 +41,4 @@ void via_update_config(const via_he_config_t* via_he_config) {
     eeprom_he_config.he_release_threshold = he_config.he_release_threshold;
     eeconfig_update_kb_datablock(&eeprom_he_config);
 }
+#endif

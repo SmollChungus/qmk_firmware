@@ -5,30 +5,21 @@
 #include "config.h"
 #include "print.h"
 
-void apc_init_thresholds(void);
-void apc_set_threshold(bool is_for_actuation);
+#ifdef VIA_ENABLE
 
-// Declaring an _apc_config_t struct that will store our data
-typedef struct _apc_config_t {
-    uint16_t actuation_threshold;
-    uint16_t release_threshold;
-} apc_config;
 
-// Check if the size of the reserved persistent memory is the same as the size of struct apc_config
-_Static_assert(sizeof(apc_config) == EECONFIG_USER_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
-
-// Declaring a new variable apc of type apc_config
-apc_config apc;
+//void apc_init_thresholds(void);
+//void apc_set_threshold(bool is_for_actuation);
 
 // Declaring enums for VIA config menu
-enum via_apc_enums {
+enum via_he_enums {
     // clang-format off
-    id_apc_actuation_threshold = 1,
-    id_apc_release_threshold = 2
+    id_via_he_actuation_threshold = 1,
+    id_via_he_release_threshold = 2
     // clang-format on
 };
 
-// Initializing persistent memory configuration: default values are declared and stored in PMEM
+/* Initializing persistent memory configuration: default values are declared and stored in PMEM
 void eeconfig_init_user(void) {
     // Default values
     apc.actuation_threshold = DEFAULT_ACTUATION_LEVEL;
@@ -37,58 +28,60 @@ void eeconfig_init_user(void) {
     eeconfig_update_user_datablock(&apc);
     uprintf("eeconfig_init_user called\n");
 
-}
+} */ //already done in keyboard.c
 
 // On Keyboard startup
 void keyboard_post_init_user(void) {
     // Read custom menu variables from memory
-    eeconfig_read_user_datablock(&apc);
-    apc_init_thresholds();
+    eeconfig_read_user_datablock(&eeprom_he_config);
+    via_he_config.he_actuation_threshold = eeprom_he_config.he_actuation_threshold;
+    via_he_config.he_release_threshold = eeprom_he_config.he_release_threshold;
 }
 
 // Handle the data received by the keyboard from the VIA menus
-void apc_config_set_value(uint8_t *data) {
+void via_he_config_set_value(uint8_t *data) {
     // data = [ value_id, value_data ]
     uint8_t *value_id   = &(data[0]);
     uint8_t *value_data = &(data[1]);
 
     switch (*value_id) {
-        case id_apc_actuation_threshold: {
-            apc.actuation_threshold = value_data[1] | (value_data[0] << 8);
-            apc_set_threshold(true);
+        case id_via_he_actuation_threshold: {
+            via_he_config.he_actuation_threshold = value_data[1] | (value_data[0] << 8);
+            via_update_config();
             break;
         }
-        case id_apc_release_threshold: {
-            apc.release_threshold = value_data[1] | (value_data[0] << 8);
-            apc_set_threshold(false);
+        case id_via_he_release_threshold: {
+            via_he_config.he_release_threshold = value_data[1] | (value_data[0] << 8);
+            via_update_config();
             break;
         }
     }
 }
 
 // Handle the data sent by the keyboard to the VIA menus
-void apc_config_get_value(uint8_t *data) {
+void via_he_config_get_value(uint8_t *data) {
     // data = [ value_id, value_data ]
     uint8_t *value_id   = &(data[0]);
     uint8_t *value_data = &(data[1]);
 
     switch (*value_id) {
-        case id_apc_actuation_threshold: {
-            value_data[0] = apc.actuation_threshold >> 8;
-            value_data[1] = apc.actuation_threshold & 0xFF;
+        case id_via_he_actuation_threshold: {
+            value_data[0] = via_he_config.he_actuation_threshold >> 8;
+            value_data[1] = via_he_config.he_actuation_threshold & 0xFF;
             break;
         }
-        case id_apc_release_threshold: {
-            value_data[0] = apc.release_threshold >> 8;
-            value_data[1] = apc.release_threshold & 0xFF;
+        case id_via_he_release_threshold: {
+            value_data[0] = via_he_config.he_release_threshold >> 8;
+            value_data[1] = via_he_config.he_release_threshold & 0xFF;
             break;
         }
     }
 }
 
 // Save the data to persistent memory after changes are made
-void apc_config_save(void) {
-    eeconfig_update_user_datablock(&apc);
+void via_he_config_save(void) {
+    eeconfig_update_user_datablock(&via_he_config);
+    uprint("eeprom wear");
 }
 
 void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
@@ -100,15 +93,15 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
     if (*channel_id == id_custom_channel) {
         switch (*command_id) {
             case id_custom_set_value: {
-                apc_config_set_value(value_id_and_data);
+                via_he_config_set_value(value_id_and_data);
                 break;
             }
             case id_custom_get_value: {
-                apc_config_get_value(value_id_and_data);
+                via_he_config_get_value(value_id_and_data);
                 break;
             }
             case id_custom_save: {
-                apc_config_save();
+                via_he_config_save();
                 break;
             }
             default: {
@@ -123,23 +116,6 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
     *command_id = id_unhandled;
 }
 
-// Initialize the thresholds
-void apc_init_thresholds(void) {
-    he_config.he_actuation_threshold = apc.actuation_threshold;
-    he_config.he_release_threshold   = apc.release_threshold;
 
-    // Update the ecsm_config
-    he_update(&he_config);
-}
 
-// Set the thresholds
-void apc_set_threshold(bool is_for_actuation) {
-    if (is_for_actuation) {
-        he_config.he_actuation_threshold = apc.actuation_threshold;
-
-    } else {
-        he_config.he_release_threshold = apc.release_threshold;
-    }
-    // Update the ecsm_config
-    he_update(&he_config);
-}
+#endif //VIA_ENABLE2

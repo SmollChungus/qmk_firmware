@@ -116,33 +116,30 @@ uint16_t he_readkey_raw(uint8_t sensorIndex) {
     return sensor_value; // Return the sensor value
 }
 
-
-
-
 // Update press/release state of a single key # CURRENT_SENSOR_VALUE SHOULD BE sw_value right?
 // Assume row and col are available and correctly identify the key's position
 bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
-    bool new_state = sensor_value > he_config.he_actuation_threshold;
     key_debounce_t *key_info = &debounce_matrix[row][col];
+    bool previously_pressed = key_info->debounced_state;
+    bool currently_pressed = sensor_value > he_config.he_actuation_threshold;
+    bool should_release = sensor_value < he_config.he_release_threshold;
 
-    if (new_state != key_info->debounced_state) {
-        // If the new state is different, increment the debounce counter
+    if (currently_pressed && !previously_pressed) {
+        // Key actuation logic
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-            // If the debounce threshold is reached, update the debounced state
-            key_info->debounced_state = new_state;
-            key_info->debounce_counter = 0; // Reset counter
-
-            // Update the actual matrix state
-            if (new_state) {
-                current_matrix[row] |= (1UL << col);
-            } else {
-                current_matrix[row] &= ~(1UL << col);
-            }
-
-            return true; // State changed
+            key_info->debounced_state = true; // Key is pressed
+            current_matrix[row] |= (1UL << col);
+            key_info->debounce_counter = 0;
+            return true;
         }
+    } else if (should_release && previously_pressed) {
+        // Key release logic
+        key_info->debounced_state = false; // Key is released
+        current_matrix[row] &= ~(1UL << col);
+        key_info->debounce_counter = 0;
+        return true;
     } else {
-        // If the state is the same as the debounced state, reset the counter
+        // Reset debounce counter if the state is stable
         key_info->debounce_counter = 0;
     }
 
@@ -174,8 +171,11 @@ void he_print_matrix(void) {
         for (int col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
-                uint16_t sensor_value = he_readkey_raw(sensorId); // Read the sensor value
-                uprintf(" (%d,%d): %u", row, col, sensor_value);
+                uint16_t sensor_value = he_readkey_raw(sensorId);
+                uint16_t actuation_threshold = he_config.he_actuation_threshold;
+                uint16_t release_threshold = he_config.he_release_threshold;
+                 // Read the sensor value
+                uprintf(" (%d,%d): %u (A%dR%d)", row, col, sensor_value, actuation_threshold, release_threshold);
             } else {
                 uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
             }
