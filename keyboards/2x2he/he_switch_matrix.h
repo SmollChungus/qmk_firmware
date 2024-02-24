@@ -22,35 +22,22 @@ typedef uint32_t matrix_row_t;
 extern "C" {
 #endif
 
-/* number of matrix rows */
 uint8_t matrix_rows(void);
-/* number of matrix columns */
 uint8_t matrix_cols(void);
-/* should be called at early stage of startup before matrix_init.(optional) */
-void matrix_setup(void);
-/* intialize matrix for scaning. */
-void matrix_init(void);
-/* scan all key states on matrix */
 bool matrix_scan(matrix_row_t current_matrix[]);
-/* whether matrix scanning operations should be executed */
 bool matrix_can_read(void);
-/* whether a switch is on */
 bool matrix_is_on(uint8_t row, uint8_t col);
-/* matrix state on row */
-matrix_row_t matrix_get_row(uint8_t row);
-/* print matrix for debug */
 void matrix_print(void);
-/* delay between changing matrix pin state and reading values */
 void matrix_output_select_delay(void);
 void matrix_output_unselect_delay(uint8_t line, bool key_pressed);
-/* only for backwards compatibility. delay between changing matrix pin state and reading values */
+void matrix_setup(void);
+void matrix_init(void);
 void matrix_io_delay(void);
-
 void matrix_init_kb(void);
 void matrix_scan_kb(void);
-
 void matrix_init_user(void);
 void matrix_scan_user(void);
+matrix_row_t matrix_get_row(uint8_t row);
 
 #ifdef __cplusplus
 }
