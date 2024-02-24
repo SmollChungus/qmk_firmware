@@ -99,13 +99,6 @@ uint8_t get_sensor_id_from_row_col(uint8_t row, uint8_t col) {
 }
 
 
-int he_update(he_config_t const* const via_he_config) {
-    // take a 2nd look at this
-    he_config = *via_he_config;
-    return 0;
-}
-
-
 // Read the HE sensor value - replace matrix with direct pin
 // Function to read HE sensor value directly through MUX and ADC
 uint16_t he_readkey_raw(uint8_t sensorIndex) {
@@ -175,7 +168,7 @@ void he_print_matrix(void) {
                 uint16_t actuation_threshold = he_config.he_actuation_threshold;
                 uint16_t release_threshold = he_config.he_release_threshold;
                  // Read the sensor value
-                uprintf(" (%d,%d): %u (A%dR%d)", row, col, sensor_value, actuation_threshold, release_threshold);
+                uprintf(" (%d,%d): %u \n (Actuation: %d Release: %d)", row, col, sensor_value, actuation_threshold, release_threshold);
             } else {
                 uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
             }
