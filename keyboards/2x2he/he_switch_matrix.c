@@ -27,11 +27,10 @@ matrix_row_t matrix_get_row(uint8_t row) {
 
 
 static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
-#define DEBOUNCE_THRESHOLD 5 // Number of scans to validate a state change
 
 const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 
-static he_config_t config;
+he_config_t he_config;
 
 static adc_mux adcMux;
 
@@ -44,8 +43,7 @@ static inline void init_mux_sel(void) {
 
 /* Initialize the peripherals pins */
 int he_init(he_config_t const* const he_config) {
-    config = *he_config;
-
+    //he_config;
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
     adcMux = pinToMux(ANALOG_PORT);
     adc_read(adcMux);
@@ -101,12 +99,12 @@ uint8_t get_sensor_id_from_row_col(uint8_t row, uint8_t col) {
 }
 
 
- // why is this deleted in gtp4?
-int he_update(he_config_t const* const he_config) {
-    // Save config
-    config = *he_config;
+int he_update(he_config_t const* const via_he_config) {
+    // take a 2nd look at this
+    he_config = *via_he_config;
     return 0;
 }
+
 
 // Read the HE sensor value - replace matrix with direct pin
 // Function to read HE sensor value directly through MUX and ADC
@@ -124,7 +122,7 @@ uint16_t he_readkey_raw(uint8_t sensorIndex) {
 // Update press/release state of a single key # CURRENT_SENSOR_VALUE SHOULD BE sw_value right?
 // Assume row and col are available and correctly identify the key's position
 bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
-    bool new_state = sensor_value > config.he_actuation_threshold;
+    bool new_state = sensor_value > he_config.he_actuation_threshold;
     key_debounce_t *key_info = &debounce_matrix[row][col];
 
     if (new_state != key_info->debounced_state) {

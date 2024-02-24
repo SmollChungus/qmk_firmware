@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "gpio.h"
+#include "eeprom.h"
+#include "eeconfig.h"
 
 #if (MATRIX_COLS <= 8)
 typedef uint8_t matrix_row_t;
@@ -37,27 +39,27 @@ void matrix_init_kb(void);
 void matrix_scan_kb(void);
 void matrix_init_user(void);
 void matrix_scan_user(void);
+__attribute__((weak)) void keyboard_post_init_user(void);
 matrix_row_t matrix_get_row(uint8_t row);
 
 #ifdef __cplusplus
 }
 #endif
 
-
-
-
 typedef struct {
     uint16_t he_actuation_threshold;
     uint16_t he_release_threshold;
-    uint8_t num_multiplexers; //yeet
 } he_config_t;
 
 typedef struct {
     uint16_t he_actuation_threshold;
     uint16_t he_release_threshold;
-    // Add any future persistent settings here
 } eeprom_he_config_t;
 
+typedef struct {
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
+} via_he_config_t;
 
 typedef struct {
     uint8_t row;
@@ -78,6 +80,10 @@ typedef struct {
 } key_debounce_t;
 
 he_config_t he_config;
+eeprom_he_config_t eeprom_he_config;
+
+_Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+
 
 int      he_init(he_config_t const* const he_config);
 int      he_update(he_config_t const* const he_config);

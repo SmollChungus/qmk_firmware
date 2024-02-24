@@ -33,7 +33,7 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 350) {
+    if (cnt++ == 10000) {
         cnt = 0;
         he_print_matrix();
     }

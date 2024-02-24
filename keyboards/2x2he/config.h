@@ -30,10 +30,10 @@
 #define APLEX_EN_PIN_1 B3
 #define ANALOG_PORT A3
 
-#define DEFAULT_ACTUATION_LEVEL 650
-#define DEFAULT_RELEASE_LEVEL 600
+#define DEFAULT_ACTUATION_LEVEL 565
+#define DEFAULT_RELEASE_LEVEL 560
 
 
-
-
+#define EECONFIG_KB_DATA_SIZE  4
+#define DEBOUNCE_THRESHOLD 5 // yeeto to xonfig.h Number of scans to validate a state change
 
