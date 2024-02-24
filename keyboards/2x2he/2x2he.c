@@ -8,7 +8,7 @@ void keyboard_post_init_kb(void) {
     eeconfig_read_kb_datablock(&eeprom_he_config);
 
     // Check if the EEPROM values are valid
-    // For example, assuming actuation_threshold should never be 0 in a properly initialized EEPROM
+    // Assuming actuation_threshold should never be 0 in a properly initialized EEPROM
     if (eeprom_he_config.he_actuation_threshold == 0 || eeprom_he_config.he_release_threshold == 0) {
         // Set to default values
         eeprom_he_config.he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
