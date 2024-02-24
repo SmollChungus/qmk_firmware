@@ -47,10 +47,16 @@ matrix_row_t matrix_get_row(uint8_t row);
 
 
 typedef struct {
-    uint16_t hesm_actuation_threshold;
-    uint16_t hesm_release_threshold;
-    uint8_t num_multiplexers;
-} hesm_config_t;
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
+    uint8_t num_multiplexers; //yeet
+} he_config_t;
+
+typedef struct {
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
+    // Add any future persistent settings here
+} eeprom_he_config_t;
 
 
 typedef struct {
@@ -71,12 +77,12 @@ typedef struct {
     uint8_t debounce_counter; // Counter for debouncing
 } key_debounce_t;
 
-hesm_config_t hesm_config;
+he_config_t he_config;
 
-int      hesm_init(hesm_config_t const* const hesm_config);
-int      hesm_update(hesm_config_t const* const hesm_config);
-bool     hesm_matrix_scan(void);
-uint16_t hesm_readkey_raw(uint8_t sensorIndex);
-bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
-void     hesm_print_matrix(void);
+int      he_init(he_config_t const* const he_config);
+int      he_update(he_config_t const* const he_config);
+bool     he_matrix_scan(void);
+uint16_t he_readkey_raw(uint8_t sensorIndex);
+bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
+void     he_print_matrix(void);
 extern matrix_row_t matrix[MATRIX_ROWS];

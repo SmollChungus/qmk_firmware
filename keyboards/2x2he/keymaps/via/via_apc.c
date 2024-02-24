@@ -141,21 +141,21 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
 
 // Initialize the thresholds
 void apc_init_thresholds(void) {
-    hesm_config.hesm_actuation_threshold = apc.actuation_threshold;
-    hesm_config.hesm_release_threshold   = apc.release_threshold;
+    he_config.he_actuation_threshold = apc.actuation_threshold;
+    he_config.he_release_threshold   = apc.release_threshold;
 
     // Update the ecsm_config
-    hesm_update(&hesm_config);
+    he_update(&he_config);
 }
 
 // Set the thresholds
 void apc_set_threshold(bool is_for_actuation) {
     if (is_for_actuation) {
-        hesm_config.hesm_actuation_threshold = apc.actuation_threshold;
+        he_config.he_actuation_threshold = apc.actuation_threshold;
 
     } else {
-        hesm_config.hesm_release_threshold = apc.release_threshold;
+        he_config.he_release_threshold = apc.release_threshold;
     }
     // Update the ecsm_config
-    hesm_update(&hesm_config);
+    he_update(&he_config);
 }

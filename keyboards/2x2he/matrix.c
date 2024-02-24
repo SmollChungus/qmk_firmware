@@ -14,14 +14,14 @@ __attribute__((weak)) void matrix_scan_user(void) {}
 
 
 void matrix_print(void) {
-    hesm_print_matrix();
+    he_print_matrix();
 }
 
 void matrix_init(void) {
-    hesm_config.hesm_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
-    hesm_config.hesm_release_threshold   = DEFAULT_RELEASE_LEVEL;
+    he_config.he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+    he_config.he_release_threshold   = DEFAULT_RELEASE_LEVEL;
 
-    hesm_init(&hesm_config);
+    he_init(&he_config);
 
     matrix_init_kb();
 
@@ -29,13 +29,13 @@ void matrix_init(void) {
 }
 
 bool matrix_scan(matrix_row_t current_matrix[]) {
-    bool updated = hesm_matrix_scan();
+    bool updated = he_matrix_scan();
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
     if (cnt++ == 350) {
         cnt = 0;
-        hesm_print_matrix();
+        he_print_matrix();
     }
     #endif
 

@@ -31,7 +31,7 @@ static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
 
 const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 
-static hesm_config_t config;
+static he_config_t config;
 
 static adc_mux adcMux;
 
@@ -43,8 +43,8 @@ static inline void init_mux_sel(void) {
 }
 
 /* Initialize the peripherals pins */
-int hesm_init(hesm_config_t const* const hesm_config) {
-    config = *hesm_config;
+int he_init(he_config_t const* const he_config) {
+    config = *he_config;
 
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
     adcMux = pinToMux(ANALOG_PORT);
@@ -102,15 +102,15 @@ uint8_t get_sensor_id_from_row_col(uint8_t row, uint8_t col) {
 
 
  // why is this deleted in gtp4?
-int hesm_update(hesm_config_t const* const hesm_config) {
+int he_update(he_config_t const* const he_config) {
     // Save config
-    config = *hesm_config;
+    config = *he_config;
     return 0;
 }
 
 // Read the HE sensor value - replace matrix with direct pin
 // Function to read HE sensor value directly through MUX and ADC
-uint16_t hesm_readkey_raw(uint8_t sensorIndex) {
+uint16_t he_readkey_raw(uint8_t sensorIndex) {
     uint16_t sensor_value = 0;
 
     select_mux(sensorIndex);
@@ -123,8 +123,8 @@ uint16_t hesm_readkey_raw(uint8_t sensorIndex) {
 
 // Update press/release state of a single key # CURRENT_SENSOR_VALUE SHOULD BE sw_value right?
 // Assume row and col are available and correctly identify the key's position
-bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
-    bool new_state = sensor_value > config.hesm_actuation_threshold;
+bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
+    bool new_state = sensor_value > config.he_actuation_threshold;
     key_debounce_t *key_info = &debounce_matrix[row][col];
 
     if (new_state != key_info->debounced_state) {
@@ -151,16 +151,16 @@ bool hesm_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uin
     return false; // No change in stable state
 }
 
-bool hesm_matrix_scan(void) {
+bool he_matrix_scan(void) {
     bool updated = false;
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
                 select_mux(sensorId);
-                uint16_t sensor_value = hesm_readkey_raw(sensorId);
+                uint16_t sensor_value = he_readkey_raw(sensorId);
                 // Assume matrix is a global matrix state accessible here
-                if (hesm_update_key(matrix, row, col, sensor_value)) {
+                if (he_update_key(matrix, row, col, sensor_value)) {
                     updated = true;
                 }
 
@@ -171,12 +171,12 @@ bool hesm_matrix_scan(void) {
 }
 
 // Debug print key values
-void hesm_print_matrix(void) {
+void he_print_matrix(void) {
     for (int row = 0; row < MATRIX_ROWS; row++) {
         for (int col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
             if (sensorId != 0xFF) { // Valid sensor ID
-                uint16_t sensor_value = hesm_readkey_raw(sensorId); // Read the sensor value
+                uint16_t sensor_value = he_readkey_raw(sensorId); // Read the sensor value
                 uprintf(" (%d,%d): %u", row, col, sensor_value);
             } else {
                 uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
