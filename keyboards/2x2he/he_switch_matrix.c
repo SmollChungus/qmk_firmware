@@ -160,6 +160,9 @@ bool he_matrix_scan(void) {
 
 // Debug print key values
 void he_print_matrix(void) {
+    print("+---------------------------------------------------------------+\n");
+    print("| Sensor Matrix                                                 |\n");
+    print("+---------------------------------------------------------------+\n");
     for (int row = 0; row < MATRIX_ROWS; row++) {
         for (int col = 0; col < MATRIX_COLS; col++) {
             uint8_t sensorId = get_sensor_id_from_row_col(row, col);
@@ -167,16 +170,23 @@ void he_print_matrix(void) {
                 uint16_t sensor_value = he_readkey_raw(sensorId);
                 uint16_t actuation_threshold = he_config.he_actuation_threshold;
                 uint16_t release_threshold = he_config.he_release_threshold;
-                 // Read the sensor value
-                uprintf(" (%d,%d): %u \n (Actuation: %d Release: %d \n)", row, col, sensor_value, actuation_threshold, release_threshold);
+
+                // Ensure the formatting aligns values neatly
+                char buffer[128];
+                snprintf(buffer, sizeof(buffer), "| (%d,%d): %-6u Act: %-6d Rel: %-6d |", row, col, sensor_value, actuation_threshold, release_threshold);
+                print(buffer);
+
+                if (col < (MATRIX_COLS - 1)) {
+                    print(" , ");
+                }
             } else {
-                uprintf("NA (%d,%d)", row, col); // Print NA for invalid sensor IDs
+                // Print NA for invalid sensor IDs, aligning with the above format
+                char buffer[128];
+                snprintf(buffer, sizeof(buffer), "| NA (%d,%d)                          |", row, col);
+                print(buffer);
             }
-            if (col < (MATRIX_COLS - 1)) {
-                print(" , ");
-            }
+            print("\n");
         }
-        print("\n");
+        print("+---------------------------------------------------------------+\n");
     }
-    print("\n");
 }
