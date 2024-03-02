@@ -19,21 +19,21 @@
 #define MATRIX_ROWS 2
 #define MATRIX_COLS 2
 
-/* Custom matrix pins and port select array delete*/
+// Multiplexer setup
+#define SENSOR_COUNT 4
+#define MUX_EN_PINS \
+    { B2, B3 }
+//#define MUX_EN_PIN_0 B2
+//#define MUX_EN_PIN_1 B3
 
+#define CHANNELS_PER_MULTIPLEXER 16
 #define MUX_SEL_PINS \
     { B4, B5, B6, B7 }
 
-/* Hardware peripherals pins */
-#define CHANNELS_PER_MULTIPLEXER 16
-#define APLEX_EN_PIN_0 B2
-#define APLEX_EN_PIN_1 B3
 #define ANALOG_PORT A3
+#define EECONFIG_KB_DATA_SIZE  4
 
+// User config
 #define DEFAULT_ACTUATION_LEVEL 565
 #define DEFAULT_RELEASE_LEVEL 560
-
-
-#define EECONFIG_KB_DATA_SIZE  4
-#define DEBOUNCE_THRESHOLD 5 // yeeto to xonfig.h Number of scans to validate a state change
-
+#define DEBOUNCE_THRESHOLD 5

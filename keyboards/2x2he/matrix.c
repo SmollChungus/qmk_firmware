@@ -14,7 +14,7 @@ __attribute__((weak)) void matrix_scan_user(void) {}
 
 
 void matrix_print(void) {
-    he_print_matrix();
+    he_matrix_print();
 }
 
 void matrix_init(void) {
@@ -35,7 +35,7 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
     static int cnt = 0;
     if (cnt++ == 10000) {
         cnt = 0;
-        he_print_matrix();
+        he_matrix_print();
     }
     #endif
 
