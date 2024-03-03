@@ -1,4 +1,5 @@
-//he_switch_matrix.h
+// Add license
+// he_switch_matrix.h
 
 #pragma once
 
@@ -8,14 +9,15 @@
 #include "eeprom.h"
 #include "eeconfig.h"
 
-//debug
+// Debug
 #define SAMPLE_COUNT 15
 
 typedef struct {
     uint16_t samples[SAMPLE_COUNT];
     uint8_t index;
 } sensor_data_t;
-//debug end*
+// Debug end
+
 
 #if (MATRIX_COLS <= 8)
 typedef uint8_t matrix_row_t;

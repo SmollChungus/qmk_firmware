@@ -8,10 +8,9 @@ eeprom_he_config_t eeprom_he_config;
 via_he_config_t via_he_config;
 
 void keyboard_post_init_kb(void) {
-    // Load from EEPROM
+
     eeconfig_read_kb_datablock(&eeprom_he_config);
 
-    // Check if the EEPROM values are valid
     // Assuming actuation_threshold should never be 0 in a properly initialized EEPROM
     if (eeprom_he_config.he_actuation_threshold == 0 || eeprom_he_config.he_release_threshold == 0) {
         // Set to default values
@@ -34,7 +33,6 @@ void via_update_config(void) {
     // Update runtime configuration
     he_config.he_actuation_threshold = via_he_config.he_actuation_threshold;
     he_config.he_release_threshold = via_he_config.he_release_threshold;
-    // Optionally, update other runtime config fields...
 
     // Convert runtime config to EEPROM format and save
     eeprom_he_config.he_actuation_threshold = he_config.he_actuation_threshold;

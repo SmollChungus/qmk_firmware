@@ -1,7 +1,6 @@
 
 //matrix.c
-#include "he_switch_matrix.h"
-//#include "matrix.h"
+#include "he_switch_matrix.h" //instead of instead of #include "matrix.h"
 
 /* matrix state(1:on, 0:off) */
 matrix_row_t raw_matrix[MATRIX_ROWS]; // raw values
