@@ -4,7 +4,7 @@
     "productId": "0x0009",
     "menus": [
         {
-            "label": "EC Tools",
+            "label": "HE Tools",
             "content": [
                 {
                     "label": "Actuation",

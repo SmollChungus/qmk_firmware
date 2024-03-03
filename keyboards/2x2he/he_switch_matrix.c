@@ -6,6 +6,7 @@
 #include "wait.h"
 #include "eeprom.h"
 #include "math.h"
+#include "timer.h" // Debugging
 
 // map = row, col, sensor_id, mux_id, mux_channel
 const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
@@ -29,8 +30,9 @@ he_config_t he_config;
 
 static void init_mux_sel(void) {
     int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
-    for (int idx = 0; idx < array_size; idx++) {
-        setPinOutput(mux_sel_pins[idx]);
+    for (int i = 0; i < array_size; i++) {
+        setPinOutput(mux_sel_pins[i]);
+        writePinLow(mux_sel_pins[i]);
     }
 }
 
@@ -40,10 +42,6 @@ int he_init(he_config_t const* const he_config) {
     adc_read(adcMux);
 
     init_mux_sel();
-    for (int i = 0; i < ARRAY_SIZE(mux_en_pins); i++) {
-        setPinOutput(mux_en_pins[i]);
-        writePinLow(mux_en_pins[i]);
-    }
 
     return 0;
 }
@@ -53,7 +51,7 @@ static inline void select_mux(uint8_t sensor_id) {
     uint8_t mux_id = sensor_to_matrix_map[sensor_id].mux_id;
     uint8_t mux_channel = sensor_to_matrix_map[sensor_id].mux_channel;
 
-    for (int i = 0; i < sizeof(mux_en_pins)/ sizeof(mux_en_pins[0   ]); i++) {
+    for (int i = 0; i < sizeof(mux_en_pins)/ sizeof(mux_en_pins[0]); i++) {
         writePinLow(mux_en_pins[i]);
     }
 
@@ -82,7 +80,6 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint1
     bool should_release = sensor_value < he_config.he_release_threshold;
 
     if (currently_pressed && !previously_pressed) {
-        // Key actuation logic
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
             key_info->debounced_state = true; // Key is pressed
             current_matrix[row] |= (1UL << col);
@@ -149,6 +146,7 @@ double calculate_std_dev(uint8_t sensor_id) {
     return std_dev;
 }
 
+
 void he_matrix_print(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
@@ -179,3 +177,68 @@ void he_matrix_print(void) {
 
     print("+----------------------------------------------------------------------------+\n");
 }
+/*
+void he_matrix_print(void) {
+    const uint32_t num_scans = 100;
+    uint32_t total_duration_ms = 0;
+
+    // Perform the scanning process num_scans times
+    for (uint32_t scan_count = 0; scan_count < num_scans; scan_count++) {
+        uint32_t start_time = timer_read32(); // Start time for each scan
+
+        // Scan logic
+        for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
+            uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
+            uint8_t row = sensor_to_matrix_map[i].row;
+            uint8_t col = sensor_to_matrix_map[i].col;
+
+            select_mux(sensor_id);
+            uint16_t sensor_value = he_readkey_raw(sensor_id);
+            // Update key state based on sensor_value
+            he_update_key(matrix, row, col, sensor_value);
+        }
+
+        uint32_t end_time = timer_read32(); // End time for each scan
+        total_duration_ms += (end_time - start_time); // Accumulate total scan duration
+    }
+
+    // Calculate the average scan duration in milliseconds
+    float average_scan_time_ms = (float)total_duration_ms / num_scans;
+
+    // Print the average scan duration
+    char scan_buffer[128];
+    snprintf(scan_buffer, sizeof(scan_buffer), "Average scan duration for %lu scans: %.2f ms\n", num_scans, average_scan_time_ms);
+    print(scan_buffer);
+
+    // Sensor data printing logic
+    print("+----------------------------------------------------------------------------+\n");
+    print("| Sensor Matrix                                                              |\n");
+    print("+----------------------------------------------------------------------------+\n");
+
+    char buffer[192]; // Buffer for printing sensor data
+
+    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
+        uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
+        uint16_t sensor_value = he_readkey_raw(sensor_id);
+
+        // Add current sensor value to samples for noise calculation
+        add_sensor_sample(sensor_id, sensor_value);
+
+        // Calculate noise as the standard deviation
+        double noise = calculate_std_dev(sensor_id);
+        int noise_int = (int)(noise * 100); // Convert noise to an integer representation for printing
+
+        // Format and print sensor data along with noise information
+        snprintf(buffer, sizeof(buffer),
+                 "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Noise (std dev): %d.%02d |\n",
+                 sensor_id, sensor_to_matrix_map[i].row, sensor_to_matrix_map[i].col,
+                 sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
+                 noise_int / 100, noise_int % 100);
+
+        print(buffer);
+    }
+
+    print("+----------------------------------------------------------------------------+\n");
+}
+
+*/
