@@ -81,7 +81,7 @@ void via_he_config_get_value(uint8_t *data) {
 // Save the data to persistent memory after changes are made
 void via_he_config_save(void) {
     eeconfig_update_user_datablock(&via_he_config);
-    uprint("eeprom wear");
+    uprint("EEPROM wear!!!\n");
 }
 
 void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
@@ -115,7 +115,4 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
 
     *command_id = id_unhandled;
 }
-
-
-
-#endif //VIA_ENABLE2
+#endif
