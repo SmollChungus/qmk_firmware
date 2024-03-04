@@ -28,6 +28,7 @@ const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 static adc_mux adcMux;
 he_config_t he_config;
 
+//move to he_init?
 static void init_mux_sel(void) {
     int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
     for (int i = 0; i < array_size; i++) {
@@ -46,7 +47,8 @@ int he_init(he_config_t const* const he_config) {
     return 0;
 }
 
-// Selects EN and SEL pins on the multiplexer
+// Sets EN and SEL pins on the multiplexer
+// write all low on kb init, then write low during scanning after en_pin is set high and read
 static inline void select_mux(uint8_t sensor_id) {
     uint8_t mux_id = sensor_to_matrix_map[sensor_id].mux_id;
     uint8_t mux_channel = sensor_to_matrix_map[sensor_id].mux_channel;
@@ -66,6 +68,7 @@ static inline void select_mux(uint8_t sensor_id) {
     }
 }
 
+// TODO scale and map to calibrated implementation
 uint16_t he_readkey_raw(uint8_t sensorIndex) {
     uint16_t sensor_value = 0;
     select_mux(sensorIndex);
@@ -100,6 +103,7 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint1
     return false; // No change in stable state
 }
 
+// Optimize scan plis
 bool he_matrix_scan(void) {
     bool updated = false;
 
@@ -119,26 +123,23 @@ bool he_matrix_scan(void) {
     return updated;
 }
 
+// Debug stuff
 sensor_data_t sensor_data[SENSOR_COUNT];
 
-// Function to add a sample to the sensor data ring buffer
 void add_sensor_sample(uint8_t sensor_id, uint16_t value) {
     sensor_data[sensor_id].samples[sensor_data[sensor_id].index % SAMPLE_COUNT] = value;
     sensor_data[sensor_id].index++;
 }
 
-// Function to calculate the standard deviation of sensor samples
 double calculate_std_dev(uint8_t sensor_id) {
     double mean = 0.0;
     double std_dev = 0.0;
 
-    // Calculate mean
     for (int i = 0; i < SAMPLE_COUNT; i++) {
         mean += sensor_data[sensor_id].samples[i];
     }
     mean /= SAMPLE_COUNT;
 
-    // Calculate standard deviation
     for (int i = 0; i < SAMPLE_COUNT; i++) {
         std_dev += pow(sensor_data[sensor_id].samples[i] - mean, 2);
     }
@@ -146,13 +147,20 @@ double calculate_std_dev(uint8_t sensor_id) {
     return std_dev;
 }
 
-
+double calculate_mean(uint8_t sensor_id) {
+    double mean = 0.0;
+    for (int i = 0; i < SAMPLE_COUNT; i++) {
+        mean += sensor_data[sensor_id].samples[i];
+    }
+    mean /= SAMPLE_COUNT;
+    return mean;
+}
 void he_matrix_print(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
 
-    char buffer[192]; // Ensure buffer is defined and large enough for your output
+    char buffer[256]; // Adjusted buffer size for additional content
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
@@ -161,16 +169,19 @@ void he_matrix_print(void) {
         // Add current sensor value to samples
         add_sensor_sample(sensor_id, sensor_value);
 
-        // Calculate noise as standard deviation
-        double noise = calculate_std_dev(sensor_id); // Ensure this function is called correctly
+        // Calculate mean and noise as standard deviation
+        double mean = calculate_mean(sensor_id);
+        double noise = calculate_std_dev(sensor_id);
         int noise_int = (int)(noise * 100); // Convert to integer representation for printing
 
-        // Format and print sensor data with noise
+        int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
+
         snprintf(buffer, sizeof(buffer),
-                 "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Noise (std dev): %d.%02d |\n",
-                 sensor_id, sensor_to_matrix_map[i].row, sensor_to_matrix_map[i].col,
-                 sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
-                 noise_int / 100, noise_int % 100); // Correctly format the noise value
+                "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise (std dev): %d.%02d |\n",
+                sensor_id, sensor_to_matrix_map[i].row, sensor_to_matrix_map[i].col,
+                sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
+                mean_fixed / 100, mean_fixed % 100, // Display fixed-point mean as a floating-point value
+                noise_int / 100, abs(noise_int) % 100); // Use abs() to ensure a positive value for the noise fractional part
 
         print(buffer);
     }

@@ -32,7 +32,7 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 5000) {
+    if (cnt++ == 7500) {
         cnt = 0;
         he_matrix_print();
     }
