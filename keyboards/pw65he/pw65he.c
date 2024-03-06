@@ -1,7 +1,6 @@
 // 2x2he.c (keyboard.c in qmk terms)
 
 #include "he_switch_matrix.h"
-#include "debug.h"
 #ifdef VIA_ENABLE
 
 eeprom_he_config_t eeprom_he_config;
@@ -9,9 +8,6 @@ via_he_config_t via_he_config;
 
 void keyboard_post_init_kb(void) {
 
-    debug_enable = true;
-    debug_matrix = true;
-    debug_keyboard = true;
 
     eeconfig_read_kb_datablock(&eeprom_he_config);
 

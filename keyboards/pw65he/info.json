@@ -29,7 +29,6 @@
         "shared_endpoint": {
             "keyboard": true
         },
-
         "vid": "0x5363"
     },
     "layouts": {
