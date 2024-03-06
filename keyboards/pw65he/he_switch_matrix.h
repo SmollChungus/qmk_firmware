@@ -1,27 +1,22 @@
-/* Copyright 2024 Matthijs Muller
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-//he_switch_matrix.h
+// Add license
+// he_switch_matrix.h
 
 #pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
-//#include "matrix.h"
 #include "gpio.h"
+#include "eeprom.h"
+#include "eeconfig.h"
 
+// Debug
+#define SAMPLE_COUNT 15
+
+typedef struct {
+    uint16_t samples[SAMPLE_COUNT];
+    uint8_t index;
+} sensor_data_t;
+// Debug end
 
 
 #if (MATRIX_COLS <= 8)
@@ -40,68 +35,68 @@ typedef uint32_t matrix_row_t;
 extern "C" {
 #endif
 
-/* number of matrix rows */
 uint8_t matrix_rows(void);
-/* number of matrix columns */
 uint8_t matrix_cols(void);
-/* should be called at early stage of startup before matrix_init.(optional) */
-void matrix_setup(void);
-/* intialize matrix for scaning. */
-void matrix_init(void);
-/* scan all key states on matrix */
 bool matrix_scan(matrix_row_t current_matrix[]);
-/* whether matrix scanning operations should be executed */
 bool matrix_can_read(void);
-/* whether a switch is on */
 bool matrix_is_on(uint8_t row, uint8_t col);
-/* matrix state on row */
-matrix_row_t matrix_get_row(uint8_t row);
-/* print matrix for debug */
 void matrix_print(void);
-/* delay between changing matrix pin state and reading values */
 void matrix_output_select_delay(void);
 void matrix_output_unselect_delay(uint8_t line, bool key_pressed);
-/* only for backwards compatibility. delay between changing matrix pin state and reading values */
+void matrix_setup(void);
+void matrix_init(void);
 void matrix_io_delay(void);
-
 void matrix_init_kb(void);
 void matrix_scan_kb(void);
-
 void matrix_init_user(void);
 void matrix_scan_user(void);
+__attribute__((weak)) void keyboard_post_init_user(void);
+matrix_row_t matrix_get_row(uint8_t row);
 
 #ifdef __cplusplus
 }
 #endif
 
-
-
+typedef struct {
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
+} he_config_t;
 
 typedef struct {
-    uint16_t hesm_actuation_threshold;
-    uint16_t hesm_release_threshold;
-    uint8_t num_multiplexers;
-} hesm_config_t;
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
+} eeprom_he_config_t;
 
+typedef struct {
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
+} via_he_config_t;
 
 typedef struct {
     uint8_t row;
     uint8_t col;
-    uint8_t sensorId;
-} key_to_sensor_map_t;
+    uint8_t sensor_id;
+    uint8_t mux_id;
+    uint8_t mux_channel;
+} sensor_to_matrix_map_t;
 
+//debounce
 typedef struct {
-    uint8_t sensorId;
-    uint8_t muxIndex;
-    uint8_t channel;
-} sensor_to_mux_map_t;
+    uint8_t debounced_state; // The stable state of the key
+    uint8_t debounce_counter; // Counter for debouncing
+} key_debounce_t;
 
-hesm_config_t hesm_config;
+extern he_config_t he_config;
+extern eeprom_he_config_t eeprom_he_config;
+extern via_he_config_t via_he_config;
 
-int      hesm_init(hesm_config_t const* const hesm_config);
-int      hesm_update(hesm_config_t const* const hesm_config);
-bool     hesm_matrix_scan(void);
-uint16_t hesm_readkey_raw(uint8_t sensorIndex);
-bool     hesm_update_key(matrix_row_t* current_sensor_state, uint16_t sensor_value);
-void     hesm_print_matrix(void);
-extern matrix_row_t matrix[MATRIX_ROWS];
+_Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+_Static_assert(sizeof(via_he_config_t) == EECONFIG_USER_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+
+int      he_init(he_config_t const* const he_config);
+bool     he_matrix_scan(void);
+uint16_t he_readkey_raw(uint8_t sensorIndex);
+bool     he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
+void     he_matrix_print(void);
+void     via_update_config(void);
+extern   matrix_row_t matrix[MATRIX_ROWS];

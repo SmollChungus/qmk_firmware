@@ -19,21 +19,22 @@
 #define MATRIX_ROWS 5
 #define MATRIX_COLS 15
 
-/* Custom matrix pins and port select array delete*/
+// Multiplexer setup
+#define SENSOR_COUNT 66
+#define MUX_EN_PINS \
+    { B0, B7, B8, B9, B10 }
 
-#define MUX_SEL_PINS \
-    { B6, B5, B4, B3 }
-
-/* Hardware peripherals pins */
 #define CHANNELS_PER_MULTIPLEXER 16
-#define APLEX_EN_PIN_0 B7
-#define APLEX_EN_PIN_1 B3
+#define MUX_SEL_PINS \
+    { B3, B4, B5, B6 }
+
 #define ANALOG_PORT A3
+#define EECONFIG_KB_DATA_SIZE  4
 
-#define DEFAULT_ACTUATION_LEVEL 550
-#define DEFAULT_RELEASE_LEVEL 500
-
-
+// User config
+#define DEFAULT_ACTUATION_LEVEL 565
+#define DEFAULT_RELEASE_LEVEL 560
+#define DEBOUNCE_THRESHOLD 5
 
 
 
