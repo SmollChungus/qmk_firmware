@@ -20,11 +20,22 @@
 #include "eeprom.h"
 #include "math.h"
 #include "timer.h" // Debugging
+#include "atomic_util.h"
 
-//row/col/sensorid
+static inline void writePinHigh_atomic(pin_t pin) {
+    ATOMIC_BLOCK_FORCEON {
+        writePinHigh(pin);
+    }
+}static inline void writePinLow_atomic(pin_t pin) {
+    ATOMIC_BLOCK_FORCEON {
+        writePinLow(pin);
+    }
+}
+
+//row/col/sensorid/muxid/muxchannel
 const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
     {0,0,0,0,3},  {0,1,1,0,5},  {0,2,2,0,6},  {0,3,3,0,2},  {0,4,4,1,6},  {0,5,5,1,5},  {0,6,6,1,4},  {0,7,7,1,3},  {0,8,8,2,5},  {0,9,9,2,4},  {0,10,10,2,3},{0,11,11,2,2}, {0,12,12,3,3}, {0,13,13,3,2},{0,14,14,4,4},
-    {1,0,15,0,4}, {1,1,16,0,7}, {1,2,17,0,0}, {1,3,18,0,1}, {1,4,19,1,7}, {1,5,20,1,0}, {1,6,21,1,1}, {1,7,22,1,2}, {1,8,23,2,6}, {1,9,24,2,0}, {1,10,25,2,1},{1,11,26,2,4}, {1,12,27,2,3}, {1,13,28,3,1},{1,14,29,4,2},
+    {1,0,15,0,4}, {1,1,16,0,7}, {1,2,17,0,0}, {1,3,18,0,1}, {1,4,19,1,7}, {1,5,20,1,0}, {1,6,21,1,1}, {1,7,22,1,2}, {1,8,23,2,6}, {1,9,24,2,0}, {1,10,25,2,1},{1,11,26,3,5}, {1,12,27,3,0}, {1,13,28,3,1},{1,14,29,4,2},
     {2,0,30,0,8}, {2,1,31,0,10},{2,2,32,0,15},{2,3,33,1,8}, {2,4,34,1,10},{2,5,35,1,15},{2,6,36,1,14},{2,7,37,2,8}, {2,8,38,2,9}, {2,9,39,2,15},{2,10,40,3,4},{2,11,41,3,8}, {2,12,42,3,13},{2,13,43,4,14},
     {3,0,44,0,9}, {3,1,45,0,13},{3,2,46,0,14},{3,3,47,1,11},{3,4,48,1,12},{3,5,49,2,10},{3,6,50,2,11},{3,7,51,2,12},{3,8,52,2,13},{3,9,53,2,14},{3,10,54,3,9},{3,11,55,3,11},{3,12,56,4,10},{3,13,57,4,13},
     {4,0,58,0,11},{4,1,59,0,12},{4,2,60,1,9}, {4,3,61,1,13},{4,4,62,3,10},  {4,5,63,4,9}, {4,6,64,4,11},{4,7,65,4,12}
@@ -46,10 +57,14 @@ he_config_t he_config;
 
 //move to he_init?
 static void init_mux_sel(void) {
-    int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
-    for (int i = 0; i < array_size; i++) {
+//    int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
+    for (int i = 0; i < 4; i++) {
         setPinOutput(mux_sel_pins[i]);
         writePinLow(mux_sel_pins[i]);
+    }
+    for (int j = 0; j < 5; j++) {
+        setPinOutput(mux_en_pins[j]);
+        writePinHigh(mux_en_pins[j]);
     }
 }
 
@@ -64,24 +79,27 @@ int he_init(he_config_t const* const he_config) {
 }
 
 // Sets EN and SEL pins on the multiplexer
-// write all low on kb init, then write low during scanning after en_pin is set high and read
 static inline void select_mux(uint8_t sensor_id) {
     uint8_t mux_id = sensor_to_matrix_map[sensor_id].mux_id;
     uint8_t mux_channel = sensor_to_matrix_map[sensor_id].mux_channel;
 
-    for (int i = 0; i < sizeof(mux_en_pins)/ sizeof(mux_en_pins[0]); i++) {
-        writePinLow(mux_en_pins[i]);
+    // Set all MUX enable pins high to disable them
+    for (int i = 0; i < 5; i++) {
+        writePinHigh(mux_en_pins[i]);
     }
 
-    writePinHigh(mux_en_pins[mux_id]);
+    // Then set the selected MUX enable pin low to enable it
+    writePinLow(mux_en_pins[mux_id]);
 
+    // Set the MUX select pins
     for (int j = 0; j < 4; j++) {
         if (mux_channel & (1 << j)) {
-            writePinHigh(mux_sel_pins[j]);
+            writePinHigh_atomic(mux_sel_pins[j]);
         } else {
-            writePinLow(mux_sel_pins[j]);
+            writePinLow_atomic(mux_sel_pins[j]);
         }
     }
+    //wait_us(5); ///way too long, debug
 }
 
 // TODO scale and map to calibrated implementation
@@ -128,7 +146,6 @@ bool he_matrix_scan(void) {
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;
 
-        select_mux(sensor_id);
         uint16_t sensor_value = he_readkey_raw(sensor_id);
 
         if (he_update_key(matrix, row, col, sensor_value)) {
@@ -180,6 +197,50 @@ void he_matrix_print(void) {
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
+        uint8_t row = sensor_to_matrix_map[i].row;
+        uint8_t col = sensor_to_matrix_map[i].col;
+        uint8_t mux_id = sensor_to_matrix_map[i].mux_id;
+        uint8_t mux_channel = sensor_to_matrix_map[i].mux_channel;
+
+        uint16_t sensor_value = he_readkey_raw(sensor_id); // This already selects the MUX internally
+
+        //Debuging output specifically for mux settings
+        char muxDebugInfo[64];
+        snprintf(muxDebugInfo, sizeof(muxDebugInfo), "MUX Debug - Sensor ID: %d, MUX ID: %d, Channel: %d\n", sensor_id, mux_id, mux_channel);
+        print(muxDebugInfo);
+
+        // Add current sensor value to samples
+        add_sensor_sample(sensor_id, sensor_value);
+
+        // Calculate mean and noise as standard deviation
+        double mean = calculate_mean(sensor_id);
+        double noise = calculate_std_dev(sensor_id);
+        int noise_int = (int)(noise * 100); // Convert to integer representation for printing
+
+        int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
+
+        snprintf(buffer, sizeof(buffer),
+                 "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise (std dev): %d.%02d |\n",
+                 sensor_id, row, col, sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
+                 mean_fixed / 100, mean_fixed % 100, noise_int / 100, abs(noise_int) % 100); // Use abs() to ensure a positive value for the noise fractional part
+
+        print(buffer);
+    }
+
+    print("+----------------------------------------------------------------------------+\n");
+}
+
+
+/*
+void he_matrix_print(void) {
+    print("+----------------------------------------------------------------------------+\n");
+    print("| Sensor Matrix                                                              |\n");
+    print("+----------------------------------------------------------------------------+\n");
+
+    char buffer[256]; // Adjusted buffer size for additional content
+
+    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
+        uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
         uint16_t sensor_value = he_readkey_raw(sensor_id);
 
         // Add current sensor value to samples
@@ -203,7 +264,7 @@ void he_matrix_print(void) {
     }
 
     print("+----------------------------------------------------------------------------+\n");
-}
+} */
 /*
 void he_matrix_print(void) {
     const uint32_t num_scans = 100;

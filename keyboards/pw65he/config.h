@@ -22,11 +22,10 @@
 // Multiplexer setup
 #define SENSOR_COUNT 66
 #define MUX_EN_PINS \
-    { B0, B7, B8, B9, B10 }
+    { B0, A7, A6, A5, A4 }
 
-#define CHANNELS_PER_MULTIPLEXER 16
 #define MUX_SEL_PINS \
-    { B3, B4, B5, B6 }
+    { B3, B4, B6, B5 }
 
 #define ANALOG_PORT A3
 #define EECONFIG_KB_DATA_SIZE  4

@@ -12,6 +12,7 @@ __attribute__((weak)) void matrix_init_user(void) {}
 __attribute__((weak)) void matrix_scan_user(void) {}
 
 
+
 void matrix_print(void) {
     he_matrix_print();
 }
@@ -32,7 +33,7 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 7500) {
+    if (cnt++ == 5555) {
         cnt = 0;
         he_matrix_print();
     }
