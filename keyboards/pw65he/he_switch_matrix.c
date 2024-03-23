@@ -20,17 +20,49 @@
 #include "eeprom.h"
 #include "math.h"
 #include "timer.h" // Debugging
-#include "atomic_util.h"
+#include "raw_hid.h"
 
-static inline void writePinHigh_atomic(pin_t pin) {
-    ATOMIC_BLOCK_FORCEON {
-        writePinHigh(pin);
+
+
+
+#ifdef RAW_ENABLE
+
+
+#define MATRIX_STATE_REPORT_ID 0x01
+#define SENSOR_VALUE_REPORT_ID_BASE 0x02 // Base for sensor value reports
+#define MATRIX_STATE_REPORT_SIZE 32
+#define SENSOR_REPORT_SIZE 32
+#define SENSORS_PER_REPORT 15
+#define REPORT_INTERVAL_MS 500
+#define NUM_SENSOR_REPORTS 5
+
+
+void send_matrix_state_report(void) {
+
+    uprintf("Sending matrix state report\n");
+
+    uint8_t report[MATRIX_STATE_REPORT_SIZE] = {0};
+    report[0] = MATRIX_STATE_REPORT_ID;
+    for (uint8_t i = 0; i < 8; i++) {
+        report[i + 1] = matrix_get_row(i) & 0xFF; // Assuming 8 rows, just an example
     }
-}static inline void writePinLow_atomic(pin_t pin) {
-    ATOMIC_BLOCK_FORCEON {
-        writePinLow(pin);
-    }
+    raw_hid_send(report, sizeof(report));
 }
+
+void send_sensor_value_report(uint8_t report_number, uint8_t start_sensor) {
+    uint8_t report[SENSOR_REPORT_SIZE] = {0};
+    report[0] = SENSOR_VALUE_REPORT_ID_BASE + report_number;
+    for (int i = 0; i < SENSORS_PER_REPORT && (start_sensor + i) < SENSOR_COUNT; ++i) {
+        // Mockup function for reading sensor value. Replace with your actual function to read sensor values.
+        uint16_t sensor_value = he_readkey_raw(start_sensor + i); // Assuming this is your sensor reading function
+        report[2 * i + 1] = (sensor_value >> 8) & 0xFF; // High byte
+        report[2 * i + 2] = sensor_value & 0xFF; // Low byte
+    }
+    raw_hid_send(report, sizeof(report));
+}
+#endif
+
+
 
 //row/col/sensorid/muxid/muxchannel
 const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
@@ -49,6 +81,7 @@ matrix_row_t matrix_get_row(uint8_t row) {
     }
 }
 
+he_sensor_calibration_t he_sensor_calibration[SENSOR_COUNT];
 static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
 const uint32_t mux_en_pins[] = MUX_EN_PINS;
 const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
@@ -67,6 +100,45 @@ static void init_mux_sel(void) {
         writePinHigh(mux_en_pins[j]);
     }
 }
+
+
+void noise_floor_calibration_init(void) {
+    // Temporary storage for calibration samples
+    uint16_t samples[NOISE_FLOOR_SAMPLE_COUNT];
+
+    for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
+        uint16_t min_value = UINT16_MAX; // Initialize to the max possible value
+
+        for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
+            // Sample each sensor multiple times
+            samples[sample] = he_readkey_raw(sensor_id);
+            wait_us(100); // Wait a bit between samples to not overload the sensor
+        }
+
+        // Find the minimum value among the samples for this sensor
+        for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
+            if (samples[sample] < min_value) {
+                min_value = samples[sample];
+            }
+        }
+
+        // Store the minimum value as the noise floor for this sensor
+        he_sensor_calibration[sensor_id].noise_floor = min_value;
+
+        // Optional: Print the noise floor for debugging
+        uprintf("Sensor %d Noise Floor: %u\n", sensor_id, min_value);
+    }
+
+    // TODO: Store the noise floor values persistently (EEPROM)
+}
+
+void noise_floor_calibration(void) {
+    print("ashi");
+}
+
+void switch_ceiling_calibration(void) {
+        print("hi");
+    }
 
 int he_init(he_config_t const* const he_config) {
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
@@ -94,9 +166,9 @@ static inline void select_mux(uint8_t sensor_id) {
     // Set the MUX select pins
     for (int j = 0; j < 4; j++) {
         if (mux_channel & (1 << j)) {
-            writePinHigh_atomic(mux_sel_pins[j]);
+            writePinHigh(mux_sel_pins[j]);
         } else {
-            writePinLow_atomic(mux_sel_pins[j]);
+            writePinLow(mux_sel_pins[j]);
         }
     }
     //wait_us(5); ///way too long, debug
@@ -188,28 +260,26 @@ double calculate_mean(uint8_t sensor_id) {
     mean /= SAMPLE_COUNT;
     return mean;
 }
+
+
 void he_matrix_print(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
 
-    char buffer[256]; // Adjusted buffer size for additional content
+    char buffer[256]; // Ensure buffer is large enough for your string
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;
-        uint8_t mux_id = sensor_to_matrix_map[i].mux_id;
-        uint8_t mux_channel = sensor_to_matrix_map[i].mux_channel;
 
-        uint16_t sensor_value = he_readkey_raw(sensor_id); // This already selects the MUX internally
+        uint16_t sensor_value = he_readkey_raw(sensor_id); // This reads the raw sensor value
 
-        //Debuging output specifically for mux settings
-        char muxDebugInfo[64];
-        snprintf(muxDebugInfo, sizeof(muxDebugInfo), "MUX Debug - Sensor ID: %d, MUX ID: %d, Channel: %d\n", sensor_id, mux_id, mux_channel);
-        print(muxDebugInfo);
+        // Fetch the noise floor for this sensor from the calibration data
+        uint16_t noise_floor = he_sensor_calibration[sensor_id].noise_floor;
 
-        // Add current sensor value to samples
+        // Continue to add the current sensor value to samples for statistical calculations
         add_sensor_sample(sensor_id, sensor_value);
 
         // Calculate mean and noise as standard deviation
@@ -219,114 +289,15 @@ void he_matrix_print(void) {
 
         int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
 
+        // Update the snprintf call to include the noise floor in the output
         snprintf(buffer, sizeof(buffer),
-                 "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise (std dev): %d.%02d |\n",
-                 sensor_id, row, col, sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
-                 mean_fixed / 100, mean_fixed % 100, noise_int / 100, abs(noise_int) % 100); // Use abs() to ensure a positive value for the noise fractional part
+                 "| Sensor %d (%d,%d): Val: %-5u NF: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise: %d.%02d |\n",
+                 sensor_id, row, col, sensor_value, noise_floor,
+                 he_config.he_actuation_threshold, he_config.he_release_threshold,
+                 mean_fixed / 100, mean_fixed % 100, noise_int / 100, abs(noise_int) % 100);
 
         print(buffer);
     }
 
     print("+----------------------------------------------------------------------------+\n");
 }
-
-
-/*
-void he_matrix_print(void) {
-    print("+----------------------------------------------------------------------------+\n");
-    print("| Sensor Matrix                                                              |\n");
-    print("+----------------------------------------------------------------------------+\n");
-
-    char buffer[256]; // Adjusted buffer size for additional content
-
-    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
-        uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
-        uint16_t sensor_value = he_readkey_raw(sensor_id);
-
-        // Add current sensor value to samples
-        add_sensor_sample(sensor_id, sensor_value);
-
-        // Calculate mean and noise as standard deviation
-        double mean = calculate_mean(sensor_id);
-        double noise = calculate_std_dev(sensor_id);
-        int noise_int = (int)(noise * 100); // Convert to integer representation for printing
-
-        int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
-
-        snprintf(buffer, sizeof(buffer),
-                "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise (std dev): %d.%02d |\n",
-                sensor_id, sensor_to_matrix_map[i].row, sensor_to_matrix_map[i].col,
-                sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
-                mean_fixed / 100, mean_fixed % 100, // Display fixed-point mean as a floating-point value
-                noise_int / 100, abs(noise_int) % 100); // Use abs() to ensure a positive value for the noise fractional part
-
-        print(buffer);
-    }
-
-    print("+----------------------------------------------------------------------------+\n");
-} */
-/*
-void he_matrix_print(void) {
-    const uint32_t num_scans = 100;
-    uint32_t total_duration_ms = 0;
-
-    // Perform the scanning process num_scans times
-    for (uint32_t scan_count = 0; scan_count < num_scans; scan_count++) {
-        uint32_t start_time = timer_read32(); // Start time for each scan
-
-        // Scan logic
-        for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
-            uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
-            uint8_t row = sensor_to_matrix_map[i].row;
-            uint8_t col = sensor_to_matrix_map[i].col;
-
-            select_mux(sensor_id);
-            uint16_t sensor_value = he_readkey_raw(sensor_id);
-            // Update key state based on sensor_value
-            he_update_key(matrix, row, col, sensor_value);
-        }
-
-        uint32_t end_time = timer_read32(); // End time for each scan
-        total_duration_ms += (end_time - start_time); // Accumulate total scan duration
-    }
-
-    // Calculate the average scan duration in milliseconds
-    float average_scan_time_ms = (float)total_duration_ms / num_scans;
-
-    // Print the average scan duration
-    char scan_buffer[128];
-    snprintf(scan_buffer, sizeof(scan_buffer), "Average scan duration for %lu scans: %.2f ms\n", num_scans, average_scan_time_ms);
-    print(scan_buffer);
-
-    // Sensor data printing logic
-    print("+----------------------------------------------------------------------------+\n");
-    print("| Sensor Matrix                                                              |\n");
-    print("+----------------------------------------------------------------------------+\n");
-
-    char buffer[192]; // Buffer for printing sensor data
-
-    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
-        uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
-        uint16_t sensor_value = he_readkey_raw(sensor_id);
-
-        // Add current sensor value to samples for noise calculation
-        add_sensor_sample(sensor_id, sensor_value);
-
-        // Calculate noise as the standard deviation
-        double noise = calculate_std_dev(sensor_id);
-        int noise_int = (int)(noise * 100); // Convert noise to an integer representation for printing
-
-        // Format and print sensor data along with noise information
-        snprintf(buffer, sizeof(buffer),
-                 "| Sensor %d (%d,%d): Value: %-5u Act: %-5d Rel: %-5d Noise (std dev): %d.%02d |\n",
-                 sensor_id, sensor_to_matrix_map[i].row, sensor_to_matrix_map[i].col,
-                 sensor_value, he_config.he_actuation_threshold, he_config.he_release_threshold,
-                 noise_int / 100, noise_int % 100);
-
-        print(buffer);
-    }
-
-    print("+----------------------------------------------------------------------------+\n");
-}
-
-*/

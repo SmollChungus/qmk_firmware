@@ -86,9 +86,19 @@ typedef struct {
     uint8_t debounce_counter; // Counter for debouncing
 } key_debounce_t;
 
+
+//Calibration
+typedef struct {
+    uint16_t noise_floor;
+    uint16_t switch_ceiling;
+} he_sensor_calibration_t;
+
+
+
 extern he_config_t he_config;
 extern eeprom_he_config_t eeprom_he_config;
 extern via_he_config_t via_he_config;
+extern he_sensor_calibration_t he_sensor_calibration[SENSOR_COUNT];
 
 _Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
 _Static_assert(sizeof(via_he_config_t) == EECONFIG_USER_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
@@ -96,7 +106,11 @@ _Static_assert(sizeof(via_he_config_t) == EECONFIG_USER_DATA_SIZE, "Mismatch in 
 int      he_init(he_config_t const* const he_config);
 bool     he_matrix_scan(void);
 uint16_t he_readkey_raw(uint8_t sensorIndex);
+uint16_t noise_floor[SENSOR_COUNT];
 bool     he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
 void     he_matrix_print(void);
 void     via_update_config(void);
 extern   matrix_row_t matrix[MATRIX_ROWS];
+void send_matrix_state_report(void);
+void send_sensor_value_report(uint8_t report_number, uint8_t start_sensor);
+void noise_floor_calibration_init(void);
