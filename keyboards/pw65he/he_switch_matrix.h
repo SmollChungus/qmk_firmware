@@ -9,16 +9,8 @@
 #include "eeprom.h"
 #include "eeconfig.h"
 
-// Debug
-#define SAMPLE_COUNT 15
 
-typedef struct {
-    uint16_t samples[SAMPLE_COUNT];
-    uint8_t index;
-} sensor_data_t;
-// Debug end
-
-
+// #include "matrix.h" substitution
 #if (MATRIX_COLS <= 8)
 typedef uint8_t matrix_row_t;
 #elif (MATRIX_COLS <= 16)
@@ -57,6 +49,7 @@ matrix_row_t matrix_get_row(uint8_t row);
 }
 #endif
 
+// Config
 typedef struct {
     uint16_t he_actuation_threshold;
     uint16_t he_release_threshold;
@@ -80,7 +73,7 @@ typedef struct {
     uint8_t mux_channel;
 } sensor_to_matrix_map_t;
 
-//debounce
+// Debounce
 typedef struct {
     uint8_t debounced_state; // The stable state of the key
     uint8_t debounce_counter; // Counter for debouncing
@@ -114,3 +107,13 @@ extern   matrix_row_t matrix[MATRIX_ROWS];
 void send_matrix_state_report(void);
 void send_sensor_value_report(uint8_t report_number, uint8_t start_sensor);
 void noise_floor_calibration_init(void);
+
+
+// Debug
+#define SAMPLE_COUNT 15
+
+typedef struct {
+    uint16_t samples[SAMPLE_COUNT];
+    uint8_t index;
+} sensor_data_t;
+// Debug end
