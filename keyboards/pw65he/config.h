@@ -35,5 +35,9 @@
 #define DEFAULT_RELEASE_LEVEL 560
 #define DEBOUNCE_THRESHOLD 5
 
+// Calibration setup
+#define NOISE_FLOOR_SAMPLE_COUNT 50
+
+
 
 
