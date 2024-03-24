@@ -28,7 +28,7 @@
     { B3, B4, B6, B5 }
 
 #define ANALOG_PORT A3
-#define EECONFIG_KB_DATA_SIZE  4
+#define EECONFIG_KB_DATA_SIZE 6
 
 // User config
 #define DEFAULT_ACTUATION_LEVEL 565

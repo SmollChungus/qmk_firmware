@@ -44,7 +44,6 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
     }
 
 
-
     #endif
     /*#ifdef RAW_ENABLE
     static int report_cnt = 0;
