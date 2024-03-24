@@ -44,7 +44,29 @@
                                     "content": [
                                         "id_save_threshold_data",
                                         0,
-                                        3
+                                        9
+                                    ]
+                                },{
+                                    "label": "Calibration Start",
+                                    "type": "button",
+                                    "options": [
+                                        0
+                                    ],
+                                    "content": [
+                                        "id_start_calibration",
+                                        0,
+                                        4
+                                    ]
+                                },{
+                                    "label": "id_save_calibration_data",
+                                    "type": "button",
+                                    "options": [
+                                        0
+                                    ],
+                                    "content": [
+                                        "id_save_threshold_data",
+                                        0,
+                                        5
                                     ]
                                 }
                                 ]

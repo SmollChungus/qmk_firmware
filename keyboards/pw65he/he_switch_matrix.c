@@ -153,9 +153,9 @@ void switch_ceiling_calibration(void) {
         }
     }
 
-    / This loop continuously updates the ceiling values
-     You might want to add debouncing or ensure that the key is fully pressed
-}*/
+    // This loop continuously updates the ceiling values
+    // You might want to add debouncing or ensure that the key is fully pressed
+}
 
 int he_init(he_config_t const* const he_config) {
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
@@ -283,7 +283,7 @@ void he_matrix_print(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
-
+    printf("calibration mode: %d \n", calibration_mode);
     char buffer[256]; // Ensure buffer is large enough for your string
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
