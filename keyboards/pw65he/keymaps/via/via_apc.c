@@ -76,12 +76,13 @@ void via_he_config_set_value(uint8_t *data) {
         }
         case id_start_calibration: {
             calibration_mode = true; // Enable calibration mode
-            print("calibration started, fully depress each key on the board");
+            print("Calibration started, fully depress each key on the board \n");
+
             break;
         }
         case id_save_calibration_data: {
             calibration_mode = false; // Disable calibration mode
-            print("calibration ended, to recalibrate, hit start calibration ");
+            print("Calibration ended, to recalibrate, hit start calibration \n");
             break;
         }
         case id_save_threshold_data: {
