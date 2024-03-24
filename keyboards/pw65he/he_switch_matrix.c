@@ -88,6 +88,8 @@ const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 static adc_mux adcMux;
 he_config_t he_config;
 
+bool calibration_mode = false;
+
 //move to he_init?
 static void init_mux_sel(void) {
 //    int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
@@ -137,8 +139,23 @@ void noise_floor_calibration(void) {
 }
 
 void switch_ceiling_calibration(void) {
-        print("hi");
+    print("hi");
+    if (!calibration_mode) {
+        return; // Exit if not in calibration mode
     }
+
+    for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
+        uint16_t current_value = he_readkey_raw(sensor_id);
+
+        // If the current value is higher than what's stored, update it
+        if (current_value > he_sensor_calibration[sensor_id].switch_ceiling) {
+            he_sensor_calibration[sensor_id].switch_ceiling = current_value;
+        }
+    }
+
+    / This loop continuously updates the ceiling values
+     You might want to add debouncing or ensure that the key is fully pressed
+}*/
 
 int he_init(he_config_t const* const he_config) {
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);

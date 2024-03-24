@@ -31,7 +31,9 @@
 enum via_he_enums {
     // clang-format off
     id_via_he_actuation_threshold = 1,
-    id_via_he_release_threshold = 2
+    id_via_he_release_threshold = 2,
+    id_start_calibration = 3,
+    id_save_calibration_data = 4
     // clang-format on
 };
 
@@ -99,7 +101,10 @@ void via_he_config_save(void) {
     eeconfig_update_user_datablock(&via_he_config);
     uprint("EEPROM wear!!!\n");
 }
-
+void via_he_calibration_save(void) {
+    eeconfig_update_user_datablock(&he_sensor_calibration);
+    uprint("EEPROM wear!!!\n");
+}
 void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
     // data = [ command_id, channel_id, value_id, value_data ]
     uint8_t *command_id        = &(data[0]);
@@ -118,6 +123,17 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
             }
             case id_custom_save: {
                 via_he_config_save();
+                break;
+            }
+            case id_start_calibration: {
+                calibration_mode = true; // Enable calibration mode
+                //switch_ceiling_calibration();
+
+                break;
+            }
+            case id_save_calibration_data: {
+                calibration_mode = false; // Disable calibration mode
+                //via_he_calibration_save(); // Save calibration data to EEPROM
                 break;
             }
             default: {
