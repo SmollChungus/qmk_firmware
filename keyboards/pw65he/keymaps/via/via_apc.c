@@ -76,6 +76,8 @@ void via_he_config_set_value(uint8_t *data) {
         }
         case id_start_calibration: {
             calibration_mode = true; // Enable calibration mode
+            switch_ceiling_calibration();
+
             print("Calibration started, fully depress each key on the board \n");
 
             break;

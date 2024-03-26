@@ -104,6 +104,25 @@ static void init_mux_sel(void) {
 }
 
 
+uint16_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
+    uint16_t sensor_value_rescaled = 0;
+
+    uint16_t noise_floor = he_sensor_calibration[sensor_id].noise_floor;
+    uint16_t switch_ceiling = he_sensor_calibration[sensor_id].switch_ceiling;
+    uint8_t target_range = 100;
+
+    if (switch_ceiling > noise_floor) {
+        // Cast to float to ensure proper division, then scale and cast back
+        sensor_value_rescaled = (uint16_t)(((float)(sensor_value - noise_floor) / (switch_ceiling - noise_floor)) * target_range);
+    } else {
+        printf("Invalid calibration for sensor %d\n", sensor_id);
+        sensor_value_rescaled = 0;
+    }
+
+    printf("%d \n", sensor_value_rescaled);
+    return sensor_value_rescaled;
+}
+
 void noise_floor_calibration_init(void) {
     // Temporary storage for calibration samples
     uint16_t samples[NOISE_FLOOR_SAMPLE_COUNT];
@@ -135,21 +154,40 @@ void noise_floor_calibration_init(void) {
 }
 
 void noise_floor_calibration(void) {
-    print("ashi");
-}
-
-void switch_ceiling_calibration(void) {
-    print("hi");
     if (!calibration_mode) {
+        print("exiting calib mode");
         return; // Exit if not in calibration mode
     }
 
     for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
         uint16_t current_value = he_readkey_raw(sensor_id);
+        //printf("id: %d, value: %d \n", sensor_id, current_value);
+
+        // If the current value is higher than what's stored, update it
+        if (current_value < he_sensor_calibration[sensor_id].noise_floor) {
+            he_sensor_calibration[sensor_id].noise_floor = current_value;
+            //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].switch_ceiling);
+        }
+    }
+
+    // This loop continuously updates the ceiling values
+    // You might want to add debouncing or ensure that the key is fully pressed
+}
+
+void switch_ceiling_calibration(void) {
+    if (!calibration_mode) {
+        print("exiting calib mode");
+        return; // Exit if not in calibration mode
+    }
+
+    for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
+        uint16_t current_value = he_readkey_raw(sensor_id);
+        //printf("id: %d, value: %d \n", sensor_id, current_value);
 
         // If the current value is higher than what's stored, update it
         if (current_value > he_sensor_calibration[sensor_id].switch_ceiling) {
             he_sensor_calibration[sensor_id].switch_ceiling = current_value;
+            //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].switch_ceiling);
         }
     }
 
@@ -241,6 +279,10 @@ bool he_matrix_scan(void) {
             updated = true;
         }
     }
+    if (calibration_mode) {
+        switch_ceiling_calibration();
+        noise_floor_calibration();
+    }
 
     return updated;
 }
@@ -284,7 +326,7 @@ void he_matrix_print(void) {
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
     printf("calibration mode: %d \n", calibration_mode);
-    char buffer[256]; // Ensure buffer is large enough for your string
+    char buffer[512]; // Adjust buffer size if needed
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
@@ -292,10 +334,9 @@ void he_matrix_print(void) {
         uint8_t col = sensor_to_matrix_map[i].col;
 
         uint16_t sensor_value = he_readkey_raw(sensor_id); // This reads the raw sensor value
-
-        // Fetch the noise floor for this sensor from the calibration data
         uint16_t noise_floor = he_sensor_calibration[sensor_id].noise_floor;
-
+        uint16_t switch_ceiling = he_sensor_calibration[sensor_id].switch_ceiling; // Fetch switch ceiling
+        uint16_t rescale_test_value = rescale(he_readkey_raw(sensor_id), sensor_id);
         // Continue to add the current sensor value to samples for statistical calculations
         add_sensor_sample(sensor_id, sensor_value);
 
@@ -303,13 +344,12 @@ void he_matrix_print(void) {
         double mean = calculate_mean(sensor_id);
         double noise = calculate_std_dev(sensor_id);
         int noise_int = (int)(noise * 100); // Convert to integer representation for printing
-
         int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
 
-        // Update the snprintf call to include the noise floor in the output
+        // Update snprintf to include the switch ceiling
         snprintf(buffer, sizeof(buffer),
-                 "| Sensor %d (%d,%d): Val: %-5u NF: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise: %d.%02d |\n",
-                 sensor_id, row, col, sensor_value, noise_floor,
+                 "| Sensor %d (%d,%d): Val: %-5u Rescale: %d NF: %-5u Ceiling: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise: %d.%02d |\n",
+                 sensor_id, row, col, sensor_value, rescale_test_value, noise_floor, switch_ceiling,
                  he_config.he_actuation_threshold, he_config.he_release_threshold,
                  mean_fixed / 100, mean_fixed % 100, noise_int / 100, abs(noise_int) % 100);
 
@@ -318,3 +358,4 @@ void he_matrix_print(void) {
 
     print("+----------------------------------------------------------------------------+\n");
 }
+

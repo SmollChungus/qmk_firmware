@@ -35,6 +35,23 @@
 #define DEFAULT_RELEASE_LEVEL 560
 #define DEBOUNCE_THRESHOLD 5
 
+//Switch/sensor dependant
+
+//Wooting Lekker
+#define WOOTING_LEKKER
+#ifdef WOOTING_LEKKER
+#define EXPECTED_NOISE_FLOOR 512
+#define EXPECTED_SWITCH_CEILING 720
+#endif
+
+// #define GEON_RAPTOR
+#ifdef GEON_RAPTOR
+#define EXPECTED_NOISE_FLOOR 550
+#define EXPECTED_SWITCH_CEILING 950
+#endif
+
+
+
 // Calibration setup
 #define NOISE_FLOOR_SAMPLE_COUNT 50
 
