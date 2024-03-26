@@ -65,19 +65,17 @@ void via_he_config_set_value(uint8_t *data) {
 
     switch (*value_id) {
         case id_via_he_actuation_threshold: {
-            via_he_config.he_actuation_threshold = value_data[1] | (value_data[0] << 8);
-            //via_update_config();
+            //via_he_config.he_actuation_threshold = value_data[1] | (value_data[0] << 8);
             break;
         }
         case id_via_he_release_threshold: {
-            via_he_config.he_release_threshold = value_data[1] | (value_data[0] << 8);
-            //via_update_config();
+            //via_he_config.he_release_threshold = value_data[1] | (value_data[0] << 8);
             break;
         }
         case id_start_calibration: {
             calibration_mode = true; // Enable calibration mode
             switch_ceiling_calibration();
-
+            noise_floor_calibration();
             print("Calibration started, fully depress each key on the board \n");
 
             break;
@@ -87,11 +85,7 @@ void via_he_config_set_value(uint8_t *data) {
             print("Calibration ended, to recalibrate, hit start calibration \n");
             break;
         }
-        case id_save_threshold_data: {
-            via_update_config();
-            print("saving threshold data \n");
-            break;
-        }
+
     }
 }
 
@@ -116,13 +110,17 @@ void via_he_config_get_value(uint8_t *data) {
     }
 }
 
-// Save the data to persistent memory after changes are made
+/* Save the data to persistent memory after changes are made
 void via_he_config_save(void) {
     // Debugging print
     uprintf("Saving HE config: Actuation: %u, Release: %u\n", via_he_config.he_actuation_threshold, via_he_config.he_release_threshold);
+    if (eeprom_he_config.he_actuation_threshold == 0 || eeprom_he_config.he_release_threshold == 0) {
+        print("don't set both to 0 plis");
+    } else {
     eeconfig_update_user_datablock(&via_he_config);
     uprintf("HE config saved successfully.\n");
-}
+    }
+} */
 
 void via_he_calibration_save(void) {
     eeconfig_update_user_datablock(&he_sensor_calibration);
@@ -145,12 +143,13 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                 break;
             }
             case id_save_threshold_data: {
-                via_he_config_save();
+
+                via_update_config();
                 break;
             }
             case id_start_calibration: {
                 calibration_mode = true; // Enable calibration mode
-                switch_ceiling_calibration();
+                noise_floor_calibration_init();
                 print("id_save_calibration_data invoked, switch_ceiling_calib invoked");
 
                 break;

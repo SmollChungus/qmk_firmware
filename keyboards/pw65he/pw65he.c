@@ -1,6 +1,8 @@
 // 2x2he.c (keyboard.c in qmk terms)
 
 #include "he_switch_matrix.h"
+#include "print.h" //debug
+
 #ifdef VIA_ENABLE
 
 eeprom_he_config_t eeprom_he_config;
@@ -32,6 +34,9 @@ void keyboard_post_init_kb(void) {
 
 void via_update_config(void) {
     // Update runtime configuration
+    if (via_he_config.he_actuation_threshold == 0 || via_he_config.he_release_threshold == 0) {
+        print("dont set to 0 please \n");
+    } else {
     he_config.he_actuation_threshold = via_he_config.he_actuation_threshold;
     he_config.he_release_threshold = via_he_config.he_release_threshold;
     he_config.he_actuation_mode = via_he_config.he_actuation_mode;
@@ -41,5 +46,7 @@ void via_update_config(void) {
     eeprom_he_config.he_release_threshold = he_config.he_release_threshold;
     eeprom_he_config.he_actuation_mode = he_config.he_actuation_mode;
     eeconfig_update_kb_datablock(&eeprom_he_config);
+    print("saved actuation thresholds to EEPROM \n");
+    }
 }
 #endif

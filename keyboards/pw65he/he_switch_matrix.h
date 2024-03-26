@@ -101,6 +101,7 @@ _Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in
 _Static_assert(sizeof(via_he_config_t)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
 
 int       he_init(he_config_t const* const he_config);
+int compare_uint16(const void *a, const void *b);
 bool      he_matrix_scan(void);
 uint16_t  he_readkey_raw(uint8_t sensorIndex);
 uint16_t  noise_floor[SENSOR_COUNT];
@@ -114,6 +115,7 @@ extern    matrix_row_t matrix[MATRIX_ROWS];
 void      send_matrix_state_report(void);
 void      send_sensor_value_report(uint8_t report_number, uint8_t start_sensor);
 void      noise_floor_calibration_init(void);
+void      noise_floor_calibration(void);
 void      save_calibration_data_to_eeprom(void);
 
 

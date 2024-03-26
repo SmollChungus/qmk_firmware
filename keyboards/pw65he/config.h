@@ -50,10 +50,23 @@
 #define EXPECTED_SWITCH_CEILING 950
 #endif
 
+// #define OTEMU
+#ifdef OTEMU
+#define EXPECTED_NOISE_FLOOR xxx
+#define EXPECTED_SWITCH_CEILING xxx
+#endif
+
+// #define GEON_RAPTOR
+#ifdef GATERON
+#define EXPECTED_NOISE_FLOOR xxx
+#define EXPECTED_SWITCH_CEILING xxx
+#endif
+
+
 
 
 // Calibration setup
-#define NOISE_FLOOR_SAMPLE_COUNT 50
+#define NOISE_FLOOR_SAMPLE_COUNT 10
 
 
 

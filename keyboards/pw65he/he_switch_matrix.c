@@ -115,16 +115,18 @@ uint16_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
         // Cast to float to ensure proper division, then scale and cast back
         sensor_value_rescaled = (uint16_t)(((float)(sensor_value - noise_floor) / (switch_ceiling - noise_floor)) * target_range);
     } else {
-        printf("Invalid calibration for sensor %d\n", sensor_id);
+        //printf("Invalid calibration for sensor %d\n", sensor_id);
         sensor_value_rescaled = 0;
     }
 
-    printf("%d \n", sensor_value_rescaled);
+    //printf("%d \n", sensor_value_rescaled);
     return sensor_value_rescaled;
 }
 
+
 void noise_floor_calibration_init(void) {
     // Temporary storage for calibration samples
+    print("noise_floor_calibration_init");
     uint16_t samples[NOISE_FLOOR_SAMPLE_COUNT];
 
     for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
@@ -133,7 +135,7 @@ void noise_floor_calibration_init(void) {
         for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
             // Sample each sensor multiple times
             samples[sample] = he_readkey_raw(sensor_id);
-            wait_us(100); // Wait a bit between samples to not overload the sensor
+            wait_us(5); // Wait a bit between samples to not overload the sensor
         }
 
         // Find the minimum value among the samples for this sensor
@@ -154,24 +156,30 @@ void noise_floor_calibration_init(void) {
 }
 
 void noise_floor_calibration(void) {
-    if (!calibration_mode) {
-        print("exiting calib mode");
-        return; // Exit if not in calibration mode
-    }
+    print("noise_floor_calibration_init");
+    if (!calibration_mode) return; // Only run in calibration mode
 
-    for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
-        uint16_t current_value = he_readkey_raw(sensor_id);
-        //printf("id: %d, value: %d \n", sensor_id, current_value);
+    // Temporary storage for noise floor values
+    uint16_t samples[SENSOR_COUNT][NOISE_FLOOR_SAMPLE_COUNT];
+    memset(samples, 0, sizeof(samples));
 
-        // If the current value is higher than what's stored, update it
-        if (current_value < he_sensor_calibration[sensor_id].noise_floor) {
-            he_sensor_calibration[sensor_id].noise_floor = current_value;
-            //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].switch_ceiling);
+    // Collect samples for each sensor
+    for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
+        for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
+            samples[sensor_id][sample] = he_readkey_raw(sensor_id);
+            wait_us(50); // Small delay between samples
         }
     }
 
-    // This loop continuously updates the ceiling values
-    // You might want to add debouncing or ensure that the key is fully pressed
+    // Calculate noise floor based on the 25th percentile of sorted samples for each sensor
+    for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
+        // Sort the samples for this sensor
+        qsort(samples[sensor_id], NOISE_FLOOR_SAMPLE_COUNT, sizeof(uint16_t), compare_uint16);
+
+        // Determine the noise floor as the 25th percentile
+        uint16_t noise_floor = samples[sensor_id][NOISE_FLOOR_SAMPLE_COUNT / 4];
+        he_sensor_calibration[sensor_id].noise_floor = noise_floor;
+    }
 }
 
 void switch_ceiling_calibration(void) {
@@ -281,7 +289,6 @@ bool he_matrix_scan(void) {
     }
     if (calibration_mode) {
         switch_ceiling_calibration();
-        noise_floor_calibration();
     }
 
     return updated;
@@ -293,6 +300,12 @@ sensor_data_t sensor_data[SENSOR_COUNT];
 void add_sensor_sample(uint8_t sensor_id, uint16_t value) {
     sensor_data[sensor_id].samples[sensor_data[sensor_id].index % SAMPLE_COUNT] = value;
     sensor_data[sensor_id].index++;
+}
+
+int compare_uint16(const void *a, const void *b) {
+    uint16_t val_a = *(const uint16_t*)a;
+    uint16_t val_b = *(const uint16_t*)b;
+    return (val_a > val_b) - (val_a < val_b);
 }
 
 double calculate_std_dev(uint8_t sensor_id) {
