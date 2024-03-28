@@ -1,5 +1,5 @@
 {
-    "name": "PR65",
+    "name": "PW65he",
     "vendorId": "0x5363",
     "productId": "0x0009",
     "menus": [
@@ -17,7 +17,7 @@
                                         720
                                     ],
                                     "content": [
-                                        "id_he_actuation_threshold",
+                                        "id_custom_set_value",
                                         0,
                                         1
                                     ]
@@ -30,7 +30,7 @@
                                         720
                                     ],
                                     "content": [
-                                        "id_he_release_threshold",
+                                        "id_custom_set_value",
                                         0,
                                         2
                                     ]

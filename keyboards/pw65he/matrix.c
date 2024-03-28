@@ -2,6 +2,7 @@
 //matrix.c
 #include "he_switch_matrix.h" //instead of instead of #include "matrix.h"
 #include "wait.h"
+#include "print.h"
 
 /* matrix state(1:on, 0:off) */
 matrix_row_t raw_matrix[MATRIX_ROWS]; // raw values
@@ -38,17 +39,16 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 5555) {
+    if (cnt++ == 200) {
         cnt = 0;
         he_matrix_print();
     }
-
-
     #endif
-    /*#ifdef RAW_ENABLE
+    #ifdef RAW_ENABLE
     static int report_cnt = 0;
     if (report_cnt++ == 500) {
         report_cnt = 0;
+        print("sending hid report");
         send_matrix_state_report(); // Send the matrix state report
         for (uint8_t report_id = 0; report_id < NUM_SENSOR_REPORTS; report_id++) {
             uint8_t start_sensor = report_id * SENSORS_PER_REPORT;
@@ -57,7 +57,7 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
     }
 
 
-    #endif */
+    #endif
 
     return updated ? 1 : 0;
 }

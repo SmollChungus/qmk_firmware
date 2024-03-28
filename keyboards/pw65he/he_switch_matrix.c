@@ -28,14 +28,6 @@
 #ifdef RAW_ENABLE
 
 
-#define MATRIX_STATE_REPORT_ID 0x01
-#define SENSOR_VALUE_REPORT_ID_BASE 0x02 // Base for sensor value reports
-#define MATRIX_STATE_REPORT_SIZE 32
-#define SENSOR_REPORT_SIZE 32
-#define SENSORS_PER_REPORT 15
-#define REPORT_INTERVAL_MS 500
-#define NUM_SENSOR_REPORTS 5
-
 
 void send_matrix_state_report(void) {
 
@@ -339,9 +331,10 @@ void he_matrix_print(void) {
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
     printf("calibration mode: %d \n", calibration_mode);
-    char buffer[512]; // Adjust buffer size if needed
 
-    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
+    for (uint8_t i = 0; i < 9; i++) {
+        char buffer[512]; // Adjust buffer size if needed
+
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;

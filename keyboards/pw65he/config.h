@@ -68,6 +68,14 @@
 // Calibration setup
 #define NOISE_FLOOR_SAMPLE_COUNT 10
 
-
+#ifdef RAW_ENABLE
+#define MATRIX_STATE_REPORT_ID 0x01
+#define SENSOR_VALUE_REPORT_ID_BASE 0x02 // Base for sensor value reports
+#define MATRIX_STATE_REPORT_SIZE 32
+#define SENSOR_REPORT_SIZE 32
+#define SENSORS_PER_REPORT 15
+#define REPORT_INTERVAL_MS 500
+#define NUM_SENSOR_REPORTS 5
+#endif
 
 

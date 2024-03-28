@@ -65,7 +65,7 @@ void via_he_config_set_value(uint8_t *data) {
 
     switch (*value_id) {
         case id_via_he_actuation_threshold: {
-            //via_he_config.he_actuation_threshold = value_data[1] | (value_data[0] << 8);
+            via_he_config.he_actuation_threshold = value_data[1] | (value_data[0] << 8);
             break;
         }
         case id_via_he_release_threshold: {
