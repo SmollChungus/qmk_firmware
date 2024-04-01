@@ -26,12 +26,9 @@
 
 
 #ifdef RAW_ENABLE
-
-
-
 void send_matrix_state_report(void) {
 
-    uprintf("Sending matrix state report\n");
+    //uprintf("Sending matrix state report\n");
 
     uint8_t report[MATRIX_STATE_REPORT_SIZE] = {0};
     report[0] = MATRIX_STATE_REPORT_ID;
@@ -325,14 +322,34 @@ double calculate_mean(uint8_t sensor_id) {
     return mean;
 }
 
+void he_matrix_print(void) {
+    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
+        char buffer[512]; // Adjust buffer size if needed
 
+        uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
+        uint16_t rescale_test_value = rescale(he_readkey_raw(sensor_id), sensor_id);
+        uint8_t row = sensor_to_matrix_map[i].row;
+        uint8_t col = sensor_to_matrix_map[i].col;
+
+        // Update snprintf to include the switch ceiling
+        snprintf(buffer, sizeof(buffer),
+                 "| (%d,%d) Rescale: %d |\n",
+                 row,col,rescale_test_value);
+
+        print(buffer);
+    }
+
+}
+
+
+/*
 void he_matrix_print(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
     printf("calibration mode: %d \n", calibration_mode);
 
-    for (uint8_t i = 0; i < 9; i++) {
+    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         char buffer[512]; // Adjust buffer size if needed
 
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
@@ -362,6 +379,6 @@ void he_matrix_print(void) {
         print(buffer);
     }
 
-    print("+----------------------------------------------------------------------------+\n");
 }
 
+*/

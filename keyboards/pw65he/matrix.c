@@ -39,16 +39,15 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 200) {
+    if (cnt++ == 100) {
         cnt = 0;
         he_matrix_print();
     }
     #endif
     #ifdef RAW_ENABLE
     static int report_cnt = 0;
-    if (report_cnt++ == 500) {
+    if (report_cnt++ == 100) {
         report_cnt = 0;
-        print("sending hid report");
         send_matrix_state_report(); // Send the matrix state report
         for (uint8_t report_id = 0; report_id < NUM_SENSOR_REPORTS; report_id++) {
             uint8_t start_sensor = report_id * SENSORS_PER_REPORT;
