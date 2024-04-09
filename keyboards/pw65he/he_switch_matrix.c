@@ -70,14 +70,15 @@ matrix_row_t matrix_get_row(uint8_t row) {
     }
 }
 
-he_sensor_calibration_t he_sensor_calibration[SENSOR_COUNT];
+// delete => he_sensor_calibration_t he_sensor_calibration[SENSOR_COUNT];
 static key_debounce_t debounce_matrix[MATRIX_ROWS][MATRIX_COLS] = {{{0, 0}}};
 const uint32_t mux_en_pins[] = MUX_EN_PINS;
 const uint32_t mux_sel_pins[] = MUX_SEL_PINS;
 static adc_mux adcMux;
 he_config_t he_config;
+he_key_config_t he_key_configs[SENSOR_COUNT];
 
-bool calibration_mode = false;
+
 
 //move to he_init?
 static void init_mux_sel(void) {
@@ -96,13 +97,13 @@ static void init_mux_sel(void) {
 uint16_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
     uint16_t sensor_value_rescaled = 0;
 
-    uint16_t noise_floor = he_sensor_calibration[sensor_id].noise_floor;
-    uint16_t switch_ceiling = he_sensor_calibration[sensor_id].switch_ceiling;
+    uint16_t noise_floor = he_key_configs[sensor_id].noise_floor;
+    uint16_t noise_ceiling = he_key_configs[sensor_id].noise_ceiling;
     uint8_t target_range = 100;
 
-    if (switch_ceiling > noise_floor) {
+    if (noise_ceiling > noise_floor) {
         // Cast to float to ensure proper division, then scale and cast back
-        sensor_value_rescaled = (uint16_t)(((float)(sensor_value - noise_floor) / (switch_ceiling - noise_floor)) * target_range);
+        sensor_value_rescaled = (uint16_t)(((float)(sensor_value - noise_floor) / (noise_ceiling - noise_floor)) * target_range);
     } else {
         //printf("Invalid calibration for sensor %d\n", sensor_id);
         sensor_value_rescaled = 0;
@@ -135,7 +136,7 @@ void noise_floor_calibration_init(void) {
         }
 
         // Store the minimum value as the noise floor for this sensor
-        he_sensor_calibration[sensor_id].noise_floor = min_value;
+        he_key_configs[sensor_id].noise_floor = min_value;
 
         // Optional: Print the noise floor for debugging
         uprintf("Sensor %d Noise Floor: %u\n", sensor_id, min_value);
@@ -146,7 +147,7 @@ void noise_floor_calibration_init(void) {
 
 void noise_floor_calibration(void) {
     print("noise_floor_calibration_init");
-    if (!calibration_mode) return; // Only run in calibration mode
+    if (!he_config.he_calibration_mode) return; // Only run in calibration mode
 
     // Temporary storage for noise floor values
     uint16_t samples[SENSOR_COUNT][NOISE_FLOOR_SAMPLE_COUNT];
@@ -167,12 +168,12 @@ void noise_floor_calibration(void) {
 
         // Determine the noise floor as the 25th percentile
         uint16_t noise_floor = samples[sensor_id][NOISE_FLOOR_SAMPLE_COUNT / 4];
-        he_sensor_calibration[sensor_id].noise_floor = noise_floor;
+        he_key_configs[sensor_id].noise_floor = noise_floor;
     }
 }
 
-void switch_ceiling_calibration(void) {
-    if (!calibration_mode) {
+void noise_ceiling_calibration(void) {
+    if (!he_config.he_calibration_mode) {
         print("exiting calib mode");
         return; // Exit if not in calibration mode
     }
@@ -182,9 +183,9 @@ void switch_ceiling_calibration(void) {
         //printf("id: %d, value: %d \n", sensor_id, current_value);
 
         // If the current value is higher than what's stored, update it
-        if (current_value > he_sensor_calibration[sensor_id].switch_ceiling) {
-            he_sensor_calibration[sensor_id].switch_ceiling = current_value;
-            //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].switch_ceiling);
+        if (current_value > he_key_configs[sensor_id].noise_ceiling) {
+            he_key_configs[sensor_id].noise_ceiling = current_value;
+            //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].noise_ceiling);
         }
     }
 
@@ -192,12 +193,20 @@ void switch_ceiling_calibration(void) {
     // You might want to add debouncing or ensure that the key is fully pressed
 }
 
-int he_init(he_config_t const* const he_config) {
+int he_init(he_key_config_t he_key_configs[], size_t count) {
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
     adcMux = pinToMux(ANALOG_PORT);
     adc_read(adcMux);
 
     init_mux_sel();
+
+    for (int i = 0; i < SENSOR_COUNT; i++) {
+        he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+        he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
+        // Add default noise floor and ceiling values here
+        he_key_configs[i].noise_floor = EXPECTED_NOISE_FLOOR;
+        he_key_configs[i].noise_ceiling = EXPECTED_noise_ceiling;
+    }
 
     return 0;
 }
@@ -234,11 +243,11 @@ uint16_t he_readkey_raw(uint8_t sensorIndex) {
     return sensor_value;
 }
 
-bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value) {
+bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
     key_debounce_t *key_info = &debounce_matrix[row][col];
     bool previously_pressed = key_info->debounced_state;
-    bool currently_pressed = sensor_value > he_config.he_actuation_threshold;
-    bool should_release = sensor_value < he_config.he_release_threshold;
+    bool currently_pressed = sensor_value > he_key_configs[sensor_id].he_actuation_threshold;
+    bool should_release = sensor_value < he_key_configs[sensor_id].he_release_threshold;
 
     if (currently_pressed && !previously_pressed) {
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
@@ -272,12 +281,12 @@ bool he_matrix_scan(void) {
 
         uint16_t sensor_value = he_readkey_raw(sensor_id);
 
-        if (he_update_key(matrix, row, col, sensor_value)) {
+        if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
             updated = true;
         }
     }
-    if (calibration_mode) {
-        switch_ceiling_calibration();
+    if (he_config.he_calibration_mode) {
+        noise_ceiling_calibration();
     }
 
     return updated;
@@ -321,6 +330,7 @@ double calculate_mean(uint8_t sensor_id) {
     mean /= SAMPLE_COUNT;
     return mean;
 }
+#ifdef CONSOLE_ENABLE
 
 void he_matrix_print(void) {
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
@@ -347,7 +357,7 @@ void he_matrix_print(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
-    printf("calibration mode: %d \n", calibration_mode);
+    printf("calibration mode: %d \n", he_config.he_calibration_mode);
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         char buffer[512]; // Adjust buffer size if needed
@@ -357,8 +367,8 @@ void he_matrix_print(void) {
         uint8_t col = sensor_to_matrix_map[i].col;
 
         uint16_t sensor_value = he_readkey_raw(sensor_id); // This reads the raw sensor value
-        uint16_t noise_floor = he_sensor_calibration[sensor_id].noise_floor;
-        uint16_t switch_ceiling = he_sensor_calibration[sensor_id].switch_ceiling; // Fetch switch ceiling
+        uint16_t noise_floor = he_key_configs[sensor_id].noise_floor;
+        uint16_t noise_ceiling = he_key_configs[sensor_id].noise_ceiling; // Fetch switch ceiling
         uint16_t rescale_test_value = rescale(he_readkey_raw(sensor_id), sensor_id);
         // Continue to add the current sensor value to samples for statistical calculations
         add_sensor_sample(sensor_id, sensor_value);
@@ -372,13 +382,13 @@ void he_matrix_print(void) {
         // Update snprintf to include the switch ceiling
         snprintf(buffer, sizeof(buffer),
                  "| Sensor %d (%d,%d): Val: %-5u Rescale: %d NF: %-5u Ceiling: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise: %d.%02d |\n",
-                 sensor_id, row, col, sensor_value, rescale_test_value, noise_floor, switch_ceiling,
-                 he_config.he_actuation_threshold, he_config.he_release_threshold,
+                 sensor_id, row, col, sensor_value, rescale_test_value, noise_floor, noise_ceiling,
+                 he_key_configs[i].he_actuation_threshold, he_key_configs[i].he_release_threshold,
                  mean_fixed / 100, mean_fixed % 100, noise_int / 100, abs(noise_int) % 100);
 
         print(buffer);
     }
 
 }
-
 */
+#endif

@@ -44,7 +44,7 @@
                                     "content": [
                                         "id_save_threshold_data",
                                         0,
-                                        9
+                                        3
                                     ]
                                 },{
                                     "label": "Calibration Start",
@@ -58,10 +58,11 @@
                                         4
                                     ]
                                 },{
-                                    "label": "Save Calibration Data",
+                                    "label": "End + Save Calibration Data",
                                     "type": "button",
                                     "options": [
                                         0
+
                                     ],
                                     "content": [
                                         "id_save_threshold_data",

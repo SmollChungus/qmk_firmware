@@ -28,7 +28,9 @@
     { B3, B4, B6, B5 }
 
 #define ANALOG_PORT A3
-#define EECONFIG_KB_DATA_SIZE 6
+#define EECONFIG_KB_DATA_SIZE 3
+#define WEAR_LEVELING_LOGICAL_SIZE 2048
+#define WEAR_LEVELING_BACKING_SIZE 16384
 
 // User config
 #define DEFAULT_ACTUATION_LEVEL 565
@@ -40,30 +42,30 @@
 //Wooting Lekker
 #define WOOTING_LEKKER
 #ifdef WOOTING_LEKKER
-#define EXPECTED_NOISE_FLOOR 512
-#define EXPECTED_SWITCH_CEILING 720
+#define EXPECTED_NOISE_FLOOR 540
+#define EXPECTED_noise_ceiling 720
 #endif
 
 // #define GEON_RAPTOR
 #ifdef GEON_RAPTOR
 #define EXPECTED_NOISE_FLOOR 550
-#define EXPECTED_SWITCH_CEILING 950
+#define EXPECTED_noise_ceiling 950
 #endif
 
 // #define OTEMU
 #ifdef OTEMU
 #define EXPECTED_NOISE_FLOOR xxx
-#define EXPECTED_SWITCH_CEILING xxx
+#define EXPECTED_noise_ceiling xxx
 #endif
 
 // #define GEON_RAPTOR
 #ifdef GATERON
 #define EXPECTED_NOISE_FLOOR xxx
-#define EXPECTED_SWITCH_CEILING xxx
+#define EXPECTED_noise_ceiling xxx
 #endif
 
 
-
+#define FORCE_NKRO
 
 // Calibration setup
 #define NOISE_FLOOR_SAMPLE_COUNT 10

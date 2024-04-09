@@ -50,24 +50,46 @@ __attribute__((weak)) void keyboard_post_init_user(void);
 }
 #endif
 
-// Config
 typedef struct {
+    bool    he_calibration_mode;
+    bool    he_post_flash;
     uint8_t he_actuation_mode;
-    uint16_t he_actuation_threshold;
-    uint16_t he_release_threshold;
 } he_config_t;
 
 typedef struct {
+    bool    he_calibration_mode;
+    bool    he_post_flash;
     uint8_t he_actuation_mode;
-    uint16_t he_actuation_threshold;
-    uint16_t he_release_threshold;
 } eeprom_he_config_t;
 
+//redundancy to decouple VIA I/O from RT/EEPROM
 typedef struct {
+    bool    he_calibration_mode;
+    bool    he_post_flash;
     uint8_t he_actuation_mode;
-    uint16_t he_actuation_threshold;
-    uint16_t he_release_threshold;
 } via_he_config_t;
+
+// Per Key Configs
+typedef struct {
+    uint16_t he_actuation_threshold; // Actuation threshold
+    uint16_t he_release_threshold;   // Release threshold
+    uint16_t noise_floor;
+    uint16_t noise_ceiling;
+} he_key_config_t;
+
+typedef struct {
+    uint16_t he_actuation_threshold; // Actuation threshold
+    uint16_t he_release_threshold;   // Release threshold
+    uint16_t noise_floor;
+    uint16_t noise_ceiling;
+} eeprom_he_key_config_t;
+
+typedef struct {
+    uint16_t he_actuation_threshold; // Actuation threshold
+    uint16_t he_release_threshold;   // Release threshold
+    uint16_t noise_floor;
+    uint16_t noise_ceiling;
+} via_he_key_config_t;
 
 typedef struct {
     uint8_t row;
@@ -84,31 +106,23 @@ typedef struct {
 } key_debounce_t;
 
 
-//Calibration
-typedef struct {
-    uint16_t noise_floor;
-    uint16_t switch_ceiling;
-} he_sensor_calibration_t;
+extern he_config_t he_config; // Assuming he_config_t is the correct type
+extern eeprom_he_config_t eeprom_he_config; // Assuming he_config_t is the correct type
+extern via_he_config_t via_he_config; // Assuming he_config_t is the correct type
+extern he_key_config_t he_key_configs[SENSOR_COUNT];
+extern eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
+extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 
-
-
-extern he_config_t he_config;
-extern eeprom_he_config_t eeprom_he_config;
-extern via_he_config_t via_he_config;
-extern he_sensor_calibration_t he_sensor_calibration[SENSOR_COUNT];
-
-_Static_assert(sizeof(eeprom_he_config_t) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
-_Static_assert(sizeof(via_he_config_t)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
-
-int       he_init(he_config_t const* const he_config);
-int compare_uint16(const void *a, const void *b);
+_Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+//_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
+int       he_init(he_key_config_t he_key_configs[], size_t count);;
+int       compare_uint16(const void *a, const void *b);
 bool      he_matrix_scan(void);
 uint16_t  he_readkey_raw(uint8_t sensorIndex);
 uint16_t  noise_floor[SENSOR_COUNT];
 uint16_t  sensor_value_rescaled;
-bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint16_t sensor_value);
-bool      calibration_mode;
-void      switch_ceiling_calibration(void);
+bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
+void      noise_ceiling_calibration(void);
 void      he_matrix_print(void);
 void      via_update_config(void);
 extern    matrix_row_t matrix[MATRIX_ROWS];
@@ -117,7 +131,7 @@ void      send_sensor_value_report(uint8_t report_number, uint8_t start_sensor);
 void      noise_floor_calibration_init(void);
 void      noise_floor_calibration(void);
 void      save_calibration_data_to_eeprom(void);
-
+void      via_he_calibration_save(void);
 
 // Debug
 #define SAMPLE_COUNT 15

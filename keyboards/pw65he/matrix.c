@@ -20,10 +20,9 @@ void matrix_print(void) {
 }
 
 void matrix_init(void) {
-    he_config.he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
-    he_config.he_release_threshold   = DEFAULT_RELEASE_LEVEL;
 
-    he_init(&he_config);
+    he_init(he_key_configs, SENSOR_COUNT);
+
 
     matrix_init_kb();
 
@@ -39,14 +38,14 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 100) {
+    if (cnt++ == 50) {
         cnt = 0;
         he_matrix_print();
     }
     #endif
     #ifdef RAW_ENABLE
     static int report_cnt = 0;
-    if (report_cnt++ == 100) {
+    if (report_cnt++ == 15000) {
         report_cnt = 0;
         send_matrix_state_report(); // Send the matrix state report
         for (uint8_t report_id = 0; report_id < NUM_SENSOR_REPORTS; report_id++) {

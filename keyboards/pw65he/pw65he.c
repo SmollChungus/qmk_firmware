@@ -8,45 +8,73 @@
 eeprom_he_config_t eeprom_he_config;
 via_he_config_t via_he_config;
 
+eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
+via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
+
 void keyboard_post_init_kb(void) {
-
-
+    //initializes kb eeprom
     eeconfig_read_kb_datablock(&eeprom_he_config);
-
-    // Assuming actuation_threshold should never be 0 in a properly initialized EEPROM
-    if (eeprom_he_config.he_actuation_threshold == 0 || eeprom_he_config.he_release_threshold == 0) {
-        // Set to default values
-        eeprom_he_config.he_actuation_mode = 0;
-        eeprom_he_config.he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
-        eeprom_he_config.he_release_threshold = DEFAULT_RELEASE_LEVEL;
-
-        // Save the default values back to EEPROM
+    if (eeprom_he_config.he_post_flash) {
+        eeprom_he_config.he_post_flash = false;
+        // set RT from defaults
+        for (int i = 0; i < SENSOR_COUNT; i++) {
+            he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+            he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
+        }
         eeconfig_update_kb_datablock(&eeprom_he_config);
+
     }
 
-    // Apply to runtime configuration
-    he_config.he_actuation_threshold = eeprom_he_config.he_actuation_threshold;
-    he_config.he_release_threshold = eeprom_he_config.he_release_threshold;
-    he_config.he_actuation_mode = eeprom_he_config.he_actuation_mode;
-    // Continue with the rest of the initialization...
+// Continue with the rest of the initialization...
     keyboard_post_init_user();
+
+
+    /* Assuming actuation_threshold should never be 0 in a properly initialized EEPROM
+    if (eeprom_he_key_configs[0].he_actuation_threshold == 0 && eeprom_he_key_configs[0].he_release_threshold == 0) {
+        // Set to default values
+        //eeprom_he_key_configs.he_actuation_mode = 0; refactor
+        for (int i = 0; i < SENSOR_COUNT; i++) {
+            // Add default noise floor and ceiling values here
+            eeprom_he_key_configs[i].noise_floor = EXPECTED_NOISE_FLOOR;
+            eeprom_he_key_configs[i].noise_ceiling = EXPECTED_noise_ceiling;
+        }
+
+
+        // Save the default values back to EEPROM
+        eeconfig_update_user_datablock(&eeprom_he_key_configs);
+    } else {
+    // Apply to runtime configuration
+    for (int i = 0; i < SENSOR_COUNT; i++) {
+            he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
+            he_key_configs[i].he_release_threshold = eeprom_he_key_configs[i].he_release_threshold;
+            // Add default noise floor and ceiling values here
+            he_key_configs[i].noise_floor = eeprom_he_key_configs[i].noise_floor;
+            he_key_configs[i].noise_ceiling = eeprom_he_key_configs[i].noise_ceiling;
+
+        }
+    }
+} */
 }
 
 void via_update_config(void) {
     // Update runtime configuration
-    if (via_he_config.he_actuation_threshold == 0 || via_he_config.he_release_threshold == 0) {
+    if (via_he_key_configs[0].he_actuation_threshold == 0 && via_he_key_configs[0].he_release_threshold == 0) {
         print("dont set to 0 please \n");
     } else {
-    he_config.he_actuation_threshold = via_he_config.he_actuation_threshold;
-    he_config.he_release_threshold = via_he_config.he_release_threshold;
-    he_config.he_actuation_mode = via_he_config.he_actuation_mode;
-
-    // Convert runtime config to EEPROM format and save
-    eeprom_he_config.he_actuation_threshold = he_config.he_actuation_threshold;
-    eeprom_he_config.he_release_threshold = he_config.he_release_threshold;
-    eeprom_he_config.he_actuation_mode = he_config.he_actuation_mode;
-    eeconfig_update_kb_datablock(&eeprom_he_config);
-    print("saved actuation thresholds to EEPROM \n");
+        he_config.he_actuation_mode = via_he_config.he_actuation_mode;
+        he_config.he_calibration_mode = via_he_config.he_calibration_mode;
+        for (int i = 0; i < SENSOR_COUNT; i++) {
+            he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
+            he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+            //he_key_configs[i].noise_floor = via_he_key_configs[i].noise_floor;
+            //he_key_configs[i].noise_ceiling = via_he_key_configs[i].noise_ceiling;
+            // Convert runtime config to EEPROM format and save
+            eeprom_he_key_configs[i].he_actuation_threshold = he_key_configs[i].he_actuation_threshold;
+            eeprom_he_key_configs[i].he_release_threshold = he_key_configs[i].he_release_threshold;
+            // delete -> eeprom_he_key_configs[i].he_actuation_mode = he_key_configs[i].he_actuation_mode;
+    eeconfig_update_user_datablock(&eeprom_he_key_configs);
+    print("saved actuation thresholds to USER EEPROM \n");
+        }
     }
 }
 #endif
