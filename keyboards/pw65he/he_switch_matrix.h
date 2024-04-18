@@ -115,6 +115,7 @@ extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 
 _Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
 //_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
+
 int       he_init(he_key_config_t he_key_configs[], size_t count);;
 int       compare_uint16(const void *a, const void *b);
 bool      he_matrix_scan(void);
@@ -124,6 +125,7 @@ uint16_t  sensor_value_rescaled;
 bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 void      noise_ceiling_calibration(void);
 void      he_matrix_print(void);
+void      he_matrix_print_extended(void);
 void      via_update_config(void);
 extern    matrix_row_t matrix[MATRIX_ROWS];
 void      send_matrix_state_report(void);

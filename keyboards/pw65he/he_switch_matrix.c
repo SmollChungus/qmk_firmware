@@ -51,7 +51,13 @@ void send_sensor_value_report(uint8_t report_number, uint8_t start_sensor) {
 }
 #endif
 
+#ifdef VIA_ENABLE
+eeprom_he_config_t eeprom_he_config;
+via_he_config_t via_he_config;
 
+eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
+via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
+#endif
 
 //row/col/sensorid/muxid/muxchannel
 const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
@@ -80,7 +86,6 @@ he_key_config_t he_key_configs[SENSOR_COUNT];
 
 
 
-//move to he_init?
 static void init_mux_sel(void) {
 //    int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
     for (int i = 0; i < 4; i++) {
@@ -118,36 +123,31 @@ void noise_floor_calibration_init(void) {
     // Temporary storage for calibration samples
     print("noise_floor_calibration_init");
     uint16_t samples[NOISE_FLOOR_SAMPLE_COUNT];
-
+    eeconfig_read_kb_datablock(&eeprom_he_key_configs);
     for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
         uint16_t min_value = UINT16_MAX; // Initialize to the max possible value
 
         for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
             // Sample each sensor multiple times
             samples[sample] = he_readkey_raw(sensor_id);
-            wait_us(5); // Wait a bit between samples to not overload the sensor
-        }
-
-        // Find the minimum value among the samples for this sensor
-        for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
             if (samples[sample] < min_value) {
                 min_value = samples[sample];
             }
+            wait_us(5);
         }
-
         // Store the minimum value as the noise floor for this sensor
         he_key_configs[sensor_id].noise_floor = min_value;
+        eeprom_he_key_configs[sensor_id].noise_floor = min_value;
 
         // Optional: Print the noise floor for debugging
         uprintf("Sensor %d Noise Floor: %u\n", sensor_id, min_value);
     }
-
-    // TODO: Store the noise floor values persistently (EEPROM)
+    eeconfig_update_kb_datablock(&eeprom_he_key_configs);
 }
 
 void noise_floor_calibration(void) {
     print("noise_floor_calibration_init");
-    if (!he_config.he_calibration_mode) return; // Only run in calibration mode
+    if (!he_config.he_calibration_mode) return; // Only run while calibration mode
 
     // Temporary storage for noise floor values
     uint16_t samples[SENSOR_COUNT][NOISE_FLOOR_SAMPLE_COUNT];
@@ -174,7 +174,7 @@ void noise_floor_calibration(void) {
 
 void noise_ceiling_calibration(void) {
     if (!he_config.he_calibration_mode) {
-        print("exiting calib mode");
+        print("exiting calibration mode");
         return; // Exit if not in calibration mode
     }
 
@@ -184,7 +184,7 @@ void noise_ceiling_calibration(void) {
 
         // If the current value is higher than what's stored, update it
         if (current_value > he_key_configs[sensor_id].noise_ceiling) {
-            he_key_configs[sensor_id].noise_ceiling = current_value;
+            he_key_configs[sensor_id].noise_ceiling = 3; //current_value;
             //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].noise_ceiling);
         }
     }
@@ -199,15 +199,31 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
     adc_read(adcMux);
 
     init_mux_sel();
+    // check and reset for non-sense user values
 
-    for (int i = 0; i < SENSOR_COUNT; i++) {
-        he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
-        he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
-        // Add default noise floor and ceiling values here
-        he_key_configs[i].noise_floor = EXPECTED_NOISE_FLOOR;
-        he_key_configs[i].noise_ceiling = EXPECTED_noise_ceiling;
+    #ifdef VIA_ENABLE
+    eeconfig_read_kb_datablock(&eeprom_he_config);
+    eeconfig_read_kb_datablock(&eeprom_he_key_configs);
+
+    if (eeprom_he_config.he_post_flash == false) {
+        eeprom_he_config.he_post_flash = true;
+        // set RT and eeprom from defaults
+        for (int i = 0; i < SENSOR_COUNT; i++) {
+            he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+            he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
+            he_key_configs[i].noise_ceiling = EXPECTED_NOISE_CEILING;
+            eeprom_he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+            eeprom_he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
+            eeprom_he_key_configs[i].noise_ceiling = EXPECTED_NOISE_CEILING;
+        }
+    } else {
+        for (int i = 0; i < SENSOR_COUNT; i++) {
+            he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
+        he_key_configs[i].he_release_threshold =eeprom_he_key_configs[i].he_release_threshold;
+        he_key_configs[i].noise_ceiling = eeprom_he_key_configs[i].noise_ceiling;
+        }
     }
-
+    #endif
     return 0;
 }
 
@@ -352,37 +368,38 @@ void he_matrix_print(void) {
 }
 
 
-/*
-void he_matrix_print(void) {
+
+void he_matrix_print_extended(void) {
     print("+----------------------------------------------------------------------------+\n");
     print("| Sensor Matrix                                                              |\n");
     print("+----------------------------------------------------------------------------+\n");
     printf("calibration mode: %d \n", he_config.he_calibration_mode);
+    printf("post flash: %d \n", eeprom_he_config.he_post_flash);
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         char buffer[512]; // Adjust buffer size if needed
 
-        uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
+        uint8_t ii = sensor_to_matrix_map[i].sensor_id;
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;
 
-        uint16_t sensor_value = he_readkey_raw(sensor_id); // This reads the raw sensor value
-        uint16_t noise_floor = he_key_configs[sensor_id].noise_floor;
-        uint16_t noise_ceiling = he_key_configs[sensor_id].noise_ceiling; // Fetch switch ceiling
-        uint16_t rescale_test_value = rescale(he_readkey_raw(sensor_id), sensor_id);
+        uint16_t sensor_value = he_readkey_raw(ii); // This reads the raw sensor value
+        uint16_t noise_floor = he_key_configs[ii].noise_floor;
+        uint16_t noise_ceiling = he_key_configs[ii].noise_ceiling; // Fetch switch ceiling
+        uint16_t rescale_test_value = rescale(he_readkey_raw(ii), ii);
         // Continue to add the current sensor value to samples for statistical calculations
-        add_sensor_sample(sensor_id, sensor_value);
+        add_sensor_sample(ii, sensor_value);
 
         // Calculate mean and noise as standard deviation
-        double mean = calculate_mean(sensor_id);
-        double noise = calculate_std_dev(sensor_id);
+        double mean = calculate_mean(ii);
+        double noise = calculate_std_dev(ii);
         int noise_int = (int)(noise * 100); // Convert to integer representation for printing
         int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
 
         // Update snprintf to include the switch ceiling
         snprintf(buffer, sizeof(buffer),
                  "| Sensor %d (%d,%d): Val: %-5u Rescale: %d NF: %-5u Ceiling: %-5u Act: %-5d Rel: %-5d Mean: %d.%02d Noise: %d.%02d |\n",
-                 sensor_id, row, col, sensor_value, rescale_test_value, noise_floor, noise_ceiling,
+                 ii, row, col, sensor_value, rescale_test_value, noise_floor, noise_ceiling,
                  he_key_configs[i].he_actuation_threshold, he_key_configs[i].he_release_threshold,
                  mean_fixed / 100, mean_fixed % 100, noise_int / 100, abs(noise_int) % 100);
 
@@ -390,5 +407,5 @@ void he_matrix_print(void) {
     }
 
 }
-*/
+
 #endif

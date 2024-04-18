@@ -43,14 +43,14 @@
     // On Keyboard startup
     void keyboard_post_init_user(void) {
         // Read custom menu variables from memory
-        eeconfig_read_user_datablock(&eeprom_he_key_configs);
+/*        eeconfig_read_user_datablock(&eeprom_he_key_configs);
         if (eeprom_he_key_configs[0].he_actuation_threshold == 0 && eeprom_he_key_configs[0].he_release_threshold == 0) {
             // Set to default values
             //eeprom_he_key_configs.he_actuation_mode = 0; refactor
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 // Add default noise floor and ceiling values here
-                eeprom_he_key_configs[i].noise_floor = EXPECTED_NOISE_FLOOR;
-                eeprom_he_key_configs[i].noise_ceiling = EXPECTED_noise_ceiling;
+                eeprom_he_key_configs[i].noise_floor = he_key_configs[i].noise_floor; // calibrated on startup
+                eeprom_he_key_configs[i].noise_ceiling = EXPECTED_NOISE_CEILING;
                 eeprom_he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
                 eeprom_he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
 
@@ -81,7 +81,7 @@
             }
 
             uprintf("Size of eeprom_he_key_config_t: %u bytes\n", sizeof(eeprom_he_key_configs));
-    }
+    }*/
     }
 
 

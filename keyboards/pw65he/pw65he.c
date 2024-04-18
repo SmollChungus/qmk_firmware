@@ -5,30 +5,9 @@
 
 #ifdef VIA_ENABLE
 
-eeprom_he_config_t eeprom_he_config;
-via_he_config_t via_he_config;
-
-eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
-via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 
 void keyboard_post_init_kb(void) {
-    //initializes kb eeprom
-    eeconfig_read_kb_datablock(&eeprom_he_config);
-    if (eeprom_he_config.he_post_flash) {
-        eeprom_he_config.he_post_flash = false;
-        // set RT from defaults
-        for (int i = 0; i < SENSOR_COUNT; i++) {
-            he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
-            he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
-        }
-        eeconfig_update_kb_datablock(&eeprom_he_config);
-
-    }
-
-// Continue with the rest of the initialization...
     keyboard_post_init_user();
-
-
     /* Assuming actuation_threshold should never be 0 in a properly initialized EEPROM
     if (eeprom_he_key_configs[0].he_actuation_threshold == 0 && eeprom_he_key_configs[0].he_release_threshold == 0) {
         // Set to default values
@@ -36,7 +15,7 @@ void keyboard_post_init_kb(void) {
         for (int i = 0; i < SENSOR_COUNT; i++) {
             // Add default noise floor and ceiling values here
             eeprom_he_key_configs[i].noise_floor = EXPECTED_NOISE_FLOOR;
-            eeprom_he_key_configs[i].noise_ceiling = EXPECTED_noise_ceiling;
+            eeprom_he_key_configs[i].noise_ceiling = EXPECTED_NOISE_CEILING;
         }
 
 

@@ -23,7 +23,7 @@ void matrix_init(void) {
 
     he_init(he_key_configs, SENSOR_COUNT);
 
-
+    //dummy call
     matrix_init_kb();
 
     wait_ms(5);
@@ -38,9 +38,17 @@ bool matrix_scan(matrix_row_t current_matrix[]) {
 
     #ifdef CONSOLE_ENABLE
     static int cnt = 0;
-    if (cnt++ == 50) {
+
+    if (cnt++ == 50000) {
         cnt = 0;
         he_matrix_print();
+    }
+    #endif
+    #ifdef CONSOLE_ENABLE_EXTENDED
+    static int cnt2 = 0;
+    if(cnt2++ == 500) {
+        cnt2 = 0;
+        he_matrix_print_extended();
     }
     #endif
     #ifdef RAW_ENABLE
