@@ -17,7 +17,7 @@
 #pragma once
 
 //debug stuff
-#define CONSOLE_ENABLE_EXTENDED 1
+///#define CONSOLE_ENABLE_EXTENDED 1
 
 //
 #define MATRIX_ROWS 5

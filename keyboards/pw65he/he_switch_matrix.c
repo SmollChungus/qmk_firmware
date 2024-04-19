@@ -171,7 +171,7 @@ void noise_floor_calibration(void) {
         he_key_configs[sensor_id].noise_floor = noise_floor;
     }
 }
-
+/*
 void noise_ceiling_calibration(void) {
     if (!he_config.he_calibration_mode) {
         print("exiting calibration mode");
@@ -184,10 +184,41 @@ void noise_ceiling_calibration(void) {
 
         // If the current value is higher than what's stored, update it
         if (current_value > he_key_configs[sensor_id].noise_ceiling) {
-            he_key_configs[sensor_id].noise_ceiling = 3; //current_value;
+            he_key_configs[sensor_id].noise_ceiling = current_value;
             //printf("updated ceiling to %d\n \n", he_sensor_calibration[sensor_id].noise_ceiling);
         }
     }
+
+    // This loop continuously updates the ceiling values
+    // You might want to add debouncing or ensure that the key is fully pressed
+}
+*/
+void noise_ceiling_calibration(void) {
+    if (!he_config.he_calibration_mode) {
+        print("exiting calibration mode");
+        return; // Exit if not in calibration mode
+    }
+    const uint8_t NUM_READINGS = 5;  // Number of readings to average
+
+    for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
+        uint16_t range = he_key_configs[i].noise_ceiling - he_key_configs[i].noise_floor;
+        uint16_t ceiling_range = he_key_configs[i].noise_ceiling - (range * 0.01);
+        uint16_t sum = 0;
+        uint16_t average_value = 0;
+
+        // Take multiple readings and calculate their average
+        for (uint8_t j = 0; j < NUM_READINGS; j++) {
+            sum += he_readkey_raw(i);
+        }
+        average_value = sum / NUM_READINGS;
+
+        // Update ceiling if the average reading is above the ceiling range
+        if (average_value > ceiling_range) {
+            he_key_configs[i].noise_ceiling = average_value;
+            printf("Updated ceiling for sensor %d to %d\n", i, average_value);
+        }
+    }
+
 
     // This loop continuously updates the ceiling values
     // You might want to add debouncing or ensure that the key is fully pressed

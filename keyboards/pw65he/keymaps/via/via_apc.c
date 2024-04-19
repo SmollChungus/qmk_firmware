@@ -119,16 +119,24 @@
                 }
                 via_he_calibration_save();
                 break;
-            /*case id_save_calibration_data: {
+            }
+            case id_start_calibration: {
+                he_config.he_calibration_mode = true; // Enable calibration mode
+                noise_ceiling_calibration();
+                noise_floor_calibration();
+                print("Calibration started, fully depress each key on the board \n");
+                break;
+            }
+            case id_save_calibration_data: {
                 he_config.he_calibration_mode = false; // Disable calibration mode
                 print("Calibration ended, to recalibrate, hit start calibration \n");
                 eeconfig_update_user_datablock(&eeprom_he_key_configs);
                 break;
-            }*/
+            }
 
         }
     }
-    }
+
     // Handle the data sent by the keyboard to the VIA menus
     void via_he_config_get_value(uint8_t *data) {
         //data = [ value_id, value_data ]
@@ -203,13 +211,6 @@
                         eeprom_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
                     }
                     //via_he_calibration_save();
-                    break;
-                }
-                case id_start_calibration: {
-                    he_config.he_calibration_mode = true; // Enable calibration mode
-                    noise_ceiling_calibration();
-                    noise_floor_calibration();
-                    print("Calibration started, fully depress each key on the board \n");
                     break;
                 }
                 case id_save_calibration_data: {
