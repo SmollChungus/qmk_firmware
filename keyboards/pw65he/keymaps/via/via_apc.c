@@ -129,6 +129,12 @@
             }
             case id_save_calibration_data: {
                 he_config.he_calibration_mode = false; // Disable calibration mode
+                for (int i = 0; i < SENSOR_COUNT; i++) {
+                    // Add default noise floor and ceiling values here
+                    eeprom_he_key_configs[i].noise_floor = he_key_configs[i].noise_floor;
+                    eeprom_he_key_configs[i].noise_ceiling = he_key_configs[i].noise_ceiling;
+
+        }
                 print("Calibration ended, to recalibrate, hit start calibration \n");
                 eeconfig_update_user_datablock(&eeprom_he_key_configs);
                 break;

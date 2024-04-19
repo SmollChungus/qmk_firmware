@@ -202,7 +202,7 @@ void noise_ceiling_calibration(void) {
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint16_t range = he_key_configs[i].noise_ceiling - he_key_configs[i].noise_floor;
-        uint16_t ceiling_range = he_key_configs[i].noise_ceiling - (range * 0.01);
+        uint16_t ceiling_range = he_key_configs[i].noise_ceiling - (range * 0.02);
         uint16_t sum = 0;
         uint16_t average_value = 0;
 
@@ -249,11 +249,13 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
         }
     } else {
         for (int i = 0; i < SENSOR_COUNT; i++) {
-            he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
+        he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
         he_key_configs[i].he_release_threshold =eeprom_he_key_configs[i].he_release_threshold;
         he_key_configs[i].noise_ceiling = eeprom_he_key_configs[i].noise_ceiling;
         }
     }
+    eeconfig_update_kb_datablock(&eeprom_he_key_configs);
+    eeconfig_update_kb_datablock(&eeprom_he_config);
     #endif
     return 0;
 }

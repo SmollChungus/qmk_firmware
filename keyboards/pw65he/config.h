@@ -17,7 +17,7 @@
 #pragma once
 
 //debug stuff
-///#define CONSOLE_ENABLE_EXTENDED 1
+#define CONSOLE_ENABLE_EXTENDED 1
 
 //
 #define MATRIX_ROWS 5
@@ -53,7 +53,7 @@
 #define GEON_RAPTOR
 #ifdef GEON_RAPTOR
 #define EXPECTED_NOISE_FLOOR 540
-#define EXPECTED_NOISE_CEILING 740
+#define EXPECTED_NOISE_CEILING 700
 #endif
 
 // #define OTEMU
