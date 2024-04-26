@@ -17,7 +17,15 @@
 #pragma once
 
 //debug stuff
-#define CONSOLE_ENABLE_EXTENDED 1
+//1 rescaled raw matrix
+//2 extended matrix report
+//3 extended rapid trigger report
+//4 rapid trigger reports
+//5 rapid trigger 0,0 debug
+#define CONSOLE_VERBOSITY 0
+#define DEBUG_MATRIX_SCAN_RATE
+
+//#define matrix_shenanigans
 
 //
 #define MATRIX_ROWS 5
@@ -32,7 +40,7 @@
     { B3, B4, B6, B5 }
 
 #define ANALOG_PORT A3
-#define EECONFIG_KB_DATA_SIZE 3
+#define EECONFIG_KB_DATA_SIZE 4
 #define WEAR_LEVELING_LOGICAL_SIZE 2048
 #define WEAR_LEVELING_BACKING_SIZE 16384
 
@@ -41,7 +49,11 @@
 #define DEFAULT_RELEASE_LEVEL 560
 #define DEBOUNCE_THRESHOLD 5
 
-//Switch/sensor dependant
+
+// Rapid Trigger config
+#define DEFAULT_DEADZONE_RT 660
+#define DEFAULT_RELEASE_DISTANCE_RT 50
+#define HYSTERESIS_MARGIN 6 // sensor&&pcb dependant, todo update to rescaled
 
 //Wooting Lekker
 //#define WOOTING_LEKKER
