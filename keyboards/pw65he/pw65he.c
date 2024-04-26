@@ -51,9 +51,9 @@ void via_update_config(void) {
             eeprom_he_key_configs[i].he_actuation_threshold = he_key_configs[i].he_actuation_threshold;
             eeprom_he_key_configs[i].he_release_threshold = he_key_configs[i].he_release_threshold;
             // delete -> eeprom_he_key_configs[i].he_actuation_mode = he_key_configs[i].he_actuation_mode;
+        }
     eeconfig_update_user_datablock(&eeprom_he_key_configs);
     print("saved actuation thresholds to USER EEPROM \n");
-        }
     }
 }
 #endif

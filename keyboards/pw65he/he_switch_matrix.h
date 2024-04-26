@@ -71,15 +71,23 @@ typedef struct {
 
 // Per Key Configs
 typedef struct {
-    uint16_t he_actuation_threshold; // Actuation threshold
-    uint16_t he_release_threshold;   // Release threshold
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
     uint16_t noise_floor;
     uint16_t noise_ceiling;
 } he_key_config_t;
 
+// Per Key Rapid Trigger Configs, need to store in EEPROM later, peak can be omitted - per ke
 typedef struct {
-    uint16_t he_actuation_threshold; // Actuation threshold
-    uint16_t he_release_threshold;   // Release threshold
+    uint16_t deadzone;
+    uint16_t rt_actuation_point;
+    uint16_t boundary_value;
+    uint16_t release_distance;
+} he_key_rapid_trigger_config_t;
+
+typedef struct {
+    uint16_t he_actuation_threshold;
+    uint16_t he_release_threshold;
     uint16_t noise_floor;
     uint16_t noise_ceiling;
 } eeprom_he_key_config_t;
@@ -112,8 +120,8 @@ extern via_he_config_t via_he_config; // Assuming he_config_t is the correct typ
 extern he_key_config_t he_key_configs[SENSOR_COUNT];
 extern eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
 extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
-
-_Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+extern he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
+//_Static_assert(sizeof(eeprom_he_config) + sizeof(eeprom_he_key_configs) > EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
 //_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
 
 int       he_init(he_key_config_t he_key_configs[], size_t count);;
@@ -123,9 +131,12 @@ uint16_t  he_readkey_raw(uint8_t sensorIndex);
 uint16_t  noise_floor[SENSOR_COUNT];
 uint16_t  sensor_value_rescaled;
 bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
+bool      he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 void      noise_ceiling_calibration(void);
 void      he_matrix_print(void);
 void      he_matrix_print_extended(void);
+void      he_matrix_print_rapid_trigger(void);
+void      he_matrix_print_rapid_trigger_debug(void);
 void      via_update_config(void);
 extern    matrix_row_t matrix[MATRIX_ROWS];
 void      send_matrix_state_report(void);

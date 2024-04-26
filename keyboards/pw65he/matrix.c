@@ -36,20 +36,42 @@ void matrix_init(void) {
 bool matrix_scan(matrix_row_t current_matrix[]) {
     bool updated = he_matrix_scan();
 
-    #ifdef CONSOLE_ENABLE
+    #if CONSOLE_VERBOSITY == 1  //for web app
     static int cnt = 0;
 
-    if (cnt++ == 50) {
+    if (cnt++ == 5) {
         cnt = 0;
         he_matrix_print();
     }
     #endif
-    #ifdef CONSOLE_ENABLE_EXTENDED
+    #if CONSOLE_VERBOSITY == 2 //for debugging
     static int cnt2 = 0;
-    if(cnt2++ == 500) {
+    if(cnt2++ == 5000) {
         cnt2 = 0;
         he_matrix_print_extended();
     }
+    #endif
+    #if CONSOLE_VERBOSITY == 3 //both but slow
+    static int cnt = 0;
+    static int cnt2 = 0;
+    if (cnt++ == 500) {
+        cnt = 0;
+        he_matrix_print();
+    }
+    if (cnt2++ == 1000) {
+        cnt2 = 0;
+        he_matrix_print_extended();
+    }
+    #endif
+    #if CONSOLE_VERBOSITY == 4 //rapid trigger web app
+    static int cnt2 = 0;
+    if(cnt2++ == 2000) {
+        cnt2 = 0;
+        he_matrix_print_rapid_trigger();
+    }
+    #endif
+    #if CONSOLE_VERBOSITY == 5 //0,0 escape key algorithm debug
+    he_matrix_print_rapid_trigger_debug();
     #endif
     #ifdef RAW_ENABLE
     static int report_cnt = 0;

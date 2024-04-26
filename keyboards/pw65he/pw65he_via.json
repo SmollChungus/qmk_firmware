@@ -71,9 +71,57 @@
                                     ]
                                 }
                                 ]
-                }
+                },
+                {
+                    "label": "Rapid Trigger Mode",
+                    "content": [
+                        {
+                            "label": "Rapid Trigger Mode Enable",
+                            "type": "toggle",
+                            "content": ["id_custom_set_value", 0, 6]
+                        },
+                        {
+                        "label": "Rapid Trigger Deadzone",
+                        "type": "range",
+                        "options": [
+                            530,
+                            720
+                        ],
+                        "content": [
+                            "id_custom_set_value",
+                            0,
+                            7
+                        ]
+                    },
+                    {
+                        "label": "Rapid Trigger Release Distance",
+                        "type": "range",
+                        "options": [
+                            1,
+                            100
+                        ],
+                        "content": [
+                            "id_custom_set_value",
+                            0,
+                            8
+                        ]
+                    },
+                    {
+                        "label": "Update changes to keyboard",
+                        "type": "button",
+                        "options": [
+                            0
+                        ],
+                        "content": [
+                            "id_save_threshold_data",
+                            0,
+                            3
+                        ]
+                    }
             ]
         }
+    ]
+}
     ],
     "matrix": {
       "rows": 5,
