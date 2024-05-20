@@ -22,8 +22,7 @@
 //3 extended rapid trigger report
 //4 rapid trigger reports
 //5 rapid trigger 0,0 debug
-#define CONSOLE_VERBOSITY 0
-#define DEBUG_MATRIX_SCAN_RATE
+#define CONSOLE_VERBOSITY 1
 
 //#define matrix_shenanigans
 
@@ -52,8 +51,7 @@
 
 // Rapid Trigger config
 #define DEFAULT_DEADZONE_RT 660
-#define DEFAULT_RELEASE_DISTANCE_RT 50
-#define HYSTERESIS_MARGIN 6 // sensor&&pcb dependant, todo update to rescaled
+#define DEFAULT_RELEASE_DISTANCE_RT 30
 
 //Wooting Lekker
 //#define WOOTING_LEKKER

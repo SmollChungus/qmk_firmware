@@ -78,6 +78,9 @@ void via_he_config_set_value(uint8_t *data) {
         }
         case id_start_calibration: {
             he_config.he_calibration_mode = true; // Enable calibration mode
+            for (int i = 0; i < SENSOR_COUNT; i++) {
+                he_key_configs[i].noise_ceiling = 590;
+            }
             noise_ceiling_calibration();
             noise_floor_calibration();
             print("Calibration started, fully depress each key on the board \n");
@@ -119,44 +122,53 @@ void via_he_config_set_value(uint8_t *data) {
     }
 }
 
-// Handle the data sent by the keyboard to the VIA menus
 void via_he_config_get_value(uint8_t *data) {
-    //data = [ value_id, value_data ]
+    // data = [ value_id, value_data ]
     uint8_t *value_id   = &(data[0]);
     uint8_t *value_data = &(data[1]);
-    uprintf("[DEBUG] Getting config value. ID: %d\n", data[0]);
+
+    // Initialize the value_data to zero before using it to ensure clean data handling
+    value_data[0] = 0;
+    value_data[1] = 0;
+
+    uprintf("[DEBUG] Getting config value. ID: %d, Current data: %d\n", *value_id, *value_data);
+
     switch (*value_id) {
         case id_via_he_actuation_threshold: {
-            value_data[0] = via_he_key_configs[0].he_actuation_threshold >> 8;
-            value_data[1] = via_he_key_configs[0].he_actuation_threshold & 0xFF;
-            uprintf("via_he_config_get_value with (%d , %d) id_via_he_actuation_threshold\n",data[0], data[1]);
+            // Convert 16-bit threshold value into two 8-bit segments
+            value_data[0] = he_key_configs[0].he_actuation_threshold >> 8; // High byte
+            value_data[1] = he_key_configs[0].he_actuation_threshold & 0xFF; // Low byte
+            uprintf("via_he_config_get_value with (%d , %d) id_via_he_actuation_threshold\n", value_data[0], value_data[1]);
             break;
-            }
+        }
         case id_via_he_release_threshold: {
-                value_data[0] = via_he_key_configs[0].he_release_threshold >> 8;
-                value_data[1] = via_he_key_configs[0].he_release_threshold & 0xFF;
-                uprintf("via_he_config_get_value with (%d , %d) id_via_he_release_threshold\n",data[0], data[1]);
-                break;
+            value_data[0] = he_key_configs[0].he_release_threshold >> 8; // High byte
+            value_data[1] = he_key_configs[0].he_release_threshold & 0xFF; // Low byte
+            uprintf("via_he_config_get_value with (%d , %d) id_via_he_release_threshold\n", value_data[0], value_data[1]);
+            break;
         }
         case id_toggle_actuation_mode: {
-            he_config.he_actuation_mode = value_data[0];
-            print("actuation mode toggled!");
+            value_data[0] = he_config.he_actuation_mode;
+            uprintf("Actuation mode requested - id, data (%d , %d)\n", *value_id, value_data[0]);
             break;
         }
         case id_set_rapid_trigger_deadzone: {
             value_data[0] = he_key_rapid_trigger_configs[0].deadzone >> 8;
             value_data[1] = he_key_rapid_trigger_configs[0].deadzone & 0xFF;
-            print("deadzone set \n");
+            uprintf("Deadzone requested - id, data (%d, %d)\n", *value_id, value_data[0]);
             break;
         }
         case id_set_rapid_trigger_release_distance: {
-                value_data[0] = he_key_rapid_trigger_configs[0].release_distance >> 8;
-                value_data[1] = he_key_rapid_trigger_configs[0].release_distance & 0xFF;
-            print("actuation mode toggled!");
+            value_data[0] = he_key_rapid_trigger_configs[0].release_distance >> 8;
+            value_data[1] = he_key_rapid_trigger_configs[0].release_distance & 0xFF;
+            uprintf("Release distance requested - id, data (%d, %d)\n", *value_id, value_data[0]);
             break;
         }
+        default:
+            uprintf("Unhandled ID %d in via_he_config_get_value\n", *value_id);
     }
 }
+
 
 /* Save the data to persistent memory after changes are made
 void via_he_config_save(void) {

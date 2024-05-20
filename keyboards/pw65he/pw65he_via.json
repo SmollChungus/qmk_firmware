@@ -17,7 +17,7 @@
                                         720
                                     ],
                                     "content": [
-                                        "id_custom_set_value",
+                                        "id_via_he_actuation_threshold",
                                         0,
                                         1
                                     ]
@@ -30,7 +30,7 @@
                                         720
                                     ],
                                     "content": [
-                                        "id_custom_set_value",
+                                        "id_via_he_release_threshold",
                                         0,
                                         2
                                     ]
@@ -88,7 +88,7 @@
                             720
                         ],
                         "content": [
-                            "id_custom_set_value",
+                            "id_set_rapid_trigger_deadzone",
                             0,
                             7
                         ]
@@ -101,21 +101,9 @@
                             100
                         ],
                         "content": [
-                            "id_custom_set_value",
+                            "id_set_rapid_trigger_release_distance",
                             0,
                             8
-                        ]
-                    },
-                    {
-                        "label": "Update changes to keyboard",
-                        "type": "button",
-                        "options": [
-                            0
-                        ],
-                        "content": [
-                            "id_save_threshold_data",
-                            0,
-                            3
                         ]
                     }
             ]

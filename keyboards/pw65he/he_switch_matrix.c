@@ -231,6 +231,9 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
         he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
         he_key_configs[i].he_release_threshold = eeprom_he_key_configs[i].he_release_threshold;
         he_key_configs[i].noise_ceiling = eeprom_he_key_configs[i].noise_ceiling;
+        he_key_rapid_trigger_configs[i].deadzone = DEFAULT_DEADZONE_RT;
+        he_key_rapid_trigger_configs[i].release_distance = DEFAULT_RELEASE_DISTANCE_RT;
+
         }
     }
     eeconfig_update_user_datablock(&eeprom_he_key_configs);
@@ -346,7 +349,7 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
             key_info->debounce_counter = 0;
         }
     }
-    return false; 
+    return false;
 }
 
 /*
@@ -494,27 +497,24 @@ void he_matrix_print_extended(void) {
     uint16_t eesize = sizeof(eeprom_he_config) + sizeof(eeprom_he_key_configs);
     printf("eesize: %d \n", eesize);
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
-        char buffer[512]; // Adjust buffer size if needed
-
+        char buffer[512];
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;
 
-        uint16_t sensor_value = he_readkey_raw(i); // This reads the raw sensor value
+        uint16_t sensor_value = he_readkey_raw(i);
         uint16_t noise_floor = he_key_configs[i].noise_floor;
-        uint16_t noise_ceiling = he_key_configs[i].noise_ceiling; // Fetch switch ceiling
+        uint16_t noise_ceiling = he_key_configs[i].noise_ceiling;
         uint16_t rescale_test_value = rescale(he_readkey_raw(i), i);
-        // Continue to add the current sensor value to samples for statistical calculations
+
         add_sensor_sample(i, sensor_value);
 
-        // Calculate mean and noise as standard deviation
         double mean = calculate_mean(i);
         double noise = calculate_std_dev(i);
-        int noise_int = (int)(noise * 100); // Convert to integer representation for printing
-        int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
+        int noise_int = (int)(noise * 100);
+        int mean_fixed = (int)(mean * 100);
 
         if (he_config.he_actuation_mode == 0) {
 
-        // Update snprintf to include the switch ceiling
         snprintf(buffer, sizeof(buffer),
                  "| Sensor %d (%d,%d): Val: %-5u Rescale: %d NF: %-5u (ee: %-5u) Ceiling: %-5u (ee: %-5u) Act: %-5d Rel: %-5d Mean: %d.%02d Noise: %d.%02d |\n",
                 i,
