@@ -79,7 +79,7 @@ void via_he_config_set_value(uint8_t *data) {
         case id_start_calibration: {
             he_config.he_calibration_mode = true; // Enable calibration mode
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                he_key_configs[i].noise_ceiling = 590;
+                he_key_configs[i].noise_ceiling = 550;
             }
             noise_ceiling_calibration();
             noise_floor_calibration();
