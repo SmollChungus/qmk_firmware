@@ -1,2 +1,0 @@
-#define TAPPING_TERM 350
-#define TAPPING_TERM_PER_KEY

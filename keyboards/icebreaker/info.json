@@ -2,12 +2,12 @@
     "manufacturer": "Serene Studio",
     "keyboard_name": "Serene Industries - Icebreaker",
     "maintainer": "Matthijs Muller",
-    "processor": "atmega32u4",
-    "bootloader": "atmel-dfu",
+    "processor": "RP2040",
+    "bootloader": "rp2040",
     "url": "github.com/smollchungus",
     "usb": {
         "vid": "0x5363",
-        "pid": "0x6504",
+        "pid": "0x6503",
         "device_version": "0.0.1"
     },
     "features": {
@@ -22,16 +22,16 @@
     },
     "diode_direction": "COL2ROW",
     "matrix_pins": {
-        "rows": ["B6", "D5", "D3", "C6", "D6"],
-        "cols": ["F7", "F6", "F5", "D1", "D2", "F1", "F0", "F4"]
+        "rows": ["GP25", "GP22", "GP28", "GP23", "GP1"],
+        "cols": ["GP24", "GP19", "GP18", "GP17", "GP29", "GP0", "GP12", "GP11", "GP10", "GP7", "GP6", "GP5", "GP4", "GP3", "GP2"]
     },
     "encoder": {
         "rotary": [
-            { "pin_a": "D7" , "pin_b": "B5" }
+            { "pin_a": "GP26" , "pin_b": "GP27" }
         ]
     },
     "ws2812": {
-        "pin": "C7",
+        "pin": "GP13",
         "driver": "vendor"
     },
     "rgb_matrix": {
@@ -98,6 +98,7 @@
             { "flags": 4, "matrix": [3,0], "x": 240,"y": 48},
             { "flags": 4, "matrix": [4,0], "x": 0,  "y": 64},
             { "flags": 4, "matrix": [4,1], "x": 24, "y": 64},
+            { "flags": 4, "matrix": [4,2], "x": 36, "y": 64},
             { "flags": 4, "matrix": [4,6], "x": 48, "y": 64},
             { "flags": 4, "matrix": [4,10],"x": 160,"y": 64},
             { "flags": 4, "matrix": [4,11],"x": 184,"y": 64},
@@ -172,10 +173,11 @@
                 { "matrix": [3, 13], "x": 14, "y": 3 },
                 { "matrix": [3, 14], "x": 15, "y": 3 },
                 { "matrix": [4, 0], "w": 1.5, "x": 0, "y": 4 },
-                { "matrix": [4, 1], "w": 1.5, "x": 1.5, "y": 4 },
-                { "matrix": [4, 6], "w": 7, "x": 3, "y": 4 },
-                { "matrix": [4, 10], "w": 1.5, "x": 10, "y": 4 },
-                { "matrix": [4, 11], "w": 1.5, "x": 11.5, "y": 4 },
+                { "matrix": [4, 1], "w": 1, "x": 1.5, "y": 4 },
+                { "matrix": [4, 2], "w": 1.5, "x": 2.5, "y": 4 },
+                { "matrix": [4, 6], "w": 7, "x": 4, "y": 4 },
+                { "matrix": [4, 10], "x": 11, "y": 4 },
+                { "matrix": [4, 11], "x": 12, "y": 4 },
                 { "matrix": [4, 12], "x": 13, "y": 4 },
                 { "matrix": [4, 13], "x": 14, "y": 4 },
                 { "matrix": [4, 14], "x": 15, "y": 4 }
