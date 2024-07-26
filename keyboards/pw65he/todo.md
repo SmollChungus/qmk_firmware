@@ -1,0 +1,2 @@
+- [] fix crashing via sliders
+- [] rapid trigger minimum offset ranges
