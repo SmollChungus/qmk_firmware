@@ -17,12 +17,9 @@
 #pragma once
 
 //debug stuff
-//1 rescaled raw matrix
-//2 extended matrix report
-//3 extended rapid trigger report
-//4 rapid trigger reports
-//5 rapid trigger 0,0 debug
-#define CONSOLE_VERBOSITY 1
+#define CONSOLE_VERBOSITY 1 //undef to turn of
+#define DEBUG_MATRIX_SCAN_RATE
+
 
 //#define matrix_shenanigans
 

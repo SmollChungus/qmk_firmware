@@ -31,7 +31,7 @@ uint8_t matrix_rows(void);
 uint8_t matrix_cols(void);
 matrix_row_t matrix_get_row(uint8_t row);
 
-bool matrix_scan(matrix_row_t current_matrix[]);
+uint8_t matrix_scan(void);
 bool matrix_can_read(void);
 bool matrix_is_on(uint8_t row, uint8_t col);
 void matrix_print(void);

@@ -49,7 +49,7 @@ void via_he_config_set_value(uint8_t *data) {
     // data = [ value_id, value_data ]
     uint8_t *value_id   = &(data[0]);
     uint8_t *value_data = &(data[1]);
-    uprintf("[DEBUG] Setting config value. ID: %d\n", data[0]);
+    uprintf("Setting config value. ID: %d\n", data[0]);
 
     switch (*value_id) {
         case id_via_he_actuation_threshold: {
@@ -74,16 +74,17 @@ void via_he_config_set_value(uint8_t *data) {
                 he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
             }
             via_he_calibration_save();
+            print("[SYSTEM]: Actuation Settings Saved!\n");
             break;
         }
         case id_start_calibration: {
+            print("[SYSTEM]: Calibration started, fully press each key on the board!\nBe sure to end the calibration in VIA with the button once you're done.\n");
             he_config.he_calibration_mode = true; // Enable calibration mode
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_configs[i].noise_ceiling = 550;
             }
             noise_ceiling_calibration();
             noise_floor_calibration();
-            print("Calibration started, fully depress each key on the board \n");
             break;
         }
         case id_save_calibration_data: {
@@ -93,28 +94,28 @@ void via_he_config_set_value(uint8_t *data) {
                 eeprom_he_key_configs[i].noise_floor = he_key_configs[i].noise_floor;
                 eeprom_he_key_configs[i].noise_ceiling = he_key_configs[i].noise_ceiling;
             }
-            print("Calibration ended, to recalibrate, hit start calibration \n");
+            print("[SYSTEM]: Calibration ended, to recalibrate, hit start calibration inside VIA again.\n");
             eeconfig_update_user_datablock(&eeprom_he_key_configs);
             via_he_calibration_save();
             break;
         }
         case id_toggle_actuation_mode: {
             he_config.he_actuation_mode = value_data[0];
-            print("actuation mode toggled!");
+            uprintf("[SYSTEM]: Actuation mode toggled! mode: %d",he_config.he_actuation_mode);
             break;
         }
         case id_set_rapid_trigger_deadzone: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_rapid_trigger_configs[i].deadzone = value_data[1] | (value_data[0] << 8);
             }
-            print("deadzone set \n");
+            uprintf("[SYSTEM]: Rapid Trigger Deadzone set to: %d\n",he_key_rapid_trigger_configs[0].deadzone);
             break;
         }
         case id_set_rapid_trigger_release_distance: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_rapid_trigger_configs[i].release_distance = value_data[0];
             }
-            print("actuation mode toggled!");
+            uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n",he_key_rapid_trigger_configs[0].release_distance);
             break;
         }
 
@@ -131,7 +132,7 @@ void via_he_config_get_value(uint8_t *data) {
     value_data[0] = 0;
     value_data[1] = 0;
 
-    uprintf("[DEBUG] Getting config value. ID: %d, Current data: %d\n", *value_id, *value_data);
+    uprintf("[SYSTEM]: Getting config value. ID: %d, Current data: %d\n", *value_id, *value_data);
 
     switch (*value_id) {
         case id_via_he_actuation_threshold: {
@@ -168,19 +169,6 @@ void via_he_config_get_value(uint8_t *data) {
             uprintf("Unhandled ID %d in via_he_config_get_value\n", *value_id);
     }
 }
-
-
-/* Save the data to persistent memory after changes are made
-void via_he_config_save(void) {
-    // Debugging print
-    uprintf("Saving HE config: Actuation: %u, Release: %u\n", via_he_config.he_actuation_threshold, via_he_config.he_release_threshold);
-    if (eeprom_he_config.he_actuation_threshold == 0 || eeprom_he_config.he_release_threshold == 0) {
-        print("don't set both to 0 plis");
-    } else {
-    eeconfig_update_user_datablock(&via_he_config);
-    uprintf("HE config saved successfully.\n");
-    }
-} */
 
 void via_he_calibration_save(void) {
     eeconfig_update_user_datablock(&eeprom_he_key_configs);
