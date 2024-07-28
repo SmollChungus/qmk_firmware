@@ -222,6 +222,8 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
             eeprom_he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
             eeprom_he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
             eeprom_he_key_configs[i].noise_ceiling = EXPECTED_NOISE_CEILING;
+            via_he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+            via_he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
             he_key_rapid_trigger_configs[i].release_distance = DEFAULT_RELEASE_DISTANCE_RT;
             he_key_rapid_trigger_configs[i].deadzone = DEFAULT_DEADZONE_RT;
             he_key_rapid_trigger_configs[i].boundary_value = DEFAULT_DEADZONE_RT;
@@ -230,6 +232,8 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
         for (int i = 0; i < SENSOR_COUNT; i++) {
         he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
         he_key_configs[i].he_release_threshold = eeprom_he_key_configs[i].he_release_threshold;
+        via_he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
+        via_he_key_configs[i].he_release_threshold = eeprom_he_key_configs[i].he_release_threshold;
         he_key_configs[i].noise_ceiling = eeprom_he_key_configs[i].noise_ceiling;
         he_key_rapid_trigger_configs[i].deadzone = DEFAULT_DEADZONE_RT;
         he_key_rapid_trigger_configs[i].release_distance = DEFAULT_RELEASE_DISTANCE_RT;
@@ -304,11 +308,14 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
     key_debounce_t *key_info = &debounce_matrix[row][col];
     uint16_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone;
     uint16_t release_distance = he_key_rapid_trigger_configs[sensor_id].release_distance;
+    uint16_t reengage_distance = 15;
+    uint16_t hysteresis_margin = 10;
     uint16_t* boundary_value = &he_key_rapid_trigger_configs[sensor_id].boundary_value;
 
-    bool currently_pressed = sensor_value > (*boundary_value);
-    bool should_release = sensor_value < (*boundary_value - release_distance);
-    if (sensor_value > deadzone) {
+    bool currently_pressed = sensor_value > (*boundary_value + hysteresis_margin);
+    bool should_release = sensor_value < (*boundary_value - release_distance - hysteresis_margin);
+
+    if (sensor_value > deadzone + hysteresis_margin) {
         if (currently_pressed) {
             if (!key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
@@ -318,39 +325,37 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
                     key_info->debounce_counter = 0;
                     return true;
                 }
-            }
-            else if (key_info->debounced_state && sensor_value > *boundary_value) {
+            } else if (key_info->debounced_state && sensor_value > *boundary_value) {
                 *boundary_value = sensor_value;
             }
-        }
-        else if (should_release) {
-            if  (key_info->debounced_state) {
+        } else if (should_release) {
+            if (key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
                     key_info->debounced_state = false;
-                    *boundary_value = sensor_value;
+                    *boundary_value = sensor_value + reengage_distance; // Update boundary for re-engagement
                     current_matrix[row] &= ~(1UL << col);
                     key_info->debounce_counter = 0;
                     return true;
                 }
+            } else {
+                *boundary_value = sensor_value + reengage_distance; // Prepare boundary for next press
             }
-            else if (!key_info->debounced_state) {
-                *boundary_value = sensor_value;
-                }
-            }
-        else {
+        } else {
             key_info->debounce_counter = 0;
-            }
-    }
-    else {
+        }
+    } else {
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
             key_info->debounced_state = false;
-            *boundary_value = deadzone;
+            *boundary_value = deadzone + hysteresis_margin; // Add hysteresis to the deadzone
             current_matrix[row] &= ~(1UL << col);
             key_info->debounce_counter = 0;
         }
     }
     return false;
 }
+
+
+
 
 /*
 bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
