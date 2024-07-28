@@ -99,7 +99,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (record->event.pressed) {
                 ;
                 uprintf("[SYSTEM]: Actuation Point Control Mode set\n");
+                uprintf("[PCB_SETTINGS]: APC MODE\n");
                 he_config.he_actuation_mode = 0;
+                eeprom_he_config.he_actuation_mode = 0;
             }
             return false;
 
@@ -107,7 +109,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (record->event.pressed) {
                 ;
                 uprintf("[SYSTEM]: Rapid Trigger Mode set\n");
+                uprintf("[PCB_SETTINGS]: RT MODE\n");
                 he_config.he_actuation_mode = 1;
+                eeprom_he_config.he_actuation_mode = 1;
             }
             return false;
 
