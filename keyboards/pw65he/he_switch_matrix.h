@@ -83,14 +83,15 @@ typedef struct {
     uint16_t rt_actuation_point;
     uint16_t boundary_value;
     uint16_t engage_distance;
-    uint16_t disengage_distance
+    uint16_t disengage_distance;
 } he_key_rapid_trigger_config_t;
 
 typedef struct {
     uint16_t deadzone;
     uint16_t rt_actuation_point;
     uint16_t boundary_value;
-    uint16_t release_distance;
+    uint16_t engage_distance;
+    uint16_t disengage_distance;
 } eeprom_he_key_rapid_trigger_config_t;
 
 typedef struct {
