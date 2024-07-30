@@ -31,7 +31,7 @@ uint8_t matrix_rows(void);
 uint8_t matrix_cols(void);
 matrix_row_t matrix_get_row(uint8_t row);
 
-bool matrix_scan(matrix_row_t current_matrix[]);
+uint8_t matrix_scan(void);
 bool matrix_can_read(void);
 bool matrix_is_on(uint8_t row, uint8_t col);
 void matrix_print(void);
@@ -77,13 +77,22 @@ typedef struct {
     uint16_t noise_ceiling;
 } he_key_config_t;
 
-// Per Key Rapid Trigger Configs, need to store in EEPROM later, peak can be omitted - per ke
+// Per Key Rapid Trigger Configs, need to store in EEPROM later
 typedef struct {
     uint16_t deadzone;
     uint16_t rt_actuation_point;
     uint16_t boundary_value;
-    uint16_t release_distance;
+    uint16_t engage_distance;
+    uint16_t disengage_distance;
 } he_key_rapid_trigger_config_t;
+
+typedef struct {
+    uint16_t deadzone;
+    uint16_t rt_actuation_point;
+    uint16_t boundary_value;
+    uint16_t engage_distance;
+    uint16_t disengage_distance;
+} eeprom_he_key_rapid_trigger_config_t;
 
 typedef struct {
     uint16_t he_actuation_threshold;
@@ -121,6 +130,7 @@ extern he_key_config_t he_key_configs[SENSOR_COUNT];
 extern eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
 extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 extern he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
+extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT]; //need to add to eeprom size!!c
 //_Static_assert(sizeof(eeprom_he_config) + sizeof(eeprom_he_key_configs) > EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
 //_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
 
@@ -145,8 +155,8 @@ void      noise_floor_calibration_init(void);
 void      noise_floor_calibration(void);
 void      save_calibration_data_to_eeprom(void);
 void      via_he_calibration_save(void);
+void      via_he_config_send_value(uint8_t value_id, uint16_t value);
 
-// Debug
 #define SAMPLE_COUNT 15
 
 typedef struct {

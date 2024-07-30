@@ -222,7 +222,10 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
             eeprom_he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
             eeprom_he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
             eeprom_he_key_configs[i].noise_ceiling = EXPECTED_NOISE_CEILING;
-            he_key_rapid_trigger_configs[i].release_distance = DEFAULT_RELEASE_DISTANCE_RT;
+            via_he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
+            via_he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
+            he_key_rapid_trigger_configs[i].engage_distance = DEFAULT_RELEASE_DISTANCE_RT;
+            he_key_rapid_trigger_configs[i].disengage_distance = DEFAULT_RELEASE_DISTANCE_RT;
             he_key_rapid_trigger_configs[i].deadzone = DEFAULT_DEADZONE_RT;
             he_key_rapid_trigger_configs[i].boundary_value = DEFAULT_DEADZONE_RT;
         }
@@ -230,10 +233,12 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
         for (int i = 0; i < SENSOR_COUNT; i++) {
         he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
         he_key_configs[i].he_release_threshold = eeprom_he_key_configs[i].he_release_threshold;
+        via_he_key_configs[i].he_actuation_threshold = eeprom_he_key_configs[i].he_actuation_threshold;
+        via_he_key_configs[i].he_release_threshold = eeprom_he_key_configs[i].he_release_threshold;
         he_key_configs[i].noise_ceiling = eeprom_he_key_configs[i].noise_ceiling;
         he_key_rapid_trigger_configs[i].deadzone = DEFAULT_DEADZONE_RT;
-        he_key_rapid_trigger_configs[i].release_distance = DEFAULT_RELEASE_DISTANCE_RT;
-
+        he_key_rapid_trigger_configs[i].engage_distance = DEFAULT_RELEASE_DISTANCE_RT;
+        he_key_rapid_trigger_configs[i].disengage_distance = DEFAULT_RELEASE_DISTANCE_RT;
         }
     }
     eeconfig_update_user_datablock(&eeprom_he_key_configs);
@@ -303,12 +308,15 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8
 bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
     key_debounce_t *key_info = &debounce_matrix[row][col];
     uint16_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone;
-    uint16_t release_distance = he_key_rapid_trigger_configs[sensor_id].release_distance;
+    uint16_t disengage_distance = he_key_rapid_trigger_configs[sensor_id].disengage_distance;
+    uint16_t engage_distance = he_key_rapid_trigger_configs[sensor_id].engage_distance;
+    uint16_t hysteresis_margin = 10;
     uint16_t* boundary_value = &he_key_rapid_trigger_configs[sensor_id].boundary_value;
 
-    bool currently_pressed = sensor_value > (*boundary_value);
-    bool should_release = sensor_value < (*boundary_value - release_distance);
-    if (sensor_value > deadzone) {
+    bool currently_pressed = sensor_value > (*boundary_value + hysteresis_margin);
+    bool should_release = sensor_value < (*boundary_value - disengage_distance - hysteresis_margin);
+
+    if (sensor_value > deadzone + hysteresis_margin) {
         if (currently_pressed) {
             if (!key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
@@ -318,33 +326,28 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
                     key_info->debounce_counter = 0;
                     return true;
                 }
-            }
-            else if (key_info->debounced_state && sensor_value > *boundary_value) {
+            } else if (key_info->debounced_state && sensor_value > *boundary_value) {
                 *boundary_value = sensor_value;
             }
-        }
-        else if (should_release) {
-            if  (key_info->debounced_state) {
+        } else if (should_release) {
+            if (key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
                     key_info->debounced_state = false;
-                    *boundary_value = sensor_value;
+                    *boundary_value = sensor_value + engage_distance; // Update boundary for re-engagement
                     current_matrix[row] &= ~(1UL << col);
                     key_info->debounce_counter = 0;
                     return true;
                 }
+            } else {
+                *boundary_value = sensor_value + engage_distance; // Prepare boundary for next press
             }
-            else if (!key_info->debounced_state) {
-                *boundary_value = sensor_value;
-                }
-            }
-        else {
+        } else {
             key_info->debounce_counter = 0;
-            }
-    }
-    else {
+        }
+    } else {
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
             key_info->debounced_state = false;
-            *boundary_value = deadzone;
+            *boundary_value = deadzone + hysteresis_margin;
             current_matrix[row] &= ~(1UL << col);
             key_info->debounce_counter = 0;
         }
@@ -352,56 +355,7 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
     return false;
 }
 
-/*
-bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
-        //release distance and deadzone dont really change, pass them as a pointer? RaTr configs need init
-    uint16_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone; //THRESHOLD FOR INITIAL PRESS
-    uint16_t boundary_value = he_key_rapid_trigger_configs[sensor_id].boundary_value;
-    uint16_t release_distance = he_key_rapid_trigger_configs[sensor_id].release_distance;
 
-    key_debounce_t *key_info = &debounce_matrix[row][col];
-    bool previously_pressed = key_info->debounced_state;
-    bool currently_pressed = sensor_value >= boundary_value - release_distance;
-    bool should_release = sensor_value < boundary_value - release_distance;
-
-    if (currently_pressed) {
-        if (sensor_value > boundary_value) {
-            he_key_rapid_trigger_configs[sensor_id].boundary_value = sensor_value; // Adjust the boundary upwards
-            uprintf("boundry updwards %d",he_key_rapid_trigger_configs[sensor_id].boundary_value);
-        }
-    } else if (should_release ) {
-        if (sensor_value < boundary_value) {
-            he_key_rapid_trigger_configs[sensor_id].boundary_value = sensor_value; // Adjust the boundary downwards
-            uprintf("boundry downwards %d",he_key_rapid_trigger_configs[sensor_id].boundary_value);
-        }
-    }
-    if (currently_pressed && !previously_pressed) {
-        // Debounce press logic
-        if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-            key_info->debounced_state = true; // Key is pressed
-            current_matrix[row] |= (1UL << col);
-            key_info->debounce_counter = 0;
-            }
-            return true;
-    } else if (should_release && previously_pressed) {
-        // Debounce release logic
-        key_info->debounced_state = false; // Key is released
-        current_matrix[row] &= ~(1UL << col);
-        key_info->debounce_counter = 0;
-        he_key_rapid_trigger_configs[sensor_id].boundary_value = sensor_value; // set boundry to current read
-        return true;
-    } else {
-        // Reset debounce counter if the state is stable
-        key_info->debounce_counter = 0;
-    }
-    if (sensor_value < deadzone) {
-        he_key_rapid_trigger_configs[sensor_id].boundary_value = deadzone; // set boundry to current read
-    }
-    return false;
-}
-*/ // skibidiwap idk
-
-// Optimize scan plis
 bool he_matrix_scan(void) {
     bool updated = false;
 
@@ -566,7 +520,7 @@ void he_matrix_print_rapid_trigger(void) {
         int noise_int = (int)(noise * 100); // Convert to integer representation for printing
         int mean_fixed = (int)(mean * 100); // Convert to fixed-point representation
         snprintf(buffer, sizeof(buffer),
-                 "| Sensor %d (%d,%d): Val: %-5u Rescale: %d NF: %-5u (ee: %-5u) Ceiling: %-5u (ee: %-5u) Deadzone: %-5d Release Dt: %-5d Boundary value: %-5d  Mean: %d.%02d Noise: %d.%02d |\n",
+                 "| Sensor %d (%d,%d): Val: %-5u Rescale: %d NF: %-5u (ee: %-5u) Ceiling: %-5u (ee: %-5u) Deadzone: %-5d Engage Dt: %-5d Disengage Dt: %-5d Boundary value: %-5d  Mean: %d.%02d Noise: %d.%02d |\n",
                 i,
                 row,
                 col,
@@ -577,7 +531,8 @@ void he_matrix_print_rapid_trigger(void) {
                 noise_ceiling,
                 eeprom_he_key_configs[i].noise_ceiling,
                 he_key_rapid_trigger_configs[i].deadzone,
-                he_key_rapid_trigger_configs[i].release_distance,
+                he_key_rapid_trigger_configs[i].engage_distance,
+                he_key_rapid_trigger_configs[i].disengage_distance,
                 he_key_rapid_trigger_configs[i].boundary_value,
                 mean_fixed / 100,
                 mean_fixed % 100,
@@ -591,25 +546,26 @@ void he_matrix_print_rapid_trigger(void) {
 
 
 void he_matrix_print_rapid_trigger_debug(void) {
-    uint8_t i = 0;  // Assuming you're using the first sensor/key for debug. Adjust as necessary.
+    uint8_t i = 0;
     uint8_t row = sensor_to_matrix_map[i].row;
     uint8_t col = sensor_to_matrix_map[i].col;
 
-    // Access the key_info for the specific key being monitored.
+
     key_debounce_t *key_info = &debounce_matrix[row][col];
     uint16_t sensor_value = he_readkey_raw(i); // This reads the raw sensor value
     uint16_t rescale_test_value = rescale(he_readkey_raw(i), i);
 
-    // Print all relevant information
-    uprintf("i: %d, sensor: %d, rescale: %d, deadzone: %d, release: %d, boundary: %d, debounced_state: %d, debounce_counter: %d\n",
+
+    uprintf("i: %d, sensor: %d, rescale: %d, deadzone: %d, engage: %d, disengage: %d, boundary: %d, debounced_state: %d, debounce_counter: %d\n",
             i,
             sensor_value,
             rescale_test_value,
             he_key_rapid_trigger_configs[i].deadzone,
-            he_key_rapid_trigger_configs[i].release_distance,
+            he_key_rapid_trigger_configs[i].engage_distance,
+            he_key_rapid_trigger_configs[i].disengage_distance,
             he_key_rapid_trigger_configs[i].boundary_value,
-            key_info->debounced_state,  // Previously pressed state
-            key_info->debounce_counter); // Debounce counter
+            key_info->debounced_state,
+            key_info->debounce_counter);
 }
 
 

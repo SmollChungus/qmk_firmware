@@ -17,12 +17,9 @@
 #pragma once
 
 //debug stuff
-//1 rescaled raw matrix
-//2 extended matrix report
-//3 extended rapid trigger report
-//4 rapid trigger reports
-//5 rapid trigger 0,0 debug
-#define CONSOLE_VERBOSITY 1
+#define CONSOLE_VERBOSITY 1 //undef to turn of
+#define DEBUG_MATRIX_SCAN_RATE
+
 
 //#define matrix_shenanigans
 
@@ -31,7 +28,7 @@
 #define MATRIX_COLS 16
 
 // Multiplexer setup
-#define SENSOR_COUNT 67
+#define SENSOR_COUNT 68
 #define MUX_EN_PINS \
     { B0, A7, A6, A5, A4 }
 
@@ -44,14 +41,14 @@
 #define WEAR_LEVELING_BACKING_SIZE 16384
 
 // User config
-#define DEFAULT_ACTUATION_LEVEL 565
-#define DEFAULT_RELEASE_LEVEL 560
+#define DEFAULT_ACTUATION_LEVEL 570
+#define DEFAULT_RELEASE_LEVEL 564
 #define DEBOUNCE_THRESHOLD 5
 
 
 // Rapid Trigger config
-#define DEFAULT_DEADZONE_RT 660
-#define DEFAULT_RELEASE_DISTANCE_RT 30
+#define DEFAULT_DEADZONE_RT 565
+#define DEFAULT_RELEASE_DISTANCE_RT 20
 
 //Wooting Lekker
 //#define WOOTING_LEKKER
@@ -87,4 +84,3 @@
 #define REPORT_INTERVAL_MS 500
 #define NUM_SENSOR_REPORTS 5
 #endif
-
