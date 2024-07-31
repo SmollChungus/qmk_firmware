@@ -69,6 +69,14 @@
                                         0,
                                         5
                                     ]
+                                },{
+                                    "label": "Toggle Key Cancellation (A & D)",
+                                    "type": "toggle",
+                                    "content": [
+                                        "id_save_threshold_data",
+                                        0,
+                                        10
+                                    ]
                                 }
                                 ]
                 },
