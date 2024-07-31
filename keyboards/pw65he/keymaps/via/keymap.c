@@ -28,7 +28,9 @@ enum custom_keycodes {
     VERB5,
     APCM,
     RTM,
-    NULLM,
+    KCM_ON,
+    KCM_OFF,
+    KCM_TOG,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -43,8 +45,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [1] = LAYOUT(
             KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12,   KC_GRV,  QK_BOOT,
-        _______,  APCM,  RTM,    NULLM,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
-        _______,  KC_LEFT,  KC_DOWN,  KC_RIGHT, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
+        _______,  APCM,  RTM,    _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
+        _______,  KCM_ON, KCM_OFF, KCM_TOG, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
         _______,  VERB1,  VERB5,  VERB0, _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_MPLY,             KC_VOLU,  _______,
         _______,    _______,    _______,    _______,                                         _______,                                  KC_MPRV,  KC_VOLD,  KC_MNXT
     )
@@ -97,7 +99,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case APCM:
             if (record->event.pressed) {
-                ;
                 uprintf("[SYSTEM]: Actuation Point Control Mode set\n");
                 uprintf("[PCB_SETTINGS]: APC MODE\n");
                 he_config.he_actuation_mode = 0;
@@ -107,7 +108,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case RTM:
             if (record->event.pressed) {
-                ;
                 uprintf("[SYSTEM]: Rapid Trigger Mode set\n");
                 uprintf("[PCB_SETTINGS]: RT MODE\n");
                 he_config.he_actuation_mode = 1;
@@ -115,7 +115,32 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
+        case KCM_ON:
+            if (record->event.pressed) {
+                uprintf("SYSTEM: Key Cancellation Mode on\n");
+                he_config.he_keycancel = true;
+                eeprom_he_config.he_actuation_mode = true;
+            }
+            return false;
+        case KCM_OFF:
+            if (record->event.pressed) {
+                uprintf("SYSTEM: Key Cancellation Mode off\n");
+                he_config.he_keycancel = false;
+                eeprom_he_config.he_actuation_mode = false;
+            }
+            return false;
+
+        case KCM_TOG:
+            if (record->event.pressed) {
+                uprintf("SYSTEM: Key Cancellation Mode: %d\n", he_config.he_keycancel);
+                he_config.he_keycancel = !he_config.he_keycancel;
+                eeprom_he_config.he_actuation_mode = he_config.he_keycancel;
+            }
+            return false;
+
         default:
             return true;
     }
 }
+
+

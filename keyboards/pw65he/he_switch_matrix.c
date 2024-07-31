@@ -65,6 +65,13 @@ const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
     {4,0,58,0,11},{4,1,59,0,12},{4,2,60,1,9}, {4,3,61,1,13},{4,4,62,3,10},  {4,5,63,4,9}, {4,6,64,4,11},{4,7,65,4,12}
 };
 
+// key cancellation stuff, implement xelus's pr(24k) whenever it hits master
+uint8_t latest_pressed = 0;
+bool cancel_lock = false;
+
+
+
+
 matrix_row_t matrix_get_row(uint8_t row) {
     if (row < MATRIX_ROWS) {
         return matrix[row];
@@ -188,7 +195,6 @@ void noise_ceiling_calibration(void) {
         }
         average_value = sum / NUM_READINGS;
 
-        // Update ceiling if the average reading is above the ceiling range
         if (average_value > ceiling_range) {
             he_key_configs[i].noise_ceiling = average_value;
             printf("Updated ceiling for sensor %d to %d\n", i, average_value);
@@ -196,8 +202,6 @@ void noise_ceiling_calibration(void) {
     }
 
 
-    // This loop continuously updates the ceiling values
-    // You might want to add debouncing or ensure that the key is fully pressed
 }
 
 int he_init(he_key_config_t he_key_configs[], size_t count) {
@@ -206,7 +210,6 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
     adc_read(adcMux);
 
     init_mux_sel();
-    // check and reset for non-sense user values
 
     #ifdef VIA_ENABLE
     eeconfig_read_kb_datablock(&eeprom_he_config);
@@ -214,7 +217,7 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
 
     if (eeprom_he_config.he_post_flash == false) {
         eeprom_he_config.he_post_flash = true;
-        // set RT and eeprom from defaults
+
         for (int i = 0; i < SENSOR_COUNT; i++) {
             he_key_configs[i].he_actuation_threshold = DEFAULT_ACTUATION_LEVEL;
             he_key_configs[i].he_release_threshold = DEFAULT_RELEASE_LEVEL;
@@ -244,25 +247,20 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
     eeconfig_update_user_datablock(&eeprom_he_key_configs);
     eeconfig_update_kb_datablock(&eeprom_he_config);
 
-    //init RT stuff
     #endif
     return 0;
 }
 
-// Sets EN and SEL pins on the multiplexer
 static inline void select_mux(uint8_t sensor_id) {
     uint8_t mux_id = sensor_to_matrix_map[sensor_id].mux_id;
     uint8_t mux_channel = sensor_to_matrix_map[sensor_id].mux_channel;
 
-    // Set all MUX enable pins high to disable them
     for (int i = 0; i < 5; i++) {
         writePinHigh(mux_en_pins[i]);
     }
 
-    // Then set the selected MUX enable pin low to enable it
     writePinLow(mux_en_pins[mux_id]);
 
-    // Set the MUX select pins
     for (int j = 0; j < 4; j++) {
         if (mux_channel & (1 << j)) {
             writePinHigh(mux_sel_pins[j]);
@@ -284,6 +282,7 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8
     bool currently_pressed = sensor_value > he_key_configs[sensor_id].he_actuation_threshold;
     bool should_release = sensor_value < he_key_configs[sensor_id].he_release_threshold;
 
+
     if (currently_pressed && !previously_pressed) {
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
             key_info->debounced_state = true; // Key is pressed
@@ -302,7 +301,7 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8
         key_info->debounce_counter = 0;
     }
 
-    return false; // No change in stable state
+    return false;
 }
 
 bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
@@ -355,6 +354,75 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
     return false;
 }
 
+//very crude but works for now, pls update later!
+bool he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
+    key_debounce_t *key_info = &debounce_matrix[row][col];
+    bool previously_pressed = key_info->debounced_state;
+    bool currently_pressed = sensor_value > he_key_configs[sensor_id].he_actuation_threshold;
+    bool should_release = sensor_value < he_key_configs[sensor_id].he_release_threshold;
+
+    if (currently_pressed && !previously_pressed) {
+        if (latest_pressed == 0) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = true; // Key is pressed
+                current_matrix[row] |= (1UL << col);
+                key_info->debounce_counter = 0;
+                latest_pressed = sensor_id;
+                return true;
+            }
+        } else if (sensor_id == 33 && latest_pressed == 31 && !cancel_lock) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = true; // Key is pressed
+                current_matrix[sensor_to_matrix_map[31].row] &= ~(1UL << sensor_to_matrix_map[31].col); // Release A
+                current_matrix[row] |= (1UL << col); // Press D
+                key_info->debounce_counter = 0;
+                latest_pressed = 33; // ID for D
+                cancel_lock = true;
+                return true;
+            }
+        } else if (sensor_id == 31 && latest_pressed == 33 && !cancel_lock) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = true; // Key is pressed
+                current_matrix[sensor_to_matrix_map[33].row] &= ~(1UL << sensor_to_matrix_map[33].col); // Release D
+                current_matrix[row] |= (1UL << col); // Press A
+                key_info->debounce_counter = 0;
+                latest_pressed = 31; // ID for A
+                cancel_lock = true;
+                return true;
+            }
+        }
+    } else if (should_release && previously_pressed) {
+        // Key release logic
+        key_info->debounced_state = false; // Key is released
+        current_matrix[row] &= ~(1UL << col);
+        key_info->debounce_counter = 0;
+
+        // If the key that was released was the latest pressed key, reset latest_pressed
+        if (latest_pressed == sensor_id) {
+            latest_pressed = 0;
+
+            // Check if the other key is still physically pressed and resend it
+            if (sensor_id == 33 && debounce_matrix[sensor_to_matrix_map[31].row][sensor_to_matrix_map[31].col].debounced_state) {
+                debounce_matrix[sensor_to_matrix_map[31].row][sensor_to_matrix_map[31].col].debounced_state = true;
+                current_matrix[sensor_to_matrix_map[31].row] |= (1UL << sensor_to_matrix_map[31].col);
+                latest_pressed = 31;
+            } else if (sensor_id == 31 && debounce_matrix[sensor_to_matrix_map[33].row][sensor_to_matrix_map[33].col].debounced_state) {
+                debounce_matrix[sensor_to_matrix_map[33].row][sensor_to_matrix_map[33].col].debounced_state = true;
+                current_matrix[sensor_to_matrix_map[33].row] |= (1UL << sensor_to_matrix_map[33].col);
+                latest_pressed = 33;
+            }
+        }
+
+        cancel_lock = false;
+        return true;
+    } else {
+        // Reset debounce counter if the state is stable
+        key_info->debounce_counter = 0;
+    }
+
+    return false;
+}
+
 
 bool he_matrix_scan(void) {
     bool updated = false;
@@ -365,23 +433,29 @@ bool he_matrix_scan(void) {
         uint8_t col = sensor_to_matrix_map[i].col;
 
         uint16_t sensor_value = he_readkey_raw(sensor_id);
+
         if (he_config.he_actuation_mode == 0) {
-            if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
+            if (he_config.he_keycancel && (sensor_id == 31 || sensor_id == 33)) { // A and D sensor_id
+                if (he_update_key_keycancel(matrix, row, col, sensor_id, sensor_value)) {
+                    updated = true;
+                }
+            } else if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
                 updated = true;
             }
-        }
-        if (he_config.he_actuation_mode == 1) {
+        } else if (he_config.he_actuation_mode == 1) {
             if (he_update_key_rapid_trigger(matrix, row, col, sensor_id, sensor_value)) {
                 updated = true;
             }
         }
     }
+
     if (he_config.he_calibration_mode) {
         noise_ceiling_calibration();
     }
 
     return updated;
 }
+
 
 // Debug stuff
 sensor_data_t sensor_data[SENSOR_COUNT];

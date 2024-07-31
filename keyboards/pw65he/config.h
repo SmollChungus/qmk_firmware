@@ -36,13 +36,13 @@
     { B3, B4, B6, B5 }
 
 #define ANALOG_PORT A3
-#define EECONFIG_KB_DATA_SIZE 4
+#define EECONFIG_KB_DATA_SIZE 5 // + 1 for keycancel, per key stuff is in eeconfig_user
 #define WEAR_LEVELING_LOGICAL_SIZE 2048
 #define WEAR_LEVELING_BACKING_SIZE 16384
 
 // User config
-#define DEFAULT_ACTUATION_LEVEL 570
-#define DEFAULT_RELEASE_LEVEL 564
+#define DEFAULT_ACTUATION_LEVEL 575
+#define DEFAULT_RELEASE_LEVEL 565
 #define DEBOUNCE_THRESHOLD 5
 
 
