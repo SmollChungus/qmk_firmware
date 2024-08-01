@@ -58,42 +58,42 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case VERB0:
             if (record->event.pressed) {
                 console_output = 0;
-                uprintf("Logging Mode set to 0\n");
+                uprintf("[SYSTEM]: Logging Mode set to 0\n");
             }
             return false;
 
         case VERB1:
             if (record->event.pressed) {
                 console_output = 1;
-                uprintf("Logging Mode set to 1\n");
+                uprintf("[SYSTEM]: Logging Mode set to 1\n");
             }
             return false;
 
         case VERB2:
             if (record->event.pressed) {
                 console_output = 2;
-                uprintf("Logging Mode set to 2 (blocking keystrokes)\n");
+                uprintf("[SYSTEM]: Logging Mode set to 2 (blocking keystrokes)\n");
             }
             return false;
 
         case VERB3:
             if (record->event.pressed) {
                 console_output = 3;
-                uprintf("Logging Mode set to 3\n");
+                uprintf("[SYSTEM]: Logging Mode set to 3(none)\n");
             }
             return false;
 
         case VERB4:
             if (record->event.pressed) {
                 console_output = 4;
-                uprintf("Logging Mode set to 4\n");
+                uprintf("[SYSTEM]: Logging Mode set to 4\n");
             }
             return false;
 
         case VERB5:
             if (record->event.pressed) {
                 console_output = 5;
-                uprintf("Logging Mode set to 5\n");
+                uprintf("[SYSTEM]: Logging Mode set to 5\n");
             }
             return false;
 
@@ -117,24 +117,24 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case KCM_ON:
             if (record->event.pressed) {
-                uprintf("SYSTEM: Key Cancellation Mode on\n");
+                uprintf("[SYSTEM]: Key Cancellation Mode on\n");
                 he_config.he_keycancel = true;
-                eeprom_he_config.he_actuation_mode = true;
+                eeprom_he_config.he_keycancel = true;
             }
             return false;
         case KCM_OFF:
             if (record->event.pressed) {
-                uprintf("SYSTEM: Key Cancellation Mode off\n");
+                uprintf("[SYSTEM]: Key Cancellation Mode off\n");
                 he_config.he_keycancel = false;
-                eeprom_he_config.he_actuation_mode = false;
+                eeprom_he_config.he_keycancel = false;
             }
             return false;
 
         case KCM_TOG:
             if (record->event.pressed) {
-                uprintf("SYSTEM: Key Cancellation Mode: %d\n", he_config.he_keycancel);
+                uprintf("[SYSTEM]: Key Cancellation Mode: %d\n", he_config.he_keycancel);
                 he_config.he_keycancel = !he_config.he_keycancel;
-                eeprom_he_config.he_actuation_mode = he_config.he_keycancel;
+                eeprom_he_config.he_keycancel = he_config.he_keycancel;
             }
             return false;
 

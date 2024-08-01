@@ -61,7 +61,7 @@ typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
-    bool he_keycanel;
+    bool he_keycancel;
 } eeprom_he_config_t;
 
 //redundancy to decouple VIA I/O from RT/EEPROM

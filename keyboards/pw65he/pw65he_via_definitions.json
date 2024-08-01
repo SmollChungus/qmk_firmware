@@ -73,7 +73,7 @@
                                     "label": "Toggle Key Cancellation (A & D)",
                                     "type": "toggle",
                                     "content": [
-                                        "id_save_threshold_data",
+                                        "id_set_key_cancel",
                                         0,
                                         10
                                     ]
