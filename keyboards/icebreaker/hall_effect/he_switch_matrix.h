@@ -54,12 +54,14 @@ typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
+    bool    he_keycancel;
 } he_config_t;
 
 typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
+    bool he_keycancel;
 } eeprom_he_config_t;
 
 //redundancy to decouple VIA I/O from RT/EEPROM
@@ -142,6 +144,7 @@ uint16_t  noise_floor[SENSOR_COUNT];
 uint16_t  sensor_value_rescaled;
 bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 bool      he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
+bool      he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
 void      noise_ceiling_calibration(void);
 void      he_matrix_print(void);
 void      he_matrix_print_extended(void);

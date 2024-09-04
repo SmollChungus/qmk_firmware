@@ -35,7 +35,8 @@ enum via_he_enums {
     id_toggle_actuation_mode = 6,
     id_set_rapid_trigger_deadzone = 7,
     id_set_rapid_trigger_engage_distance = 8,
-    id_set_rapid_trigger_disengage_distance = 9
+    id_set_rapid_trigger_disengage_distance = 9,
+    id_set_key_cancel = 10,
     // clang-format on
 };
 
@@ -166,6 +167,10 @@ void via_he_config_set_value(uint8_t *data) {
             }
             uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n",he_key_rapid_trigger_configs[0].disengage_distance);
             break;
+        }
+        case id_set_key_cancel: {
+            he_config.he_keycancel = true;
+            uprintf("[SYSTEM]: Key Cancelation Mode toggled: %d", he_config.he_keycancel);
         }
     }
 }

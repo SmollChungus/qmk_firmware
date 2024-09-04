@@ -8,7 +8,7 @@
 matrix_row_t raw_matrix[MATRIX_ROWS]; // raw values
 matrix_row_t matrix[MATRIX_ROWS];     // debounced values
 
-uint8_t console_output = 0;
+uint8_t console_output = 2;
 
 __attribute__((weak)) void matrix_init_kb(void) { matrix_init_user(); }
 __attribute__((weak)) void matrix_scan_kb(void) { matrix_scan_user(); }

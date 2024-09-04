@@ -3,117 +3,138 @@
     "vendorId": "0x5363",
     "productId": "0x0009",
     "menus": [
-        {
-            "label": "HE Tools",
-            "content": [
-                {
-                    "label": "Switch Settings",
-                    "content": [
-                        {
-                                    "label": "Actuation Threshold",
-                                    "type": "range",
-                                    "options": [
-                                        530,
-                                        720
-                                    ],
-                                    "content": [
-                                        "id_via_he_actuation_threshold",
-                                        0,
-                                        1
-                                    ]
-                                },
-                                {
-                                    "label": "Release Threshold(set lower than Actuation Threshold)",
-                                    "type": "range",
-                                    "options": [
-                                        530,
-                                        720
-                                    ],
-                                    "content": [
-                                        "id_via_he_release_threshold",
-                                        0,
-                                        2
-                                    ]
-                                },
-                                {
-                                    "label": "Update changes to keyboard",
-                                    "type": "button",
-                                    "options": [
-                                        0
-                                    ],
-                                    "content": [
-                                        "id_save_threshold_data",
-                                        0,
-                                        3
-                                    ]
-                                },{
-                                    "label": "Calibration Start",
-                                    "type": "button",
-                                    "options": [
-                                        0
-                                    ],
-                                    "content": [
-                                        "id_start_calibration",
-                                        0,
-                                        4
-                                    ]
-                                },{
-                                    "label": "End + Save Calibration Data",
-                                    "type": "button",
-                                    "options": [
-                                        0
+      {
+          "label": "HE Tools",
+          "content": [
+              {
+                  "label": "Switch Settings",
+                  "content": [
+                      {
+                                  "label": "Actuation Threshold",
+                                  "type": "range",
+                                  "options": [
+                                      570,
+                                      720
+                                  ],
+                                  "content": [
+                                      "id_via_he_actuation_threshold",
+                                      0,
+                                      1
+                                  ]
+                              },
+                              {
+                                  "label": "Release Threshold(set lower than Actuation Threshold)",
+                                  "type": "range",
+                                  "options": [
+                                      570,
+                                      720
+                                  ],
+                                  "content": [
+                                      "id_via_he_release_threshold",
+                                      0,
+                                      2
+                                  ]
+                              },
+                              {
+                                  "label": "Update changes to keyboard",
+                                  "type": "button",
+                                  "options": [
+                                      0
+                                  ],
+                                  "content": [
+                                      "id_save_threshold_data",
+                                      0,
+                                      3
+                                  ]
+                              },{
+                                  "label": "Calibration Start",
+                                  "type": "button",
+                                  "options": [
+                                      0
+                                  ],
+                                  "content": [
+                                      "id_start_calibration",
+                                      0,
+                                      4
+                                  ]
+                              },{
+                                  "label": "End + Save Calibration Data",
+                                  "type": "button",
+                                  "options": [
+                                      0
 
-                                    ],
-                                    "content": [
-                                        "id_save_threshold_data",
-                                        0,
-                                        5
-                                    ]
-                                }
-                                ]
-                },
-                {
-                    "label": "Rapid Trigger Mode",
-                    "content": [
-                        {
-                            "label": "Rapid Trigger Mode Enable",
-                            "type": "toggle",
-                            "content": ["id_custom_set_value", 0, 6]
-                        },
-                        {
-                        "label": "Rapid Trigger Deadzone",
-                        "type": "range",
-                        "options": [
-                            530,
-                            720
-                        ],
-                        "content": [
-                            "id_set_rapid_trigger_deadzone",
-                            0,
-                            7
-                        ]
-                    },
-                    {
-                        "label": "Rapid Trigger Release Distance",
-                        "type": "range",
-                        "options": [
-                            1,
-                            100
-                        ],
-                        "content": [
-                            "id_set_rapid_trigger_release_distance",
-                            0,
-                            8
-                        ]
-                    }
-            ]
-        }
-    ]
+                                  ],
+                                  "content": [
+                                      "id_save_threshold_data",
+                                      0,
+                                      5
+                                  ]
+                              },{
+                                  "label": "Toggle Key Cancellation (A & D)",
+                                  "type": "toggle",
+                                  "content": [
+                                      "id_set_key_cancel",
+                                      0,
+                                      10
+                                  ]
+                              }
+                              ]
+              },
+              {
+                  "label": "Rapid Trigger Mode",
+                  "content": [
+                      {
+                          "label": "Rapid Trigger Mode Enable",
+                          "type": "toggle",
+                          "content": ["id_custom_set_value", 0, 6]
+                      },
+                      {
+                      "label": "Rapid Trigger Deadzone",
+                      "type": "range",
+                      "options": [
+                          570,
+                          720
+                      ],
+                      "content": [
+                          "id_set_rapid_trigger_deadzone",
+                          0,
+                          7
+                      ]
+                      },
+                      {
+                      "label": "Rapid Trigger Engage Distance",
+                      "type": "range",
+                      "options": [
+                          10,
+                          100
+                      ],
+                      "content": [
+                          "id_set_rapid_trigger_engage_distance",
+                          0,
+                          8
+                      ]
+                  },
+                  {
+                      "label": "Rapid Trigger Disengage Distance",
+                      "type": "range",
+                      "options": [
+                          10,
+                          100
+                      ],
+                      "content": [
+                          "id_set_rapid_trigger_disengage_distance",
+                          0,
+                          9
+                      ]
+                  }
+          ]
+      }
+  ]
 }
-    ],
+  ],
     "matrix": {
       "rows": 5,
-      "cols": 15
+      "cols": 16
     },
     "layouts": {
     "keymap": [
@@ -217,13 +238,7 @@
             "w": 7
           },
           "4,3",
-          {
-            "w": 1.25
-          },
           "4,4",
-          {
-            "x": 0.75
-          },
           "4,5",
           "4,6",
           "4,7",

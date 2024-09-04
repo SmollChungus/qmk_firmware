@@ -59,11 +59,15 @@ via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 //data = row,col,sensor_id,mux_id,mux_channel
 const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
     {0,0,0,0,3},  {0,1,1,0,5},  {0,2,2,0,6},  {0,3,3,0,2},  {0,4,4,1,6},  {0,5,5,1,5},  {0,6,6,1,4},  {0,7,7,1,3},  {0,8,8,2,5},  {0,9,9,2,4},  {0,10,10,2,3},{0,11,11,2,2}, {0,12,12,3,3}, {0,13,13,3,2},{0,14,14,4,5},{0,15,15,4,4},
-    {1,0,15,0,4}, {1,1,16,0,7}, {1,2,17,0,0}, {1,3,18,0,1}, {1,4,19,1,7}, {1,5,20,1,0}, {1,6,21,1,1}, {1,7,22,1,2}, {1,8,23,2,6}, {1,9,24,2,0}, {1,10,25,2,1},{1,11,26,3,5}, {1,12,27,3,0}, {1,13,28,3,1},{1,14,29,4,2},
-    {2,0,30,0,8}, {2,1,31,0,10},{2,2,32,0,15},{2,3,33,1,8}, {2,4,34,1,10},{2,5,35,1,15},{2,6,36,1,14},{2,7,37,2,8}, {2,8,38,2,9}, {2,9,39,2,15},{2,10,40,3,8},{2,11,41,3,9}, {2,12,42,3,14},{2,13,43,4,14},
-    {3,0,44,0,9}, {3,1,45,0,13},{3,2,46,0,14},{3,3,47,1,11},{3,4,48,1,12},{3,5,49,2,10},{3,6,50,2,11},{3,7,51,2,12},{3,8,52,2,13},{3,9,53,2,14},{3,10,54,3,10},{3,11,55,3,13},{3,12,56,4,10},{3,13,57,4,13},
-    {4,0,58,0,11},{4,1,59,0,12},{4,2,60,1,9}, {4,3,61,1,13},{4,4,62,3,12},{4,5,63,3,11},{4,6,64,4,9}, {4,7,65,4,11},{4,8,66,4,12}
+    {1,0,16,0,4}, {1,1,17,0,7}, {1,2,18,0,0}, {1,3,19,0,1}, {1,4,20,1,7}, {1,5,21,1,0}, {1,6,22,1,1}, {1,7,23,1,2}, {1,8,24,2,6}, {1,9,25,2,0}, {1,10,26,2,1},{1,11,27,3,5}, {1,12,28,3,0}, {1,13,29,3,1},{1,14,30,4,2},
+    {2,0,31,0,8}, {2,1,32,0,10},{2,2,33,0,15},{2,3,34,1,8}, {2,4,35,1,10},{2,5,36,1,15},{2,6,37,1,14},{2,7,38,2,8}, {2,8,39,2,9}, {2,9,40,2,15},{2,10,41,3,8},{2,11,42,3,9}, {2,12,43,3,14},{2,13,44,4,14},
+    {3,0,45,0,9}, {3,1,46,0,13},{3,2,47,0,14},{3,3,48,1,11},{3,4,49,1,12},{3,5,50,2,10},{3,6,51,2,11},{3,7,52,2,12},{3,8,53,2,13},{3,9,54,2,14},{3,10,55,3,10},{3,11,56,3,13},{3,12,57,4,10},{3,13,58,4,13},
+    {4,0,59,0,11},{4,1,60,0,12},{4,2,61,1,9}, {4,3,62,1,13},{4,4,63,3,11},{4,5,64,3,12},{4,6,65,4,9}, {4,7,66,4,11},{4,8,67,4,12}
 };
+
+// key cancellation stuff, implement xelus's pr(24k) whenever it hits master
+uint8_t latest_pressed = 0;
+bool cancel_lock = false;
 
 matrix_row_t matrix_get_row(uint8_t row) {
     if (row < MATRIX_ROWS) {
@@ -166,6 +170,8 @@ void noise_floor_calibration(void) {
         // Determine the noise floor as the 25th percentile
         uint16_t noise_floor = samples[sensor_id][NOISE_FLOOR_SAMPLE_COUNT / 4];
         he_key_configs[sensor_id].noise_floor = noise_floor;
+        eeprom_he_key_configs[sensor_id].noise_floor = noise_floor;
+
     }
 }
 
@@ -355,6 +361,75 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
     return false;
 }
 
+//very crude but works for now, pls update later!
+bool he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
+    key_debounce_t *key_info = &debounce_matrix[row][col];
+    bool previously_pressed = key_info->debounced_state;
+    bool currently_pressed = sensor_value > he_key_configs[sensor_id].he_actuation_threshold;
+    bool should_release = sensor_value < he_key_configs[sensor_id].he_release_threshold;
+
+    if (currently_pressed && !previously_pressed) {
+        if (latest_pressed == 0) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = true; // Key is pressed
+                current_matrix[row] |= (1UL << col);
+                key_info->debounce_counter = 0;
+                latest_pressed = sensor_id;
+                return true;
+            }
+        } else if (sensor_id == 34 && latest_pressed == 32 && !cancel_lock) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = true; // Key is pressed
+                current_matrix[sensor_to_matrix_map[32].row] &= ~(1UL << sensor_to_matrix_map[32].col); // Release A
+                current_matrix[row] |= (1UL << col); // Press D
+                key_info->debounce_counter = 0;
+                latest_pressed = 34; // ID for D
+                cancel_lock = true;
+                return true;
+            }
+        } else if (sensor_id == 32 && latest_pressed == 34 && !cancel_lock) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = true; // Key is pressed
+                current_matrix[sensor_to_matrix_map[34].row] &= ~(1UL << sensor_to_matrix_map[34].col); // Release D
+                current_matrix[row] |= (1UL << col); // Press A
+                key_info->debounce_counter = 0;
+                latest_pressed = 32; // ID for A
+                cancel_lock = true;
+                return true;
+            }
+        }
+    } else if (should_release && previously_pressed) {
+        // Key release logic
+        key_info->debounced_state = false; // Key is released
+        current_matrix[row] &= ~(1UL << col);
+        key_info->debounce_counter = 0;
+
+        // If the key that was released was the latest pressed key, reset latest_pressed
+        if (latest_pressed == sensor_id) {
+            latest_pressed = 0;
+
+            // Check if the other key is still physically pressed and resend it
+            if (sensor_id == 34 && debounce_matrix[sensor_to_matrix_map[32].row][sensor_to_matrix_map[32].col].debounced_state) {
+                debounce_matrix[sensor_to_matrix_map[32].row][sensor_to_matrix_map[32].col].debounced_state = true;
+                current_matrix[sensor_to_matrix_map[32].row] |= (1UL << sensor_to_matrix_map[32].col);
+                latest_pressed = 32;
+            } else if (sensor_id == 32 && debounce_matrix[sensor_to_matrix_map[34].row][sensor_to_matrix_map[34].col].debounced_state) {
+                debounce_matrix[sensor_to_matrix_map[34].row][sensor_to_matrix_map[34].col].debounced_state = true;
+                current_matrix[sensor_to_matrix_map[34].row] |= (1UL << sensor_to_matrix_map[34].col);
+                latest_pressed = 34;
+            }
+        }
+
+        cancel_lock = false;
+        return true;
+    } else {
+        // Reset debounce counter if the state is stable
+        key_info->debounce_counter = 0;
+    }
+
+    return false;
+}
+
 
 bool he_matrix_scan(void) {
     bool updated = false;
@@ -365,17 +440,22 @@ bool he_matrix_scan(void) {
         uint8_t col = sensor_to_matrix_map[i].col;
 
         uint16_t sensor_value = he_readkey_raw(sensor_id);
+
         if (he_config.he_actuation_mode == 0) {
-            if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
+            if (he_config.he_keycancel && (sensor_id == 32 || sensor_id == 34)) { // A and D sensor_id
+                if (he_update_key_keycancel(matrix, row, col, sensor_id, sensor_value)) {
+                    updated = true;
+                }
+            } else if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
                 updated = true;
             }
-        }
-        if (he_config.he_actuation_mode == 1) {
+        } else if (he_config.he_actuation_mode == 1) {
             if (he_update_key_rapid_trigger(matrix, row, col, sensor_id, sensor_value)) {
                 updated = true;
             }
         }
     }
+
     if (he_config.he_calibration_mode) {
         noise_ceiling_calibration();
     }
@@ -546,7 +626,7 @@ void he_matrix_print_rapid_trigger(void) {
 
 
 void he_matrix_print_rapid_trigger_debug(void) {
-    uint8_t i = 0;
+    uint8_t i = 1;
     uint8_t row = sensor_to_matrix_map[i].row;
     uint8_t col = sensor_to_matrix_map[i].col;
 
