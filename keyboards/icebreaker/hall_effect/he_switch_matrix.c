@@ -65,6 +65,7 @@ const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
     {4,0,59,0,11},{4,1,60,0,12},{4,2,61,1,9}, {4,3,62,1,13},{4,4,63,3,11},{4,5,64,3,12},{4,6,65,4,9}, {4,7,66,4,11},{4,8,67,4,12}
 };
 
+
 // key cancellation stuff, implement xelus's pr(24k) whenever it hits master
 uint8_t latest_pressed = 0;
 bool cancel_lock = false;
@@ -87,8 +88,7 @@ he_key_config_t he_key_configs[SENSOR_COUNT];
 he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
 
 
-static void init_mux_sel(void) {
-//    int array_size = sizeof(mux_sel_pins) / sizeof(mux_sel_pins[0]);
+static void mux_sel_init(void) {
     for (int i = 0; i < 4; i++) {
         setPinOutput(mux_sel_pins[i]);
         writePinLow(mux_sel_pins[i]);
@@ -111,11 +111,9 @@ uint16_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
         // Cast to float to ensure proper division, then scale and cast back
         sensor_value_rescaled = (uint16_t)(((float)(sensor_value - noise_floor) / (noise_ceiling - noise_floor)) * target_range);
     } else {
-        //printf("Invalid calibration for sensor %d\n", sensor_id);
         sensor_value_rescaled = 0;
     }
 
-    //printf("%d \n", sensor_value_rescaled);
     return sensor_value_rescaled;
 }
 
@@ -129,14 +127,12 @@ void noise_floor_calibration_init(void) {
         uint16_t min_value = UINT16_MAX; // Initialize to the max possible value
 
         for (uint8_t sample = 0; sample < NOISE_FLOOR_SAMPLE_COUNT; sample++) {
-            // Sample each sensor multiple times
             samples[sample] = he_readkey_raw(sensor_id);
             if (samples[sample] < min_value) {
                 min_value = samples[sample];
             }
             wait_us(5);
         }
-        // Store the minimum value as the noise floor for this sensor
         he_key_configs[sensor_id].noise_floor = min_value;
         eeprom_he_key_configs[sensor_id].noise_floor = min_value;
 
@@ -211,7 +207,7 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
     adcMux = pinToMux(ANALOG_PORT);
     adc_read(adcMux);
 
-    init_mux_sel();
+    mux_sel_init();
     // check and reset for non-sense user values
 
     #ifdef VIA_ENABLE
@@ -255,7 +251,7 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
     return 0;
 }
 
-// Sets EN and SEL pins on the multiplexer
+// Sets EN and SEL pins on the multiplexer during scanning
 static inline void select_mux(uint8_t sensor_id) {
     uint8_t mux_id = sensor_to_matrix_map[sensor_id].mux_id;
     uint8_t mux_channel = sensor_to_matrix_map[sensor_id].mux_channel;
@@ -282,6 +278,7 @@ static inline void select_mux(uint8_t sensor_id) {
 uint16_t he_readkey_raw(uint8_t sensorIndex) {
     select_mux(sensorIndex);
     return adc_read(adcMux);
+
 }
 
 bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
@@ -626,7 +623,7 @@ void he_matrix_print_rapid_trigger(void) {
 
 
 void he_matrix_print_rapid_trigger_debug(void) {
-    uint8_t i = 1;
+    uint8_t i = 15;
     uint8_t row = sensor_to_matrix_map[i].row;
     uint8_t col = sensor_to_matrix_map[i].col;
 

@@ -61,17 +61,17 @@ typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
-    bool he_keycancel;
+    bool    he_keycancel;
 } eeprom_he_config_t;
 
-//redundancy to decouple VIA I/O from RT/EEPROM
+//redundancy to decouple VIA I/O from RT/EEPROM - ton of space on the stm32f411 anyway...
 typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
 } via_he_config_t;
 
-// Per Key Configs
+// Thresholds are stored per key atm - but configured globally
 typedef struct {
     uint16_t he_actuation_threshold;
     uint16_t he_release_threshold;
@@ -79,7 +79,6 @@ typedef struct {
     uint16_t noise_ceiling;
 } he_key_config_t;
 
-// Per Key Rapid Trigger Configs, need to store in EEPROM later
 typedef struct {
     uint16_t deadzone;
     uint16_t rt_actuation_point;
@@ -104,8 +103,8 @@ typedef struct {
 } eeprom_he_key_config_t;
 
 typedef struct {
-    uint16_t he_actuation_threshold; // Actuation threshold
-    uint16_t he_release_threshold;   // Release threshold
+    uint16_t he_actuation_threshold; 
+    uint16_t he_release_threshold;   
     uint16_t noise_floor;
     uint16_t noise_ceiling;
 } via_he_key_config_t;
@@ -118,23 +117,25 @@ typedef struct {
     uint8_t mux_channel;
 } sensor_to_matrix_map_t;
 
-// Debounce
 typedef struct {
-    uint8_t debounced_state; // The stable state of the key
-    uint8_t debounce_counter; // Counter for debouncing
+    uint8_t debounced_state; 
+    uint8_t debounce_counter; 
 } key_debounce_t;
 
 
-extern he_config_t he_config; // Assuming he_config_t is the correct type
-extern eeprom_he_config_t eeprom_he_config; // Assuming he_config_t is the correct type
-extern via_he_config_t via_he_config; // Assuming he_config_t is the correct type
+extern he_config_t he_config; 
+extern eeprom_he_config_t eeprom_he_config; 
+extern via_he_config_t via_he_config; 
 extern he_key_config_t he_key_configs[SENSOR_COUNT];
 extern eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
 extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 extern he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
-extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT]; //need to add to eeprom size!!c
-//_Static_assert(sizeof(eeprom_he_config) + sizeof(eeprom_he_key_configs) > EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
-//_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
+extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT]; 
+
+/*
+_Static_assert(sizeof(eeprom_he_config) + sizeof(eeprom_he_key_configs) > EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
+*/
 
 int       he_init(he_key_config_t he_key_configs[], size_t count);;
 int       compare_uint16(const void *a, const void *b);
@@ -162,8 +163,10 @@ void      via_he_config_send_value(uint8_t value_id, uint16_t value);
 
 #define SAMPLE_COUNT 15
 
+
+
+//debug - remove later
 typedef struct {
     uint16_t samples[SAMPLE_COUNT];
     uint8_t index;
 } sensor_data_t;
-// Debug end
