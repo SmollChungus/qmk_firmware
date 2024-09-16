@@ -16,13 +16,14 @@
 //config.h
 #pragma once
 
-// PWM + DMA setup
+// Corrected PWM + DMA setup
 
 #define WS2812_PWM_DRIVER PWMD1  // Timer 1 corresponds to PWMD1
 #define WS2812_PWM_CHANNEL 1
 #define WS2812_PWM_PAL_MODE 2
-#define WS2812_PWM_DMA_STREAM STM32_DMA1_STREAM4
-#define WS2812_PWM_DMA_CHANNEL 5
+#define WS2812_PWM_DMA_STREAM STM32_DMA2_STREAM6
+#define WS2812_PWM_DMA_CHANNEL 6
+
 
 
 
