@@ -17,4 +17,4 @@
 #pragma once
 
 // This is the size of the EEPROM for the custom VIA-specific data
-#define EECONFIG_USER_DATA_SIZE 598
+#define EECONFIG_USER_DATA_SIZE 408

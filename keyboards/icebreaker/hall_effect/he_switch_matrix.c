@@ -22,31 +22,7 @@
 #include "timer.h" // Debugging
 #include "raw_hid.h"
 
-#ifdef RAW_ENABLE
-void send_matrix_state_report(void) {
 
-    //uprintf("Sending matrix state report\n");
-
-    uint8_t report[MATRIX_STATE_REPORT_SIZE] = {0};
-    report[0] = MATRIX_STATE_REPORT_ID;
-    for (uint8_t i = 0; i < 8; i++) {
-        report[i + 1] = matrix_get_row(i) & 0xFF; // Assuming 8 rows, just an example
-    }
-    raw_hid_send(report, sizeof(report));
-}
-
-void send_sensor_value_report(uint8_t report_number, uint8_t start_sensor) {
-    uint8_t report[SENSOR_REPORT_SIZE] = {0};
-    report[0] = SENSOR_VALUE_REPORT_ID_BASE + report_number;
-    for (int i = 0; i < SENSORS_PER_REPORT && (start_sensor + i) < SENSOR_COUNT; ++i) {
-        // Mockup function for reading sensor value. Replace with your actual function to read sensor values.
-        uint16_t sensor_value = he_readkey_raw(start_sensor + i); // Assuming this is your sensor reading function
-        report[2 * i + 1] = (sensor_value >> 8) & 0xFF; // High byte
-        report[2 * i + 2] = sensor_value & 0xFF; // Low byte
-    }
-    raw_hid_send(report, sizeof(report));
-}
-#endif
 
 #ifdef VIA_ENABLE
 eeprom_he_config_t eeprom_he_config;
@@ -100,27 +76,22 @@ static void mux_sel_init(void) {
 }
 
 
-uint16_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
-    uint16_t sensor_value_rescaled = 0;
-
-    uint16_t noise_floor = he_key_configs[sensor_id].noise_floor;
-    uint16_t noise_ceiling = he_key_configs[sensor_id].noise_ceiling;
-    uint8_t target_range = 100;
+uint8_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
+    uint16_t noise_floor = he_key_configs[sensor_id].noise_floor; //raw read
+    uint16_t noise_ceiling = he_key_configs[sensor_id].noise_ceiling; //raw read
 
     if (noise_ceiling > noise_floor) {
-        // Cast to float to ensure proper division, then scale and cast back
-        sensor_value_rescaled = (uint16_t)(((float)(sensor_value - noise_floor) / (noise_ceiling - noise_floor)) * target_range);
-    } else {
-        sensor_value_rescaled = 0;
+        if (sensor_value <= noise_floor) return 0;
+        if (sensor_value >= noise_ceiling) return 100;
+        return (uint8_t)(((uint32_t)(sensor_value - noise_floor) * 100) / (noise_ceiling - noise_floor));
     }
-
-    return sensor_value_rescaled;
+    return 0;
 }
 
 
 void noise_floor_calibration_init(void) {
     // Temporary storage for calibration samples
-    print("noise_floor_calibration_init");
+    print("noise_floor_calibration_init"); //  i think this happens during boot before hid console connects so yeah
     uint16_t samples[NOISE_FLOOR_SAMPLE_COUNT];
     eeconfig_read_user_datablock(&eeprom_he_key_configs);
     for (uint8_t sensor_id = 0; sensor_id < SENSOR_COUNT; sensor_id++) {
@@ -143,8 +114,8 @@ void noise_floor_calibration_init(void) {
 }
 
 void noise_floor_calibration(void) {
-    print("noise_floor_calibration_init");
-    if (!he_config.he_calibration_mode) return; // Only run while calibration mode
+    print("noise_floor_calibration");
+    if (!he_config.he_calibration_mode) return;
 
     // Temporary storage for noise floor values
     uint16_t samples[SENSOR_COUNT][NOISE_FLOOR_SAMPLE_COUNT];
@@ -174,9 +145,9 @@ void noise_floor_calibration(void) {
 void noise_ceiling_calibration(void) {
     if (!he_config.he_calibration_mode) {
         print("exiting calibration mode");
-        return; // Exit if not in calibration mode
+        return;
     }
-    const uint8_t NUM_READINGS = 5;  // Number of readings to average
+    const uint8_t NUM_READINGS = 5;  // todo move to config.h
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint16_t range = he_key_configs[i].noise_ceiling - he_key_configs[i].noise_floor;
@@ -199,7 +170,6 @@ void noise_ceiling_calibration(void) {
 
 
     // This loop continuously updates the ceiling values
-    // You might want to add debouncing or ensure that the key is fully pressed
 }
 
 int he_init(he_key_config_t he_key_configs[], size_t count) {
@@ -209,7 +179,6 @@ int he_init(he_key_config_t he_key_configs[], size_t count) {
 
     mux_sel_init();
     // check and reset for non-sense user values
-
     #ifdef VIA_ENABLE
     eeconfig_read_kb_datablock(&eeprom_he_config);
     eeconfig_read_user_datablock(&eeprom_he_key_configs);
@@ -284,8 +253,9 @@ uint16_t he_readkey_raw(uint8_t sensorIndex) {
 bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
     key_debounce_t *key_info = &debounce_matrix[row][col];
     bool previously_pressed = key_info->debounced_state;
-    bool currently_pressed = sensor_value > he_key_configs[sensor_id].he_actuation_threshold;
-    bool should_release = sensor_value < he_key_configs[sensor_id].he_release_threshold;
+    uint8_t rescaled_value = rescale(sensor_value, sensor_id);
+    bool currently_pressed = rescaled_value > he_key_configs[sensor_id].he_actuation_threshold;
+    bool should_release = rescaled_value < he_key_configs[sensor_id].he_release_threshold;
 
     if (currently_pressed && !previously_pressed) {
         if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
@@ -310,39 +280,41 @@ bool he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8
 
 bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
     key_debounce_t *key_info = &debounce_matrix[row][col];
-    uint16_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone;
-    uint16_t disengage_distance = he_key_rapid_trigger_configs[sensor_id].disengage_distance;
-    uint16_t engage_distance = he_key_rapid_trigger_configs[sensor_id].engage_distance;
-    uint16_t hysteresis_margin = 10;
-    uint16_t* boundary_value = &he_key_rapid_trigger_configs[sensor_id].boundary_value;
+    uint8_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone;
+    uint8_t disengage_distance = he_key_rapid_trigger_configs[sensor_id].disengage_distance;
+    uint8_t engage_distance = he_key_rapid_trigger_configs[sensor_id].engage_distance;
+    uint8_t hysteresis_margin = 5;
+    uint8_t* boundary_value = &he_key_rapid_trigger_configs[sensor_id].boundary_value;
 
-    bool currently_pressed = sensor_value > (*boundary_value + hysteresis_margin);
-    bool should_release = sensor_value < (*boundary_value - disengage_distance - hysteresis_margin);
+    uint8_t rescaled_value = rescale(sensor_value, sensor_id);
 
-    if (sensor_value > deadzone + hysteresis_margin) {
+    bool currently_pressed = rescaled_value > (*boundary_value + hysteresis_margin);
+    bool should_release = rescaled_value < (*boundary_value - disengage_distance - hysteresis_margin);
+
+    if (rescaled_value > deadzone + hysteresis_margin) {
         if (currently_pressed) {
             if (!key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
                     key_info->debounced_state = true;
-                    *boundary_value = sensor_value;
+                    *boundary_value = rescaled_value;
                     current_matrix[row] |= (1UL << col);
                     key_info->debounce_counter = 0;
                     return true;
                 }
-            } else if (key_info->debounced_state && sensor_value > *boundary_value) {
-                *boundary_value = sensor_value;
+            } else if (key_info->debounced_state && rescaled_value > *boundary_value) {
+                *boundary_value = rescaled_value;
             }
         } else if (should_release) {
             if (key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
                     key_info->debounced_state = false;
-                    *boundary_value = sensor_value + engage_distance; // Update boundary for re-engagement
+                    *boundary_value = rescaled_value + engage_distance; // Update boundary for re-engagement
                     current_matrix[row] &= ~(1UL << col);
                     key_info->debounce_counter = 0;
                     return true;
                 }
             } else {
-                *boundary_value = sensor_value + engage_distance; // Prepare boundary for next press
+                *boundary_value = rescaled_value + engage_distance; // Prepare boundary for next press
             }
         } else {
             key_info->debounce_counter = 0;
@@ -362,8 +334,9 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
 bool he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
     key_debounce_t *key_info = &debounce_matrix[row][col];
     bool previously_pressed = key_info->debounced_state;
-    bool currently_pressed = sensor_value > he_key_configs[sensor_id].he_actuation_threshold;
-    bool should_release = sensor_value < he_key_configs[sensor_id].he_release_threshold;
+    uint8_t rescaled_value = rescale(sensor_value, sensor_id);
+    bool currently_pressed = rescaled_value > he_key_configs[sensor_id].he_actuation_threshold;
+    bool should_release = rescaled_value < he_key_configs[sensor_id].he_release_threshold;
 
     if (currently_pressed && !previously_pressed) {
         if (latest_pressed == 0) {
@@ -431,6 +404,10 @@ bool he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t 
 bool he_matrix_scan(void) {
     bool updated = false;
 
+    if (he_config.he_calibration_mode) {
+        noise_ceiling_calibration();
+        return false;
+    }
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
         uint8_t row = sensor_to_matrix_map[i].row;
@@ -452,11 +429,6 @@ bool he_matrix_scan(void) {
             }
         }
     }
-
-    if (he_config.he_calibration_mode) {
-        noise_ceiling_calibration();
-    }
-
     return updated;
 }
 
@@ -505,7 +477,7 @@ void he_matrix_print(void) {
         char buffer[512]; // Adjust buffer size if needed
 
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
-        uint16_t rescale_test_value = rescale(he_readkey_raw(sensor_id), sensor_id);
+        uint8_t rescale_test_value = rescale(he_readkey_raw(sensor_id), sensor_id);
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;
 
@@ -535,7 +507,7 @@ void he_matrix_print_extended(void) {
         uint16_t sensor_value = he_readkey_raw(i);
         uint16_t noise_floor = he_key_configs[i].noise_floor;
         uint16_t noise_ceiling = he_key_configs[i].noise_ceiling;
-        uint16_t rescale_test_value = rescale(he_readkey_raw(i), i);
+        uint8_t rescale_test_value = rescale(he_readkey_raw(i), i);
 
         add_sensor_sample(i, sensor_value);
 
@@ -587,7 +559,7 @@ void he_matrix_print_rapid_trigger(void) {
         uint16_t sensor_value = he_readkey_raw(i); // This reads the raw sensor value
         uint16_t noise_floor = he_key_configs[i].noise_floor;
         uint16_t noise_ceiling = he_key_configs[i].noise_ceiling; // Fetch switch ceiling
-        uint16_t rescale_test_value = rescale(he_readkey_raw(i), i);
+        uint8_t rescale_test_value = rescale(he_readkey_raw(i), i);
         // Continue to add the current sensor value to samples for statistical calculations
         add_sensor_sample(i, sensor_value);
 
@@ -630,7 +602,7 @@ void he_matrix_print_rapid_trigger_debug(void) {
 
     key_debounce_t *key_info = &debounce_matrix[row][col];
     uint16_t sensor_value = he_readkey_raw(i); // This reads the raw sensor value
-    uint16_t rescale_test_value = rescale(he_readkey_raw(i), i);
+    uint8_t rescale_test_value = rescale(he_readkey_raw(i), i);
 
 
     uprintf("i: %d, sensor: %d, rescale: %d, deadzone: %d, engage: %d, disengage: %d, boundary: %d, debounced_state: %d, debounce_counter: %d\n",

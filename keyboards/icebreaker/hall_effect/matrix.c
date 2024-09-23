@@ -8,25 +8,21 @@
 matrix_row_t raw_matrix[MATRIX_ROWS]; // raw values
 matrix_row_t matrix[MATRIX_ROWS];     // debounced values
 
-uint8_t console_output = 2;
-
 __attribute__((weak)) void matrix_init_kb(void) { matrix_init_user(); }
 __attribute__((weak)) void matrix_scan_kb(void) { matrix_scan_user(); }
 __attribute__((weak)) void matrix_init_user(void) {}
 __attribute__((weak)) void matrix_scan_user(void) {}
 
-
+uint8_t console_output = 2;
 
 void matrix_print(void) {
     he_matrix_print();
 }
 
 void matrix_init(void) {
-
     he_init(he_key_configs, SENSOR_COUNT);
-
-    //dummy call
-    matrix_init_kb();
+    
+    matrix_init_kb(); //dummy call
 
     wait_ms(5);
 
@@ -38,7 +34,7 @@ void matrix_init(void) {
 uint8_t matrix_scan(void) {
     int updated = he_matrix_scan();  // Updated function call and type
 
-    if (console_output == 0) { //for web app
+    if (console_output == 0) {
         /*do nothing*/
     }
     else if (console_output == 1) { //for web app
@@ -55,7 +51,7 @@ uint8_t matrix_scan(void) {
             he_matrix_print_extended();
         }
     }
-    else if (console_output == 3) { //both but slow
+    else if (console_output == 3) { //todo REMOVE // both but slow
         static int cnt = 0;
         static int cnt2 = 0;
         if (cnt++ == 500) {

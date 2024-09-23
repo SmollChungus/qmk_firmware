@@ -13,27 +13,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-//config.h
 #pragma once
 
 // Corrected PWM + DMA setup
 
 #define WS2812_PWM_DRIVER PWMD1  // Timer 1 corresponds to PWMD1
 #define WS2812_PWM_CHANNEL 1
-#define WS2812_PWM_PAL_MODE 2
+#define WS2812_PWM_PAL_MODE 1
 #define WS2812_PWM_DMA_STREAM STM32_DMA2_STREAM6
-#define WS2812_PWM_DMA_CHANNEL 6
+#define WS2812_PWM_DMA_CHANNEL 0
 
 
+// Define the pin connected to the data line of the WS2812 LEDs
+#define WS2812_DI_PIN A8  // Ensure this matches the pin in your hardware
 
 
+// Set maximum brightness if desired (0-255)
+#define RGBLIGHT_LIMIT_VAL 120  // Adjust as needed
 
 //debug stuff
 #define CONSOLE_VERBOSITY 1 //undef to turn of
-#define DEBUG_MATRIX_SCAN_RATE
+//#define DEBUG_MATRIX_SCAN_RATE
 
-
-//#define matrix_shenanigans
 
 //
 #define MATRIX_ROWS 5
@@ -48,19 +49,19 @@
     { B3, B4, B6, B5 }
 
 #define ANALOG_PORT A3
-#define EECONFIG_KB_DATA_SIZE 5 //
+#define EECONFIG_KB_DATA_SIZE 4 //
 #define WEAR_LEVELING_LOGICAL_SIZE 2048
 #define WEAR_LEVELING_BACKING_SIZE 16384
 
 // User config
-#define DEFAULT_ACTUATION_LEVEL 575
-#define DEFAULT_RELEASE_LEVEL 565
+#define DEFAULT_ACTUATION_LEVEL 50
+#define DEFAULT_RELEASE_LEVEL 30
 #define DEBOUNCE_THRESHOLD 5
 
 
 // Rapid Trigger config
-#define DEFAULT_DEADZONE_RT 565
-#define DEFAULT_RELEASE_DISTANCE_RT 20
+#define DEFAULT_DEADZONE_RT 15
+#define DEFAULT_RELEASE_DISTANCE_RT 5
 
 //
 #define GEON_RAW_HE
@@ -74,15 +75,6 @@
 // Calibration setup
 #define NOISE_FLOOR_SAMPLE_COUNT 10
 
-#ifdef RAW_ENABLE
-#define MATRIX_STATE_REPORT_ID 0x01
-#define SENSOR_VALUE_REPORT_ID_BASE 0x02 // Base for sensor value reports
-#define MATRIX_STATE_REPORT_SIZE 32
-#define SENSOR_REPORT_SIZE 32
-#define SENSORS_PER_REPORT 15
-#define REPORT_INTERVAL_MS 500
-#define NUM_SENSOR_REPORTS 5
-#endif
 
 
 

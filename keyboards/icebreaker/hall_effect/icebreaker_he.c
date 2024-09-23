@@ -10,7 +10,7 @@ void keyboard_post_init_kb(void) {
 }
 
 
-// is this ever called actually?????
+// is this ever called actually????? // no but triplwxhwxk
 void via_update_config(void) {
     // Update runtime configuration
     if (via_he_key_configs[0].he_actuation_threshold == 0 && via_he_key_configs[0].he_release_threshold == 0) {

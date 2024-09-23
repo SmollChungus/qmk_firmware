@@ -73,40 +73,40 @@ typedef struct {
 
 // Thresholds are stored per key atm - but configured globally
 typedef struct {
-    uint16_t he_actuation_threshold;
-    uint16_t he_release_threshold;
+    uint8_t he_actuation_threshold;
+    uint8_t he_release_threshold;
     uint16_t noise_floor;
     uint16_t noise_ceiling;
 } he_key_config_t;
 
 typedef struct {
-    uint16_t deadzone;
-    uint16_t rt_actuation_point;
-    uint16_t boundary_value;
-    uint16_t engage_distance;
-    uint16_t disengage_distance;
+    uint8_t deadzone;
+    uint8_t rt_actuation_point;
+    uint8_t boundary_value;
+    uint8_t engage_distance;
+    uint8_t disengage_distance;
 } he_key_rapid_trigger_config_t;
 
 typedef struct {
-    uint16_t deadzone;
-    uint16_t rt_actuation_point;
-    uint16_t boundary_value;
-    uint16_t engage_distance;
-    uint16_t disengage_distance;
+    uint8_t deadzone;
+    uint8_t rt_actuation_point;
+    uint8_t boundary_value;
+    uint8_t engage_distance;
+    uint8_t disengage_distance;
 } eeprom_he_key_rapid_trigger_config_t;
 
 typedef struct {
-    uint16_t he_actuation_threshold;
-    uint16_t he_release_threshold;
+    uint8_t he_actuation_threshold;
+    uint8_t he_release_threshold;
     uint16_t noise_floor;
     uint16_t noise_ceiling;
 } eeprom_he_key_config_t;
 
 typedef struct {
-    uint16_t he_actuation_threshold; 
-    uint16_t he_release_threshold;   
-    uint16_t noise_floor;
-    uint16_t noise_ceiling;
+    uint8_t he_actuation_threshold; 
+    uint8_t he_release_threshold;   
+    uint16_t noise_floor; //delete?
+    uint16_t noise_ceiling; //delete?
 } via_he_key_config_t;
 
 typedef struct {
@@ -132,17 +132,17 @@ extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 extern he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
 extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT]; 
 
-/*
-_Static_assert(sizeof(eeprom_he_config) + sizeof(eeprom_he_key_configs) > EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
+
+_Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
 _Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
-*/
+
 
 int       he_init(he_key_config_t he_key_configs[], size_t count);;
 int       compare_uint16(const void *a, const void *b);
 bool      he_matrix_scan(void);
 uint16_t  he_readkey_raw(uint8_t sensorIndex);
 uint16_t  noise_floor[SENSOR_COUNT];
-uint16_t  sensor_value_rescaled;
+uint8_t  sensor_value_rescaled;
 bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 bool      he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 bool      he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);

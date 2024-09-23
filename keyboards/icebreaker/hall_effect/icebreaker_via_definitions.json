@@ -1,8 +1,9 @@
 {
     "name": "Icebreaker",
     "vendorId": "0x5363",
-    "productId": "0x0009",
+    "productId": "0x0010",
     "menus": [
+        "qmk_rgblight",
       {
           "label": "HE Tools",
           "content": [
@@ -13,8 +14,8 @@
                                   "label": "Actuation Threshold",
                                   "type": "range",
                                   "options": [
-                                      570,
-                                      720
+                                      10,
+                                      90
                                   ],
                                   "content": [
                                       "id_via_he_actuation_threshold",
@@ -26,8 +27,8 @@
                                   "label": "Release Threshold(set lower than Actuation Threshold)",
                                   "type": "range",
                                   "options": [
-                                      570,
-                                      720
+                                      10,
+                                      90
                                   ],
                                   "content": [
                                       "id_via_he_release_threshold",
@@ -62,7 +63,6 @@
                                   "type": "button",
                                   "options": [
                                       0
-
                                   ],
                                   "content": [
                                       "id_save_threshold_data",
@@ -86,14 +86,14 @@
                       {
                           "label": "Rapid Trigger Mode Enable",
                           "type": "toggle",
-                          "content": ["id_custom_set_value", 0, 6]
+                          "content": ["id_toggle_actuation_mode", 0, 6]
                       },
                       {
                       "label": "Rapid Trigger Deadzone",
                       "type": "range",
                       "options": [
-                          570,
-                          720
+                          10,
+                          60
                       ],
                       "content": [
                           "id_set_rapid_trigger_deadzone",
@@ -105,8 +105,8 @@
                       "label": "Rapid Trigger Engage Distance",
                       "type": "range",
                       "options": [
-                          10,
-                          100
+                          2,
+                          20
                       ],
                       "content": [
                           "id_set_rapid_trigger_engage_distance",
@@ -118,8 +118,8 @@
                       "label": "Rapid Trigger Disengage Distance",
                       "type": "range",
                       "options": [
-                          10,
-                          100
+                          2,
+                          20
                       ],
                       "content": [
                           "id_set_rapid_trigger_disengage_distance",

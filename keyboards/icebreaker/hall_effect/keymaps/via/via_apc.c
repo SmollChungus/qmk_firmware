@@ -21,6 +21,8 @@
 #include "config.h"
 #include "print.h"
 #include "eeprom.h"
+#include "rgblight.h"
+
 
 #ifdef VIA_ENABLE
 
@@ -42,8 +44,15 @@ enum via_he_enums {
 
 
     // On Keyboard startup
-__attribute__((weak)) void keyboard_post_init_user(void) {}
 
+void keyboard_post_init_user(void) {
+    // Ensure rgblight is reinitialized
+    extern bool is_rgblight_initialized;
+    is_rgblight_initialized = false;
+
+    // Manually initialize the RGB lighting
+    rgblight_init();
+}
 
 void via_he_config_get_value(uint8_t *data);
 
@@ -52,56 +61,53 @@ void via_he_config_send_value(uint8_t value_id, uint16_t value) {
     data[0] = value_id;
     data[1] = (uint8_t)(value >> 8); // High byte
     data[2] = (uint8_t)(value & 0xFF); // Low byte
-    via_he_config_get_value(data);
+    via_he_config_get_value(data); // todo is this needed??
 }
 
 
 // Handle the data received by the keyboard from the VIA menus
 void via_he_config_set_value(uint8_t *data) {
+    uint8_t value_id   = data[0];
+    uint8_t value_data = data[1];
 
-    // data = [ value_id, value_data ]
-    uint8_t *value_id   = &(data[0]);
-    uint8_t *value_data = &(data[1]);
-    uprintf("Setting config value. ID: %d\n", data[0]);
+    uprintf("Setting config value. ID: %d, Value: %d\n", value_id, value_data);
 
-    switch (*value_id) {
+    switch (value_id) {
         case id_via_he_actuation_threshold: {
-            uint16_t actuation_value = value_data[1] | (value_data[0] << 8);
-            for (int i = 0; i < SENSOR_COUNT; i++) {
-                // Ensure actuation threshold is less than release threshold
-                if (actuation_value > via_he_key_configs[i].he_release_threshold) {
-                    via_he_key_configs[i].he_actuation_threshold = actuation_value;
-                    uprintf("[SYSTEM]: Actuation threshold for sensor %d set to: %d\n", i, actuation_value);
-                } else {
-                    uprintf("[SYSTEM]: Invalid actuation threshold value: %d for sensor %d. It must be less than release threshold %d.\n",
-                            actuation_value, i, via_he_key_configs[i].he_release_threshold);
-                    // Adjust the actuation threshold to be slightly less than the release threshold
-                    via_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_release_threshold - 1;
-                    uprintf("[SYSTEM]: Actuation threshold for sensor %d adjusted to: %d\n",
-                            i, via_he_key_configs[i].he_actuation_threshold);
-                    // Send the corrected value back to VIA
-                    via_he_config_send_value(id_via_he_actuation_threshold, via_he_key_configs[i].he_actuation_threshold);
+            if (value_data >= 10 && value_data <= 90) {
+                for (int i = 0; i < SENSOR_COUNT; i++) {
+                    if (value_data > via_he_key_configs[i].he_release_threshold) {
+                        via_he_key_configs[i].he_actuation_threshold = value_data;
+                        uprintf("[SYSTEM]: Actuation threshold for sensor %d set to: %d\n", i, value_data);
+                    } else {
+                        uprintf("[SYSTEM]: Invalid actuation threshold value: %d for sensor %d. It must be greater than release threshold %d.\n",
+                                value_data, i, via_he_key_configs[i].he_release_threshold);
+                        via_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_release_threshold + 1;
+                        uprintf("[SYSTEM]: Actuation threshold for sensor %d adjusted to: %d\n",
+                                i, via_he_key_configs[i].he_actuation_threshold);
+                    }
                 }
+            } else {
+                uprintf("[SYSTEM]: Invalid actuation threshold value: %d. It must be between 10 and 90.\n", value_data);
             }
             break;
         }
         case id_via_he_release_threshold: {
-            uint16_t release_value = value_data[1] | (value_data[0] << 8);
-            for (int i = 0; i < SENSOR_COUNT; i++) {
-                // Ensure release threshold is more than actuation threshold
-                if (release_value < via_he_key_configs[i].he_actuation_threshold) {
-                    via_he_key_configs[i].he_release_threshold = release_value;
-                    uprintf("[SYSTEM]: Release threshold for sensor %d set to: %d\n", i, release_value);
-                } else {
-                    uprintf("[SYSTEM]: Invalid release threshold value: %d for sensor %d. It must be greater than actuation threshold %d.\n",
-                            release_value, i, via_he_key_configs[i].he_actuation_threshold);
-                    // Adjust the release threshold to be slightly more than the actuation threshold
-                    via_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_actuation_threshold - 10;
-                    uprintf("[SYSTEM]: Release threshold for sensor %d adjusted to: %d\n",
-                            i, via_he_key_configs[i].he_release_threshold);
-                    // Send the corrected value back to VIA
-                    via_he_config_send_value(id_via_he_release_threshold, via_he_key_configs[i].he_release_threshold);
+            if (value_data >= 10 && value_data <= 90) {
+                for (int i = 0; i < SENSOR_COUNT; i++) {
+                    if (value_data < via_he_key_configs[i].he_actuation_threshold) {
+                        via_he_key_configs[i].he_release_threshold = value_data;
+                        uprintf("[SYSTEM]: Release threshold for sensor %d set to: %d\n", i, value_data);
+                    } else {
+                        uprintf("[SYSTEM]: Invalid release threshold value: %d for sensor %d. It must be less than actuation threshold %d.\n",
+                                value_data, i, via_he_key_configs[i].he_actuation_threshold);
+                        via_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_actuation_threshold - 1;
+                        uprintf("[SYSTEM]: Release threshold for sensor %d adjusted to: %d\n",
+                                i, via_he_key_configs[i].he_release_threshold);
+                    }
                 }
+            } else {
+                uprintf("[SYSTEM]: Invalid release threshold value: %d. It must be between 10 and 90.\n", value_data);
             }
             break;
         }
@@ -122,7 +128,7 @@ void via_he_config_set_value(uint8_t *data) {
             print("[SYSTEM]: Calibration started, fully press each key on the board!\nBe sure to end the calibration in VIA with the button once you're done.\n");
             he_config.he_calibration_mode = true; // Enable calibration mode
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                he_key_configs[i].noise_ceiling = 550;
+                he_key_configs[i].noise_ceiling = 570;
             }
             noise_ceiling_calibration();
             noise_floor_calibration();
@@ -141,88 +147,87 @@ void via_he_config_set_value(uint8_t *data) {
             break;
         }
         case id_toggle_actuation_mode: {
-            he_config.he_actuation_mode = value_data[0];
-            uprintf("[SYSTEM]: Actuation mode toggled! mode: %d\n",he_config.he_actuation_mode);
+            he_config.he_actuation_mode = value_data;
+            uprintf("[SYSTEM]: Actuation mode toggled! mode: %d\n", he_config.he_actuation_mode);
             break;
         }
         case id_set_rapid_trigger_deadzone: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                he_key_rapid_trigger_configs[i].deadzone = value_data[1] | (value_data[0] << 8);
+                he_key_rapid_trigger_configs[i].deadzone = value_data;
                 eeconfig_update_user_datablock(&eeprom_he_key_configs);
             }
-
-            uprintf("[SYSTEM]: Rapid Trigger Deadzone set to: %d\n",he_key_rapid_trigger_configs[0].deadzone);
+            uprintf("[SYSTEM]: Rapid Trigger Deadzone set to: %d\n", he_key_rapid_trigger_configs[0].deadzone);
             break;
         }
         case id_set_rapid_trigger_engage_distance: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                he_key_rapid_trigger_configs[i].engage_distance = value_data[0];
+                he_key_rapid_trigger_configs[i].engage_distance = value_data;
             }
-            uprintf("[SYSTEM]: Rapid Trigger Engage Distance set to: %d\n",he_key_rapid_trigger_configs[0].engage_distance);
+            uprintf("[SYSTEM]: Rapid Trigger Engage Distance set to: %d\n", he_key_rapid_trigger_configs[0].engage_distance);
             break;
         }
         case id_set_rapid_trigger_disengage_distance: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                he_key_rapid_trigger_configs[i].disengage_distance = value_data[0];
+                he_key_rapid_trigger_configs[i].disengage_distance = value_data;
             }
-            uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n",he_key_rapid_trigger_configs[0].disengage_distance);
+            uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n", he_key_rapid_trigger_configs[0].disengage_distance);
             break;
         }
         case id_set_key_cancel: {
-            he_config.he_keycancel = true;
-            uprintf("[SYSTEM]: Key Cancelation Mode toggled: %d", he_config.he_keycancel);
+            he_config.he_actuation_mode = value_data;
+            uprintf("[SYSTEM]: Key Cancelation Mode toggled: %d", he_config.he_keycancel); //todo fix this
         }
     }
 }
 
 void via_he_config_get_value(uint8_t *data) {
-    // data = [ value_id, value_data ]
-    uint8_t *value_id   = &(data[0]);
+    uint8_t value_id   = data[0];
     uint8_t *value_data = &(data[1]);
 
-    // Initialize the value_data to zero before using it to ensure clean data handling
-    value_data[0] = 0;
-    value_data[1] = 0;
+    uprintf("[SYSTEM]: Getting config value. ID: %d\n", value_id);
 
-    uprintf("[SYSTEM]: Getting config value. ID: %d, Current data: %d\n", *value_id, *value_data);
-
-    switch (*value_id) {
-        case id_via_he_actuation_threshold: {
-            // Convert 16-bit threshold value into two 8-bit segments
-            value_data[0] = he_key_configs[0].he_actuation_threshold >> 8; // High byte
-            value_data[1] = he_key_configs[0].he_actuation_threshold & 0xFF; // Low byte
-            uprintf("via_he_config_get_value with (%d , %d) id_via_he_actuation_threshold\n", value_data[0], value_data[1]);
+    switch (value_id) {
+        case id_via_he_actuation_threshold:
+            *value_data = he_key_configs[0].he_actuation_threshold;
+            uprintf("via_he_config_get_value with (%d) id_via_he_actuation_threshold\n", *value_data);
             break;
-        }
-        case id_via_he_release_threshold: {
-            value_data[0] = he_key_configs[0].he_release_threshold >> 8; // High byte
-            value_data[1] = he_key_configs[0].he_release_threshold & 0xFF; // Low byte
-            uprintf("via_he_config_get_value with (%d , %d) id_via_he_release_threshold\n", value_data[0], value_data[1]);
+        case id_via_he_release_threshold:
+            *value_data = he_key_configs[0].he_release_threshold;
+            uprintf("via_he_config_get_value with (%d) id_via_he_release_threshold\n", *value_data);
             break;
-        }
-        case id_toggle_actuation_mode: {
+        case id_start_calibration:
+            uprintf("Button action requested - id (%d)\n", value_id);
+            break;
+        case id_save_threshold_data:
+            // These are button actions, so we don't need to return a value
+            uprintf("Button action requested - id (%d)\n", value_id);
+            break;
+        case id_set_key_cancel:
+            value_data[0] = he_config.he_keycancel ? 1 : 0;
+            uprintf("Key cancel mode requested - id, data (%d , %d)\n", value_id, value_data[0]);
+            break;
+        case id_toggle_actuation_mode:
             value_data[0] = he_config.he_actuation_mode;
-            uprintf("Actuation mode requested - id, data (%d , %d)\n", *value_id, value_data[0]);
+            uprintf("Actuation mode requested - id, data (%d , %d)\n", value_id, value_data[0]);
             break;
-        }
         case id_set_rapid_trigger_deadzone: {
             value_data[0] = he_key_rapid_trigger_configs[0].deadzone >> 8;
             value_data[1] = he_key_rapid_trigger_configs[0].deadzone & 0xFF;
-            uprintf("Deadzone requested - id, data (%d, %d %d)\n", *value_id, value_data[0], value_data[1]);
+            uprintf("Deadzone requested - id, data (%d, %d %d)\n", value_id, value_data[0], value_data[1]);
             break;
         }
         case id_set_rapid_trigger_engage_distance: {
             value_data[0] = he_key_rapid_trigger_configs[0].engage_distance & 0xFF;
-            uprintf("Release distance requested - id, data (%d, %d %d)\n", *value_id, value_data[0], value_data[1]);
+            uprintf("Engage distance requested - id, data (%d, %d %d)\n", value_id, value_data[0], value_data[1]);
             break;
         }
         case id_set_rapid_trigger_disengage_distance: {
             value_data[0] = he_key_rapid_trigger_configs[0].disengage_distance & 0xFF;
-            uprintf("Release distance requested - id, data (%d, %d %d)\n", *value_id, value_data[0], value_data[1]);
+            uprintf("Release distance requested - id, data (%d, %d %d)\n", value_id, value_data[0], value_data[1]);
             break;
         }
         default:
-            uprintf("Unhandled ID %d in via_he_config_get_value\n", *value_id);
+            uprintf("Unhandled ID %d in via_he_config_get_value\n", value_id);
     }
 }
 
