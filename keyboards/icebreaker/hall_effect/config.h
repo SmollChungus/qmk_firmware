@@ -1,39 +1,40 @@
-/* Copyright 2024 Matthijs Muller
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// config.h
+
 #pragma once
 
-// Corrected PWM + DMA setup
 
-#define WS2812_PWM_DRIVER PWMD1  // Timer 1 corresponds to PWMD1
+// PWM + DMA setup on PA8
+#define WS2812_DI_PIN A8
+
+#define WS2812_PWM_DRIVER PWMD1
 #define WS2812_PWM_CHANNEL 1
 #define WS2812_PWM_PAL_MODE 1
-#define WS2812_PWM_DMA_STREAM STM32_DMA2_STREAM6
-#define WS2812_PWM_DMA_CHANNEL 0
+#define WS2812_PWM_DMA_STREAM STM32_DMA2_STREAM5
+#define WS2812_PWM_DMA_CHANNEL 6
+//#define WS2812_PWM_COMPLEMENTARY_OUTPUT
+
+/* PWM + DMA setup on PB1 -- setup works after jumping to B1
+#define WS2812_DI_PIN B1
+
+#define WS2812_PWM_DRIVER PWMD3
+#define WS2812_PWM_CHANNEL 4
+#define WS2812_PWM_PAL_MODE 2
+#define WS2812_DMA_STREAM STM32_DMA1_STREAM2
+#define WS2812_DMA_CHANNEL 5
+*/
 
 
-// Define the pin connected to the data line of the WS2812 LEDs
-#define WS2812_DI_PIN A8  // Ensure this matches the pin in your hardware
 
 
-// Set maximum brightness if desired (0-255)
-#define RGBLIGHT_LIMIT_VAL 120  // Adjust as needed
+// RGB Defaults
+#define RGBLIGHT_DEFAULT_MODE RGBLIGHT_MODE_STATIC_LIGHT
+#define RGBLIGHT_DEFAULT_HUE 0
+#define RGBLIGHT_DEFAULT_SAT 0
+#define RGBLIGHT_DEFAULT_VAL 100
 
 //debug stuff
 #define CONSOLE_VERBOSITY 1 //undef to turn of
-//#define DEBUG_MATRIX_SCAN_RATE
+#define DEBUG_MATRIX_SCAN_RATE
 
 
 //
