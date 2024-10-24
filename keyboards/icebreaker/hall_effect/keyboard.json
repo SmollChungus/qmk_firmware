@@ -11,7 +11,7 @@
         "bootmagic": false,
         "console": true,
         "extrakey": true,
-        "rgb_light": true,
+        "rgblight": true,
         "nkro": true,
         "encoder": true
     },
@@ -31,25 +31,16 @@
         ]
     },
     "ws2812": {
-        "pin": "A8",
         "driver": "pwm"
     },
     "rgblight": {
         "animations": {
-            "alternating": true,
-            "breathing": true,
-            "christmas": true,
-            "knight": true,
-            "rainbow_mood": true,
-            "rainbow_swirl": true,
-            "rgb_test": true,
-            "snake": true,
-            "static_gradient": true,
-            "twinkle": true
+            "breathing": true
         },
         "brightness_steps": 10,
         "led_count": 68,
-        "saturation_steps": 8
+        "saturation_steps": 8,
+        "max_brightness": 100
     },
 
     "layouts": {

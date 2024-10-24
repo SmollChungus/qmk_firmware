@@ -14,14 +14,13 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 //Credit to Cipulot's EC boards as a foundation for HE VIA intergration
-//keyboards/he2x2/keymaps/via/via_apc.c
+//keyboards/icebreaker/keymaps/via/via_apc.c
 #include "he_switch_matrix.h"
 #include "action.h"
 #include "via.h"
 #include "config.h"
 #include "print.h"
 #include "eeprom.h"
-#include "rgblight.h"
 
 
 #ifdef VIA_ENABLE
@@ -46,12 +45,6 @@ enum via_he_enums {
     // On Keyboard startup
 
 void keyboard_post_init_user(void) {
-    // Ensure rgblight is reinitialized
-    extern bool is_rgblight_initialized;
-    is_rgblight_initialized = false;
-
-    // Manually initialize the RGB lighting
-    rgblight_init();
 }
 
 void via_he_config_get_value(uint8_t *data);
@@ -174,7 +167,7 @@ void via_he_config_set_value(uint8_t *data) {
             break;
         }
         case id_set_key_cancel: {
-            he_config.he_actuation_mode = value_data;
+            he_config.he_keycancel = value_data;
             uprintf("[SYSTEM]: Key Cancelation Mode toggled: %d", he_config.he_keycancel); //todo fix this
         }
     }

@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+//keymap.c
 #include QMK_KEYBOARD_H
 #include "he_switch_matrix.h"
 
@@ -47,11 +47,35 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12, _______,  _______,  QK_BOOT,
         _______,  APCM,  RTM, _______, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
         _______,  KCM_ON,  KCM_OFF,  KCM_TOG, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
-        _______,  VERB1, VERB5,  VERB0,  _______, _______,  _______,  _______,  _______,  _______,   _______,  KC_MPLY,             KC_VOLU,  _______,
-        _______,  _______,  _______,  _______,                                         _______,  _______,                           KC_MPRV,  KC_VOLD,  KC_MNXT
+        _______,  VERB1, VERB5,  VERB0,  _______, _______,  _______,  _______,  _______,  _______,   _______,  KC_MPLY,             RGB_HUI,  _______,
+        _______,  _______,  _______,  _______,                                         _______,  _______,                           RGB_TOG,  RGB_HUD,  KC_MNXT
     )
 
 };
+
+// Blinking variables
+static bool is_blinking = false;
+static uint8_t blink_count = 0;
+static uint16_t blink_timer = 0;
+static uint8_t blink_hue = 0;
+static uint8_t blink_leds[] = {28, 32, 33, 34}; // LEDs to blink (adjust indices as needed)
+
+static uint8_t saved_mode;
+static HSV saved_hsv;
+
+void start_mode_blink(uint8_t hue) {
+    // Save current RGB settings using API functions
+    saved_mode = rgblight_get_mode();
+    saved_hsv = rgblight_get_hsv();
+
+    // Start the blinking process
+    is_blinking = true;
+    blink_count = 6; // Total on/off cycles
+    blink_timer = timer_read();
+    blink_hue = hue;
+}
+
+
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -103,6 +127,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[PCB_SETTINGS]: APC MODE\n");
                 he_config.he_actuation_mode = 0;
                 eeprom_he_config.he_actuation_mode = 0;
+                
+                start_mode_blink(85); // green
             }
             return false;
 
@@ -112,6 +138,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[PCB_SETTINGS]: RT MODE\n");
                 he_config.he_actuation_mode = 1;
                 eeprom_he_config.he_actuation_mode = 1;
+
+                // Start blinking in red hue for RT mode
+                start_mode_blink(0); // 0 is red in HSV
             }
             return false;
 
@@ -142,3 +171,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return true;
     }
 }
+
+void matrix_scan_user(void) {
+    if (is_blinking) {
+        if (timer_elapsed(blink_timer) > 200) { // Adjust timing as needed
+            // Toggle LEDs
+            bool leds_on = (blink_count % 2 == 0);
+            for (uint8_t i = 0; i < sizeof(blink_leds); i++) {
+                uint8_t led_index = blink_leds[i];
+                if (leds_on) {
+                    // Turn on LED with specified hue
+                    rgblight_sethsv_at(blink_hue, 255, 255, led_index);
+                } else {
+                    // Turn off LED
+                    rgblight_sethsv_at(0, 0, 0, led_index);
+                }
+            }
+            rgblight_set();
+            blink_count--;
+            blink_timer = timer_read();
+
+            if (blink_count == 0) {
+                // Blinking finished
+                is_blinking = false;
+                // Restore previous RGB settings
+                rgblight_mode_noeeprom(saved_mode);
+                rgblight_sethsv_noeeprom(saved_hsv.h, saved_hsv.s, saved_hsv.v);
+                rgblight_set();
+            }
+
+        }
+    }
+}
+
