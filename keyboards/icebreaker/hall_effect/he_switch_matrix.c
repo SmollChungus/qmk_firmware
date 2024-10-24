@@ -21,7 +21,7 @@
 #include "math.h"
 #include "timer.h" // Debugging
 #include "raw_hid.h"
-
+#include "custom_rgb.h"
 
 
 #ifdef VIA_ENABLE
@@ -148,6 +148,7 @@ void noise_ceiling_calibration(void) {
         return;
     }
     const uint8_t NUM_READINGS = 5;  // todo move to config.h
+    bool led_trigger = false;
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint16_t range = he_key_configs[i].noise_ceiling - he_key_configs[i].noise_floor;
@@ -164,12 +165,15 @@ void noise_ceiling_calibration(void) {
         // Update ceiling if the average reading is above the ceiling range
         if (average_value > ceiling_range) {
             he_key_configs[i].noise_ceiling = average_value;
+            update_calibration_rgb(i, average_value);
+            led_trigger  = true;
             printf("Updated ceiling for sensor %d to %d\n", i, average_value);
         }
     }
 
-
-    // This loop continuously updates the ceiling values
+    if (led_trigger) {
+        apply_calibration_changes_rgb();
+    }
 }
 
 int he_init(he_key_config_t he_key_configs[], size_t count) {
@@ -282,15 +286,24 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
     uint8_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone;
     uint8_t disengage_distance = he_key_rapid_trigger_configs[sensor_id].disengage_distance;
     uint8_t engage_distance = he_key_rapid_trigger_configs[sensor_id].engage_distance;
-    uint8_t hysteresis_margin = 5;
+    uint8_t hysteresis_margin = 8;
     uint8_t* boundary_value = &he_key_rapid_trigger_configs[sensor_id].boundary_value;
 
     uint8_t rescaled_value = rescale(sensor_value, sensor_id);
 
-    bool currently_pressed = rescaled_value > (*boundary_value + hysteresis_margin);
-    bool should_release = rescaled_value < (*boundary_value - disengage_distance - hysteresis_margin);
+    if (rescaled_value <= (deadzone - hysteresis_margin)) {
+        key_info->debounced_state = false;
+        *boundary_value = deadzone;
+        current_matrix[row] &= ~(1UL << col);
+        key_info->debounce_counter = 0;
+        return true;
+    }
 
-    if (rescaled_value > deadzone + hysteresis_margin) {
+    // Only process if we're above deadzone + hysteresis
+    if (rescaled_value > (deadzone + hysteresis_margin)) {
+        bool currently_pressed = rescaled_value > (*boundary_value + engage_distance);
+        bool should_release = rescaled_value < (*boundary_value - disengage_distance);
+
         if (currently_pressed) {
             if (!key_info->debounced_state) {
                 if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
@@ -300,29 +313,21 @@ bool he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint
                     key_info->debounce_counter = 0;
                     return true;
                 }
-            } else if (key_info->debounced_state && rescaled_value > *boundary_value) {
-                *boundary_value = rescaled_value;
-            }
-        } else if (should_release) {
-            if (key_info->debounced_state) {
-                if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                    key_info->debounced_state = false;
-                    *boundary_value = rescaled_value + engage_distance; // Update boundary for re-engagement
-                    current_matrix[row] &= ~(1UL << col);
-                    key_info->debounce_counter = 0;
-                    return true;
-                }
             } else {
-                *boundary_value = rescaled_value + engage_distance; // Prepare boundary for next press
+                // Update boundary only if we detect significant movement upward
+                if (rescaled_value > (*boundary_value + hysteresis_margin)) {
+                    *boundary_value = rescaled_value;
+                }
+            }
+        } else if (should_release && key_info->debounced_state) {
+            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+                key_info->debounced_state = false;
+                *boundary_value = rescaled_value + engage_distance;
+                current_matrix[row] &= ~(1UL << col);
+                key_info->debounce_counter = 0;
+                return true;
             }
         } else {
-            key_info->debounce_counter = 0;
-        }
-    } else {
-        if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-            key_info->debounced_state = false;
-            *boundary_value = deadzone + hysteresis_margin;
-            current_matrix[row] &= ~(1UL << col);
             key_info->debounce_counter = 0;
         }
     }
@@ -335,181 +340,65 @@ bool he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t 
     uint8_t rescaled_value = rescale(sensor_value, sensor_id);
     bool currently_pressed = rescaled_value > he_key_configs[sensor_id].he_actuation_threshold;
     bool should_release = rescaled_value < he_key_configs[sensor_id].he_release_threshold;
+    static bool a_physically_pressed = false;
+    static bool d_physically_pressed = false;
 
+    // Handle key press
     if (currently_pressed && !previously_pressed) {
-        if (latest_pressed == 0) {
-            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                key_info->debounced_state = true; // Key is pressed
-                current_matrix[row] |= (1UL << col);
-                key_info->debounce_counter = 0;
-                latest_pressed = sensor_id;
-                return true;
+        if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
+            // Update physical state tracking
+            if (sensor_id == 32) a_physically_pressed = true;
+            if (sensor_id == 34) d_physically_pressed = true;
+
+            // Special handling for A and D keys (sensor 32 and 34)
+            if ((sensor_id == 34 && latest_pressed == 32) ||
+                (sensor_id == 32 && latest_pressed == 34)) {
+                // Cancel the previous key
+                uint8_t prev_sensor = (sensor_id == 34) ? 32 : 34;
+                current_matrix[sensor_to_matrix_map[prev_sensor].row] &= ~(1UL << sensor_to_matrix_map[prev_sensor].col);
             }
-        } else if (sensor_id == 34 && latest_pressed == 32 && !cancel_lock) {
-            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                key_info->debounced_state = true; // Key is pressed
-                current_matrix[sensor_to_matrix_map[32].row] &= ~(1UL << sensor_to_matrix_map[32].col); // Release A
-                current_matrix[row] |= (1UL << col); // Press D
-                key_info->debounce_counter = 0;
-                latest_pressed = 34; // ID for D
-                cancel_lock = true;
-                return true;
-            }
-        } else if (sensor_id == 32 && latest_pressed == 34 && !cancel_lock) {
-            if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                key_info->debounced_state = true; // Key is pressed
-                current_matrix[sensor_to_matrix_map[34].row] &= ~(1UL << sensor_to_matrix_map[34].col); // Release D
-                current_matrix[row] |= (1UL << col); // Press A
-                key_info->debounce_counter = 0;
-                latest_pressed = 32; // ID for A
-                cancel_lock = true;
-                return true;
-            }
+
+            // Press the current key
+            key_info->debounced_state = true;
+            current_matrix[row] |= (1UL << col);
+            key_info->debounce_counter = 0;
+            latest_pressed = sensor_id;
+            return true;
         }
-    } else if (should_release && previously_pressed) {
-        // Key release logic
-        key_info->debounced_state = false; // Key is released
+    }
+    // Handle key release
+    else if (should_release && previously_pressed) {
+        // Update physical state tracking
+        if (sensor_id == 32) a_physically_pressed = false;
+        if (sensor_id == 34) d_physically_pressed = false;
+
+        key_info->debounced_state = false;
         current_matrix[row] &= ~(1UL << col);
         key_info->debounce_counter = 0;
 
-        // If the key that was released was the latest pressed key, reset latest_pressed
+        // If releasing the currently active key, check if we should restore the other key
         if (latest_pressed == sensor_id) {
-            latest_pressed = 0;
-
-            // Check if the other key is still physically pressed and resend it
-            if (sensor_id == 34 && debounce_matrix[sensor_to_matrix_map[32].row][sensor_to_matrix_map[32].col].debounced_state) {
-                debounce_matrix[sensor_to_matrix_map[32].row][sensor_to_matrix_map[32].col].debounced_state = true;
-                current_matrix[sensor_to_matrix_map[32].row] |= (1UL << sensor_to_matrix_map[32].col);
-                latest_pressed = 32;
-            } else if (sensor_id == 32 && debounce_matrix[sensor_to_matrix_map[34].row][sensor_to_matrix_map[34].col].debounced_state) {
-                debounce_matrix[sensor_to_matrix_map[34].row][sensor_to_matrix_map[34].col].debounced_state = true;
+            if (sensor_id == 32 && d_physically_pressed) {
+                // If releasing A and D is still physically pressed, restore D
                 current_matrix[sensor_to_matrix_map[34].row] |= (1UL << sensor_to_matrix_map[34].col);
                 latest_pressed = 34;
+            } else if (sensor_id == 34 && a_physically_pressed) {
+                // If releasing D and A is still physically pressed, restore A
+                current_matrix[sensor_to_matrix_map[32].row] |= (1UL << sensor_to_matrix_map[32].col);
+                latest_pressed = 32;
+            } else {
+                latest_pressed = 0;
             }
         }
-
-        cancel_lock = false;
         return true;
-    } else {
-        // Reset debounce counter if the state is stable
+    }
+    else {
         key_info->debounce_counter = 0;
     }
 
     return false;
 }
 
-//very crude but works for now, pls update later!
-bool he_update_key_rapid_trigger_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
-    key_debounce_t *key_info = &debounce_matrix[row][col];
-    uint8_t deadzone = he_key_rapid_trigger_configs[sensor_id].deadzone;
-    uint8_t disengage_distance = he_key_rapid_trigger_configs[sensor_id].disengage_distance;
-    uint8_t engage_distance = he_key_rapid_trigger_configs[sensor_id].engage_distance;
-    uint8_t hysteresis_margin = 5;
-    uint8_t* boundary_value = &he_key_rapid_trigger_configs[sensor_id].boundary_value;
-
-    uint8_t rescaled_value = rescale(sensor_value, sensor_id);
-
-    bool currently_pressed = rescaled_value > (*boundary_value + hysteresis_margin);
-    bool should_release = rescaled_value < (*boundary_value - disengage_distance - hysteresis_margin);
-
-    if (rescaled_value > deadzone + hysteresis_margin) {
-        if (currently_pressed) {
-            if (!key_info->debounced_state) {
-                // Key was not pressed before, now is pressed
-                // Handle keycancel logic
-                if (latest_pressed == 0) {
-                    if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                        key_info->debounced_state = true;
-                        *boundary_value = rescaled_value;
-                        current_matrix[row] |= (1UL << col);
-                        key_info->debounce_counter = 0;
-                        latest_pressed = sensor_id;
-                        return true;
-                    }
-                } else if (((sensor_id == 34 && latest_pressed == 32) || (sensor_id == 32 && latest_pressed == 34)) && !cancel_lock) {
-                    if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                        // Cancel previous key
-                        uint8_t prev_sensor_id = latest_pressed;
-                        uint8_t prev_row = sensor_to_matrix_map[prev_sensor_id].row;
-                        uint8_t prev_col = sensor_to_matrix_map[prev_sensor_id].col;
-
-                        debounce_matrix[prev_row][prev_col].debounced_state = false;
-                        current_matrix[prev_row] &= ~(1UL << prev_col);
-
-                        // Press current key
-                        key_info->debounced_state = true;
-                        current_matrix[row] |= (1UL << col);
-                        key_info->debounce_counter = 0;
-                        latest_pressed = sensor_id;
-                        cancel_lock = true;
-                        return true;
-                    }
-                }
-            } else {
-                // Key is already pressed
-                if (rescaled_value > *boundary_value) {
-                    *boundary_value = rescaled_value;
-                }
-            }
-        } else if (should_release) {
-            if (key_info->debounced_state) {
-                // Key was pressed before, now is releasing
-                if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-                    key_info->debounced_state = false;
-                    *boundary_value = rescaled_value + engage_distance;
-                    current_matrix[row] &= ~(1UL << col);
-                    key_info->debounce_counter = 0;
-
-                    // Handle latest_pressed
-                    if (latest_pressed == sensor_id) {
-                        latest_pressed = 0;
-                        // Check if other key is still pressed
-                        uint8_t other_sensor_id = (sensor_id == 32) ? 34 : 32;
-                        uint8_t other_row = sensor_to_matrix_map[other_sensor_id].row;
-                        uint8_t other_col = sensor_to_matrix_map[other_sensor_id].col;
-                        key_debounce_t *other_key_info = &debounce_matrix[other_row][other_col];
-                        if (other_key_info->debounced_state) {
-                            // Re-press other key
-                            current_matrix[other_row] |= (1UL << other_col);
-                            latest_pressed = other_sensor_id;
-                        }
-                    }
-                    cancel_lock = false;
-                    return true;
-                }
-            } else {
-                // Key is already released
-                *boundary_value = rescaled_value + engage_distance;
-            }
-        } else {
-            key_info->debounce_counter = 0;
-        }
-    } else {
-        // rescaled_value <= deadzone + hysteresis_margin
-        if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-            key_info->debounced_state = false;
-            *boundary_value = deadzone + hysteresis_margin;
-            current_matrix[row] &= ~(1UL << col);
-            key_info->debounce_counter = 0;
-            // Handle latest_pressed
-            if (latest_pressed == sensor_id) {
-                latest_pressed = 0;
-                cancel_lock = false;
-                // Check if other key is still pressed
-                uint8_t other_sensor_id = (sensor_id == 32) ? 34 : 32;
-                uint8_t other_row = sensor_to_matrix_map[other_sensor_id].row;
-                uint8_t other_col = sensor_to_matrix_map[other_sensor_id].col;
-                key_debounce_t *other_key_info = &debounce_matrix[other_row][other_col];
-                if (other_key_info->debounced_state) {
-                    // Re-press other key
-                    current_matrix[other_row] |= (1UL << other_col);
-                    latest_pressed = other_sensor_id;
-                }
-            }
-        }
-    }
-    return false;
-}
 
 
 bool he_matrix_scan(void) {
@@ -519,34 +408,31 @@ bool he_matrix_scan(void) {
         noise_ceiling_calibration();
         return false;
     }
+
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
         uint8_t sensor_id = sensor_to_matrix_map[i].sensor_id;
         uint8_t row = sensor_to_matrix_map[i].row;
         uint8_t col = sensor_to_matrix_map[i].col;
-
         uint16_t sensor_value = he_readkey_raw(sensor_id);
 
         if (he_config.he_actuation_mode == 0) {
-            if (he_config.he_keycancel && (sensor_id == 32 || sensor_id == 34)) { // A and D sensor_id
-                if (he_update_key_keycancel(matrix, row, col, sensor_id, sensor_value)) {
-                    updated = true;
-                }
-            } else if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
-                updated = true;
+            if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
+                   updated = true;
             }
-        } else if (he_config.he_actuation_mode == 1) {
-            if (he_config.he_keycancel && (sensor_id == 32 || sensor_id == 34)) { // A and D sensor_id
-                if (he_update_key_rapid_trigger_keycancel(matrix, row, col, sensor_id, sensor_value)) {
-                    updated = true;
-                }
-            } else if (he_update_key_rapid_trigger(matrix, row, col, sensor_id, sensor_value)) {
+        }
+        else if (he_config.he_actuation_mode == 1) {
+            if (he_update_key_rapid_trigger(matrix, row, col, sensor_id, sensor_value)) {
+            updated = true;
+            }
+        }
+        else if (he_config.he_actuation_mode == 2) {
+            if (he_update_key_keycancel(matrix, row, col, sensor_id, sensor_value)) {
                 updated = true;
             }
         }
     }
     return updated;
 }
-
 
 // Debug stuff
 sensor_data_t sensor_data[SENSOR_COUNT];
@@ -624,7 +510,6 @@ void he_matrix_print_extended(void) {
         uint16_t noise_floor = he_key_configs[i].noise_floor;
         uint16_t noise_ceiling = he_key_configs[i].noise_ceiling;
         uint8_t rescale_test_value = rescale(he_readkey_raw(i), i);
-
         add_sensor_sample(i, sensor_value);
 
         double mean = calculate_mean(i);
@@ -673,7 +558,6 @@ void he_matrix_print_extended(void) {
                 noise_int / 100,
                 abs(noise_int) % 100);
             print(buffer);
-
         }
     }
 }
@@ -756,3 +640,4 @@ void he_matrix_print_rapid_trigger_debug(void) {
 
 
 #endif
+

@@ -53,24 +53,22 @@ typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
-    bool    he_keycancel;
 } he_config_t;
 
 typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
-    bool    he_keycancel;
 } eeprom_he_config_t;
 
-//redundancy to decouple VIA I/O from RT/EEPROM - ton of space on the stm32f411 anyway...
+//redundancy to decouple VIA I/O from runtime/EEPROM
 typedef struct {
     bool    he_calibration_mode;
     bool    he_post_flash;
     uint8_t he_actuation_mode;
 } via_he_config_t;
 
-// Thresholds are stored per key atm - but configured globally
+// Thresholds are stored per key for future use - but configured globally
 typedef struct {
     uint8_t he_actuation_threshold;
     uint8_t he_release_threshold;
@@ -131,6 +129,13 @@ extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 extern he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
 extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT];
 
+#define ACTUATION_MODE_NORMAL 0
+#define ACTUATION_MODE_RAPID_TRIGGER 1
+#define ACTUATION_MODE_KEY_CANCEL 2
+
+extern uint16_t eeprom_save_timer;
+extern bool eeprom_save_pending;
+#define EEPROM_SAVE_DELAY 2000
 
 _Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in EECONFIG_KB_DATA_SIZE");
 _Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "Mismatch in EECONFIG_USER_DATA_SIZE");
@@ -145,7 +150,6 @@ uint8_t  sensor_value_rescaled;
 bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 bool      he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
 bool      he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
-bool      he_update_key_rapid_trigger_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
 void      noise_ceiling_calibration(void);
 void      he_matrix_print(void);
 void      he_matrix_print_extended(void);
@@ -170,3 +174,4 @@ typedef struct {
     uint16_t samples[SAMPLE_COUNT];
     uint8_t index;
 } sensor_data_t;
+

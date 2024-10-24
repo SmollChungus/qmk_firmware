@@ -21,9 +21,12 @@
 #include "config.h"
 #include "print.h"
 #include "eeprom.h"
-
+#include "custom_rgb.h"
 
 #ifdef VIA_ENABLE
+
+uint16_t eeprom_save_timer = 0;
+bool eeprom_save_pending = false;
 
 // Declaring enums for VIA config menu
 enum via_he_enums {
@@ -37,7 +40,6 @@ enum via_he_enums {
     id_set_rapid_trigger_deadzone = 7,
     id_set_rapid_trigger_engage_distance = 8,
     id_set_rapid_trigger_disengage_distance = 9,
-    id_set_key_cancel = 10,
     // clang-format on
 };
 
@@ -45,6 +47,7 @@ enum via_he_enums {
     // On Keyboard startup
 
 void keyboard_post_init_user(void) {
+    calibration_warning();
 }
 
 void via_he_config_get_value(uint8_t *data);
@@ -80,6 +83,8 @@ void via_he_config_set_value(uint8_t *data) {
                                 i, via_he_key_configs[i].he_actuation_threshold);
                     }
                 }
+                eeprom_save_timer = timer_read();
+                eeprom_save_pending = true;
             } else {
                 uprintf("[SYSTEM]: Invalid actuation threshold value: %d. It must be between 10 and 90.\n", value_data);
             }
@@ -99,6 +104,8 @@ void via_he_config_set_value(uint8_t *data) {
                                 i, via_he_key_configs[i].he_release_threshold);
                     }
                 }
+                eeprom_save_timer = timer_read();
+                eeprom_save_pending = true;
             } else {
                 uprintf("[SYSTEM]: Invalid release threshold value: %d. It must be between 10 and 90.\n", value_data);
             }
@@ -123,20 +130,23 @@ void via_he_config_set_value(uint8_t *data) {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_configs[i].noise_ceiling = 570;
             }
+            start_calibration_rgb(); // Add this line
             noise_ceiling_calibration();
             noise_floor_calibration();
             break;
         }
+
         case id_save_calibration_data: {
-            he_config.he_calibration_mode = false; // Disable calibration mode
+            he_config.he_calibration_mode = false;
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                // Add default noise floor and ceiling values here
                 eeprom_he_key_configs[i].noise_floor = he_key_configs[i].noise_floor;
                 eeprom_he_key_configs[i].noise_ceiling = he_key_configs[i].noise_ceiling;
             }
             print("[SYSTEM]: Calibration ended, to recalibrate, hit start calibration inside VIA again.\n");
             eeconfig_update_user_datablock(&eeprom_he_key_configs);
             via_he_calibration_save();
+            end_calibration_visual(); // Add this line
+            calibration_warning();
             break;
         }
         case id_toggle_actuation_mode: {
@@ -166,10 +176,6 @@ void via_he_config_set_value(uint8_t *data) {
             uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n", he_key_rapid_trigger_configs[0].disengage_distance);
             break;
         }
-        case id_set_key_cancel: {
-            he_config.he_keycancel = value_data;
-            uprintf("[SYSTEM]: Key Cancelation Mode toggled: %d", he_config.he_keycancel); //todo fix this
-        }
     }
 }
 
@@ -194,10 +200,6 @@ void via_he_config_get_value(uint8_t *data) {
         case id_save_threshold_data:
             // These are button actions, so we don't need to return a value
             uprintf("Button action requested - id (%d)\n", value_id);
-            break;
-        case id_set_key_cancel:
-            value_data[0] = he_config.he_keycancel ? 1 : 0;
-            uprintf("Key cancel mode requested - id, data (%d , %d)\n", value_id, value_data[0]);
             break;
         case id_toggle_actuation_mode:
             value_data[0] = he_config.he_actuation_mode;

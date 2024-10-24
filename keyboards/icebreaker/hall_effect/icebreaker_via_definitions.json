@@ -4,137 +4,98 @@
     "productId": "0x0010",
     "menus": [
         "qmk_rgblight",
-      {
+        {
           "label": "HE Tools",
-          "content": [
-              {
-                  "label": "Switch Settings",
-                  "content": [
-                      {
-                                  "label": "Actuation Threshold",
-                                  "type": "range",
-                                  "options": [
-                                      10,
-                                      90
-                                  ],
-                                  "content": [
-                                      "id_via_he_actuation_threshold",
-                                      0,
-                                      1
-                                  ]
-                              },
-                              {
-                                  "label": "Release Threshold(set lower than Actuation Threshold)",
-                                  "type": "range",
-                                  "options": [
-                                      10,
-                                      90
-                                  ],
-                                  "content": [
-                                      "id_via_he_release_threshold",
-                                      0,
-                                      2
-                                  ]
-                              },
-                              {
-                                  "label": "Update changes to keyboard",
-                                  "type": "button",
-                                  "options": [
-                                      0
-                                  ],
-                                  "content": [
-                                      "id_save_threshold_data",
-                                      0,
-                                      3
-                                  ]
-                              },{
-                                  "label": "Calibration Start",
-                                  "type": "button",
-                                  "options": [
-                                      0
-                                  ],
-                                  "content": [
-                                      "id_start_calibration",
-                                      0,
-                                      4
-                                  ]
-                              },{
-                                  "label": "End + Save Calibration Data",
-                                  "type": "button",
-                                  "options": [
-                                      0
-                                  ],
-                                  "content": [
-                                      "id_save_threshold_data",
-                                      0,
-                                      5
-                                  ]
-                              },{
-                                  "label": "Toggle Key Cancellation (A & D)",
-                                  "type": "toggle",
-                                  "content": [
-                                      "id_set_key_cancel",
-                                      0,
-                                      10
-                                  ]
-                              }
-                              ]
-              },
-              {
-                  "label": "Rapid Trigger Mode",
-                  "content": [
-                      {
-                          "label": "Rapid Trigger Mode Enable",
-                          "type": "toggle",
-                          "content": ["id_toggle_actuation_mode", 0, 6]
-                      },
-                      {
-                      "label": "Rapid Trigger Deadzone",
-                      "type": "range",
-                      "options": [
-                          10,
-                          60
-                      ],
-                      "content": [
-                          "id_set_rapid_trigger_deadzone",
-                          0,
-                          7
-                      ]
-                      },
-                      {
-                      "label": "Rapid Trigger Engage Distance",
-                      "type": "range",
-                      "options": [
-                          2,
-                          20
-                      ],
-                      "content": [
-                          "id_set_rapid_trigger_engage_distance",
-                          0,
-                          8
-                      ]
-                  },
-                  {
-                      "label": "Rapid Trigger Disengage Distance",
-                      "type": "range",
-                      "options": [
-                          2,
-                          20
-                      ],
-                      "content": [
-                          "id_set_rapid_trigger_disengage_distance",
-                          0,
-                          9
-                      ]
-                  }
-          ]
-      }
-  ]
+            "content": [
+                {
+                    "label": "Actuation Mode",
+                    "content": [
+                        {
+                        "label": "Actuation Mode",
+                        "type": "dropdown",
+                        "options": [
+                        "Normal",
+                        "Rapid Trigger",
+                        "Key Cancel"
+                    ],
+                    "content": ["id_toggle_actuation_mode", 0, 6]
+                },
+                {
+                    "label": "Calibration Star (Hit every key on the board)",
+                    "type": "button",
+                    "options": [0],
+                    "content": ["id_start_calibration", 0, 4]
+                },
+                {
+                    "label": "End + Save Calibration (Press after all keys are green)",
+                    "type": "button",
+                    "options": [0],
+                    "content": ["id_save_calibration_data", 0, 5]
+                }
+            ]
+        },
+        {
+            "label": "APC Settings",
+            "content": [
+                
+                {
+                    "label": "Actuation Threshold (0-100)",
+                    "type": "range",
+                    "options": [10, 90],
+                    "content": ["id_via_he_actuation_threshold", 0, 1]
+                },
+                {
+                    "label": "Release Threshold (0,100 - set lower than Actuation)",
+                    "type": "range",
+                    "options": [10, 90],
+                    "content": ["id_via_he_release_threshold", 0, 2]
+                }
+            ]
+        },
+        {
+            "label": "Rapid Trigger",
+            "content": [
+                {
+                    "label": "Rapid Trigger Deadzone",
+                    "type": "range",
+                    "options": [15, 60],
+                    "content": ["id_set_rapid_trigger_deadzone", 0, 7]
+                },
+                {
+                    "label": "Rapid Trigger Engage Distance",
+                    "type": "range",
+                    "options": [2, 20],
+                    "content": ["id_set_rapid_trigger_engage_distance", 0, 8]
+                },
+                {
+                    "label": "Rapid Trigger Disengage Distance",
+                    "type": "range",
+                    "options": [2, 20],
+                    "content": ["id_set_rapid_trigger_disengage_distance", 0, 9]
+                }
+            ]
+        },
+        {
+            "label": "Key Cancel",
+            "content": [
+                {
+                    "label": "A&D Mode",
+                    "type": "toggle",
+                    "content": ["id_keycancel_ad_mode", 0, 10]
+                },
+                {
+                    "label": "ZX Mode",
+                    "type": "toggle", 
+                    "content": ["id_keycancel_xz_mode", 0, 11]
+                }
+            ]
+        }
+    ]
 }
-  ],
+    ],
     "matrix": {
-      "rows": 5,
-      "cols": 16
+        "rows": 5,
+        "cols": 16
     },
     "layouts": {
     "keymap": [

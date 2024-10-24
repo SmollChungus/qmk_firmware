@@ -16,6 +16,8 @@
 //keymap.c
 #include QMK_KEYBOARD_H
 #include "he_switch_matrix.h"
+#include "custom_rgb.h"
+
 
 extern uint8_t console_output;
 
@@ -28,9 +30,7 @@ enum custom_keycodes {
     VERB5,
     APCM,
     RTM,
-    KCM_ON,
-    KCM_OFF,
-    KCM_TOG,
+    KCM,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -45,9 +45,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [1] = LAYOUT(
         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12, _______,  _______,  QK_BOOT,
-        _______,  APCM,  RTM, _______, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
-        _______,  KCM_ON,  KCM_OFF,  KCM_TOG, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
-        _______,  VERB1, VERB5,  VERB0,  _______, _______,  _______,  _______,  _______,  _______,   _______,  KC_MPLY,             RGB_HUI,  _______,
+        _______,  APCM,  RTM, KCM, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
+        _______,  _______,  _______,  _______, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
+        _______,  VERB1, VERB5,  VERB0,  VERB2, _______,  _______,  _______,  _______,  _______,   _______,  KC_MPLY,             RGB_HUI,  _______,
         _______,  _______,  _______,  _______,                                         _______,  _______,                           RGB_TOG,  RGB_HUD,  KC_MNXT
     )
 
@@ -127,8 +127,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[PCB_SETTINGS]: APC MODE\n");
                 he_config.he_actuation_mode = 0;
                 eeprom_he_config.he_actuation_mode = 0;
-                
                 start_mode_blink(85); // green
+                eeconfig_update_kb_datablock(&eeprom_he_config);
+
             }
             return false;
 
@@ -138,32 +139,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[PCB_SETTINGS]: RT MODE\n");
                 he_config.he_actuation_mode = 1;
                 eeprom_he_config.he_actuation_mode = 1;
+                start_mode_blink(0); // red
+                eeconfig_update_kb_datablock(&eeprom_he_config);
 
-                // Start blinking in red hue for RT mode
-                start_mode_blink(0); // 0 is red in HSV
             }
             return false;
 
-        case KCM_ON:
+        case KCM:
             if (record->event.pressed) {
-                uprintf("[SYSTEM]: Key Cancellation Mode on\n");
-                he_config.he_keycancel = true;
-                eeprom_he_config.he_keycancel = true;
-            }
-            return false;
-        case KCM_OFF:
-            if (record->event.pressed) {
-                uprintf("[SYSTEM]: Key Cancellation Mode off\n");
-                he_config.he_keycancel = false;
-                eeprom_he_config.he_keycancel = false;
-            }
-            return false;
-
-        case KCM_TOG:
-            if (record->event.pressed) {
-                uprintf("[SYSTEM]: Key Cancellation Mode: %d\n", he_config.he_keycancel);
-                he_config.he_keycancel = !he_config.he_keycancel;
-                eeprom_he_config.he_keycancel = he_config.he_keycancel;
+                uprintf("[SYSTEM]: Key Cancel Mode set\n");
+                he_config.he_actuation_mode = 2;
+                eeprom_he_config.he_actuation_mode = 2;
+                start_mode_blink(170); // purple
+                eeconfig_update_kb_datablock(&eeprom_he_config);
             }
             return false;
 
@@ -202,5 +190,18 @@ void matrix_scan_user(void) {
 
         }
     }
+    if (eeprom_save_pending && timer_elapsed(eeprom_save_timer) > EEPROM_SAVE_DELAY) {
+    for (int i = 0; i < SENSOR_COUNT; i++) {
+        eeprom_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
+        eeprom_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+        he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
+        he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+    }
+    eeconfig_update_user_datablock(&eeprom_he_key_configs);
+
+    eeprom_save_pending = false;
+    uprintf("[SYSTEM]: Settings auto-saved to EEPROM\n");
+    }
 }
+
 
