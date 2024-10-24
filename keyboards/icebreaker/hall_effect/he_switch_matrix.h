@@ -30,7 +30,6 @@ extern "C" {
 uint8_t matrix_rows(void);
 uint8_t matrix_cols(void);
 matrix_row_t matrix_get_row(uint8_t row);
-
 uint8_t matrix_scan(void);
 bool matrix_can_read(void);
 bool matrix_is_on(uint8_t row, uint8_t col);
@@ -103,8 +102,8 @@ typedef struct {
 } eeprom_he_key_config_t;
 
 typedef struct {
-    uint8_t he_actuation_threshold; 
-    uint8_t he_release_threshold;   
+    uint8_t he_actuation_threshold;
+    uint8_t he_release_threshold;
     uint16_t noise_floor; //delete?
     uint16_t noise_ceiling; //delete?
 } via_he_key_config_t;
@@ -118,23 +117,23 @@ typedef struct {
 } sensor_to_matrix_map_t;
 
 typedef struct {
-    uint8_t debounced_state; 
-    uint8_t debounce_counter; 
+    uint8_t debounced_state;
+    uint8_t debounce_counter;
 } key_debounce_t;
 
 
-extern he_config_t he_config; 
-extern eeprom_he_config_t eeprom_he_config; 
-extern via_he_config_t via_he_config; 
+extern he_config_t he_config;
+extern eeprom_he_config_t eeprom_he_config;
+extern via_he_config_t via_he_config;
 extern he_key_config_t he_key_configs[SENSOR_COUNT];
 extern eeprom_he_key_config_t eeprom_he_key_configs[SENSOR_COUNT];
 extern via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 extern he_key_rapid_trigger_config_t he_key_rapid_trigger_configs[SENSOR_COUNT];
-extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT]; 
+extern eeprom_he_key_rapid_trigger_config_t eeprom_he_key_rapid_trigger_configs[SENSOR_COUNT];
 
 
-_Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in keyboard EECONFIG stored data");
-_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "mismatch in EECONFIG_USER_DATA_SIZE.");
+_Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in EECONFIG_KB_DATA_SIZE");
+_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "Mismatch in EECONFIG_USER_DATA_SIZE");
 
 
 int       he_init(he_key_config_t he_key_configs[], size_t count);;
@@ -144,8 +143,9 @@ uint16_t  he_readkey_raw(uint8_t sensorIndex);
 uint16_t  noise_floor[SENSOR_COUNT];
 uint8_t  sensor_value_rescaled;
 bool      he_update_key(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
-bool      he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
 bool      he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
+bool      he_update_key_rapid_trigger(matrix_row_t* current_matrix, uint8_t row, uint8_t col,uint8_t sensor_id, uint16_t sensor_value);
+bool      he_update_key_rapid_trigger_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
 void      noise_ceiling_calibration(void);
 void      he_matrix_print(void);
 void      he_matrix_print_extended(void);
