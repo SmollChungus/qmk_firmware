@@ -14,14 +14,14 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 //Credit to Cipulot's EC boards as a foundation for HE VIA intergration
-//keyboards/icebreaker/keymaps/via/via_apc.c
+//keyboards/U65_HE/keymaps/via/via_apc.c
 #include "he_switch_matrix.h"
 #include "action.h"
 #include "via.h"
 #include "config.h"
 #include "print.h"
 #include "eeprom.h"
-#include "custom_rgb.h"
+//#include "custom_rgb.h"
 
 #ifdef VIA_ENABLE
 
@@ -47,7 +47,7 @@ enum via_he_enums {
     // On Keyboard startup
 
 void keyboard_post_init_user(void) {
-    calibration_warning();
+    //calibration_warning();
 }
 
 void via_he_config_get_value(uint8_t *data);
@@ -74,15 +74,16 @@ void via_he_config_set_value(uint8_t *data) {
                 for (int i = 0; i < SENSOR_COUNT; i++) {
                     if (value_data > via_he_key_configs[i].he_release_threshold) {
                         via_he_key_configs[i].he_actuation_threshold = value_data;
-                        uprintf("[SYSTEM]: Actuation threshold for sensor %d set to: %d\n", i, value_data);
+                        //uprintf("[SYSTEM]: Actuation threshold for sensor %d set to: %d\n", i, value_data);
                     } else {
-                        uprintf("[SYSTEM]: Invalid actuation threshold value: %d for sensor %d. It must be greater than release threshold %d.\n",
-                                value_data, i, via_he_key_configs[i].he_release_threshold);
+                        //uprintf("[SYSTEM]: Invalid actuation threshold value: %d for sensor %d. It must be greater than release threshold %d.\n",
+                        //        value_data, i, via_he_key_configs[i].he_release_threshold);
                         via_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_release_threshold + 1;
-                        uprintf("[SYSTEM]: Actuation threshold for sensor %d adjusted to: %d\n",
-                                i, via_he_key_configs[i].he_actuation_threshold);
+                        //uprintf("[SYSTEM]: Actuation threshold for sensor %d adjusted to: %d\n",
+                        //        i, via_he_key_configs[i].he_actuation_threshold);
                     }
                 }
+                //start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;
             } else {
@@ -130,7 +131,7 @@ void via_he_config_set_value(uint8_t *data) {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_configs[i].noise_ceiling = 570;
             }
-            start_calibration_rgb(); // Add this line
+            //start_calibration_rgb(); // Add this line
             noise_ceiling_calibration();
             noise_floor_calibration();
             break;
@@ -145,8 +146,8 @@ void via_he_config_set_value(uint8_t *data) {
             print("[SYSTEM]: Calibration ended, to recalibrate, hit start calibration inside VIA again.\n");
             eeconfig_update_user_datablock(&eeprom_he_key_configs);
             via_he_calibration_save();
-            end_calibration_visual(); // Add this line
-            calibration_warning();
+            //end_calibration_visual(); // Add this line
+            //calibration_warning();
             break;
         }
         case id_toggle_actuation_mode: {

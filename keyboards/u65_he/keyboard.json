@@ -1,6 +1,6 @@
 {
     "manufacturer": "Matthijs Muller",
-    "keyboard_name": "Serene Industries - Icebreaker HE",
+    "keyboard_name": "Serene Industries - U65 HE",
     "maintainer": "Matthijs Muller",
     "bootloader": "stm32-dfu",
     "build": {
@@ -11,36 +11,17 @@
         "bootmagic": false,
         "console": true,
         "extrakey": true,
-        "rgblight": true,
-        "nkro": true,
-        "encoder": true
+        "nkro": true
     },
     "processor": "STM32F411",
     "url": "https://www.github.com/SmollChungus",
     "usb": {
         "device_version": "0.0.1",
-        "pid": "0x0010",
+        "pid": "0x0011",
         "shared_endpoint": {
             "keyboard": true
         },
         "vid": "0x5363"
-    },
-    "encoder": {
-        "rotary": [
-            { "pin_a": "B14", "pin_b": "B13"}
-        ]
-    },
-    "ws2812": {
-        "driver": "pwm"
-    },
-    "rgblight": {
-        "animations": {
-            "breathing": true
-        },
-        "brightness_steps": 10,
-        "led_count": 68,
-        "saturation_steps": 8,
-        "max_brightness": 100
     },
 
     "layouts": {
@@ -59,9 +40,8 @@
                 {"label": "0",   "matrix": [0, 10], "x": 10.0, "y": 0.0},
                 {"label": "-",    "matrix": [0, 11], "x": 11.0, "y": 0.0},
                 {"label": "=",     "matrix": [0, 12], "x": 12.0, "y": 0.0},
-                {"label": "pipe",  "matrix": [0, 13], "x": 13.0, "y": 0.0},
-                {"label": "del",   "matrix": [0, 14], "x": 14.0, "y": 0.0},
-                {"label": "tilda", "matrix": [0, 15], "x": 54.0, "y": 0.0},
+                {"label": "backspace",   "matrix": [0, 13], "w": 2, "x": 13.0, "y": 0.0},
+                {"label": "tilda", "matrix": [0, 14],"x": 15.0, "y": 0.0},
                 {"label": "tab", "matrix": [1, 0], "w": 1.5, "x": 0.0, "y": 1.0},
                 {"label": "q", "matrix": [1, 1], "x": 1.5, "y": 1.0},
                 {"label": "w", "matrix": [1, 2], "x": 2.5, "y": 1.0},
@@ -110,7 +90,6 @@
                 {"label": "lalt", "matrix": [4, 2], "w": 1.5, "x": 2.5, "y": 4.0},
                 {"label": "space", "matrix": [4, 3], "w": 7, "x": 4.0, "y": 4.0},
                 {"label": "ralt", "matrix": [4, 4],  "x": 11, "y": 4.0},
-                {"label": "rctl", "matrix": [4, 5],  "x": 12, "y": 4.0},
                 {"label": "left", "matrix": [4, 6], "x": 13, "y": 4.0},
                 {"label": "down", "matrix": [4, 7], "x": 14, "y": 4.0},
                 {"label": "right", "matrix": [4, 8], "x":15, "y":4.0}

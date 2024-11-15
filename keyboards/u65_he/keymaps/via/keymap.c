@@ -16,7 +16,6 @@
 //keymap.c
 #include QMK_KEYBOARD_H
 #include "he_switch_matrix.h"
-#include "custom_rgb.h"
 
 
 extern uint8_t console_output;
@@ -37,23 +36,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
     [0] = LAYOUT(
-        KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,   KC_5,     KC_6,     KC_7,      KC_8,     KC_9,     KC_0,     KC_MINS,   KC_EQL, KC_BSLS,  KC_DEL,  KC_GRV,
-        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,   KC_T,     KC_Y,     KC_U,      KC_I,     KC_O,     KC_P,     KC_LBRC,   KC_RBRC,   KC_BSPC,  KC_HOME,
-        KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,   KC_G,     KC_H,     KC_J,      KC_K,     KC_L,     KC_SCLN,  KC_QUOT,   KC_ENTER,            KC_END,
-        KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,   KC_B,     KC_N,      KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,              KC_UP,    MO(1),
-        KC_LCTL,  KC_LGUI,  KC_LALT,  KC_SPC,                                          KC_RALT,   KC_RCTL,                              KC_LEFT,   KC_DOWN,  KC_RGHT
-    ),
-    [1] = LAYOUT(
-        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12, _______,  _______,  QK_BOOT,
-        _______,  APCM,  RTM, KCM, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
-        _______,  _______,  _______,  _______, _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
-        _______,  VERB1, VERB5,  VERB0,  VERB2, _______,  _______,  _______,  _______,  _______,   _______,  KC_MPLY,             RGB_HUI,  _______,
-        _______,  _______,  _______,  _______,                                         _______,  _______,                           RGB_TOG,  RGB_HUD,  KC_MNXT
+        KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,    KC_5,     KC_6,     KC_7,      KC_8,     KC_9,     KC_0,     KC_MINS,   KC_EQL, KC_BSPC,  KC_GRV,
+        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,    KC_T,     KC_Y,     KC_U,      KC_I,     KC_O,     KC_P,     KC_LBRC,   KC_RBRC,   KC_BSLS,  KC_HOME,
+        KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,    KC_G,     KC_H,     KC_J,      KC_K,     KC_L,     KC_SCLN,  KC_QUOT,   KC_ENTER,            KC_END,
+        KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,    KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,              KC_UP,    MO(1),
+        KC_LCTL,  KC_LGUI,  KC_LALT,  KC_SPC,                                          KC_RALT,                              KC_LEFT,   KC_DOWN,  KC_RGHT
+    ),                                                                                                
+    [1] = LAYOUT(                                                                                       
+        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12, _______,  QK_BOOT,
+        _______,  APCM,     RTM, KCM, _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
+        _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
+        _______,  VERB1,    VERB5,    VERB0,    VERB2,   _______,  _______,  _______,  _______,  _______,   _______,  KC_MPLY,            _______,  _______,
+        _______,  _______,  _______,                                         _______,  _______,                           _______,  _______,  _______
     )
 
 };
 
-// Blinking variables
+/* Blinking variables
 static bool is_blinking = false;
 static uint8_t blink_count = 0;
 static uint16_t blink_timer = 0;
@@ -73,7 +72,7 @@ void start_mode_blink(uint8_t hue) {
     blink_count = 6; // Total on/off cycles
     blink_timer = timer_read();
     blink_hue = hue;
-}
+}*/
 
 
 
@@ -127,7 +126,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[PCB_SETTINGS]: APC MODE\n");
                 he_config.he_actuation_mode = 0;
                 eeprom_he_config.he_actuation_mode = 0;
-                start_mode_blink(85); // green
+                //start_mode_blink(85); // green
                 eeconfig_update_kb_datablock(&eeprom_he_config);
 
             }
@@ -139,7 +138,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[PCB_SETTINGS]: RT MODE\n");
                 he_config.he_actuation_mode = 1;
                 eeprom_he_config.he_actuation_mode = 1;
-                start_mode_blink(0); // red
+                //start_mode_blink(0); // red
                 eeconfig_update_kb_datablock(&eeprom_he_config);
 
             }
@@ -150,7 +149,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 uprintf("[SYSTEM]: Key Cancel Mode set\n");
                 he_config.he_actuation_mode = 2;
                 eeprom_he_config.he_actuation_mode = 2;
-                start_mode_blink(170); // purple
+                //start_mode_blink(170); // purple
                 eeconfig_update_kb_datablock(&eeprom_he_config);
             }
             return false;
@@ -161,17 +160,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 void matrix_scan_user(void) {
-    if (is_blinking) {
-        if (timer_elapsed(blink_timer) > 200) { // Adjust timing as needed
-            // Toggle LEDs
+    /*if (is_blinking) {
+        if (timer_elapsed(blink_timer) > 200) {
             bool leds_on = (blink_count % 2 == 0);
             for (uint8_t i = 0; i < sizeof(blink_leds); i++) {
                 uint8_t led_index = blink_leds[i];
                 if (leds_on) {
-                    // Turn on LED with specified hue
                     rgblight_sethsv_at(blink_hue, 255, 255, led_index);
                 } else {
-                    // Turn off LED
                     rgblight_sethsv_at(0, 0, 0, led_index);
                 }
             }
@@ -189,19 +185,22 @@ void matrix_scan_user(void) {
             }
 
         }
-    }
+    }*/
     if (eeprom_save_pending && timer_elapsed(eeprom_save_timer) > EEPROM_SAVE_DELAY) {
-    for (int i = 0; i < SENSOR_COUNT; i++) {
-        eeprom_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
-        eeprom_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
-        he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
-        he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
-    }
-    eeconfig_update_user_datablock(&eeprom_he_key_configs);
+        for (int i = 0; i < SENSOR_COUNT; i++) {
+            eeprom_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
+            eeprom_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+            he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold; //redundant ig
+            he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold; //redundant 
+        }
+        eeconfig_update_user_datablock(&eeprom_he_key_configs);
 
-    eeprom_save_pending = false;
-    uprintf("[SYSTEM]: Settings auto-saved to EEPROM\n");
+        eeprom_save_pending = false;
+        uprintf("[SYSTEM]: Settings auto-saved to EEPROM\n");
     }
+    /*if (slider_visualization_active && timer_elapsed(slider_timeout_timer) > SLIDER_TIMEOUT) {
+        end_slider_visualization();
+    }*/
 }
 
 
