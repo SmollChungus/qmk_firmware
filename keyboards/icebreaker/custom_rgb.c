@@ -28,6 +28,14 @@ static uint8_t warning_led_count = 0;
 static calibration_led_t calibration_leds[SENSOR_COUNT];
 static bool calibration_changes_pending = false;
 
+uint8_t saved_calibration_mode;
+HSV saved_calibration_hsv;
+
+
+// via slider viz
+bool slider_visualization_active = false;
+uint16_t slider_timeout_timer = 0;
+
 
 
 void calibration_warning(void) {
@@ -95,13 +103,19 @@ void flash_rgb_warning(uint8_t sensor_id, uint8_t notification_type) {
     }
 }
 
-
 void start_calibration_rgb(void) {
+    // Save current RGB settings
+    saved_calibration_mode = rgblight_get_mode();
+    saved_calibration_hsv = rgblight_get_hsv();
+
+    // Initialize all LEDs to uncalibrated state (red)
     for (int i = 0; i < SENSOR_COUNT; i++) {
         calibration_leds[i].sensor_id = i;
         calibration_leds[i].state = LED_STATE_UNCALIBRATED;
+        rgblight_sethsv_at(uncalibrated_color.h, uncalibrated_color.s, uncalibrated_color.v, sensor_to_led_map[i]);
     }
-    apply_calibration_changes_rgb();
+    rgblight_set();
+    calibration_changes_pending = false;  // Since we've already applied the changes
 }
 
 void update_calibration_rgb(uint8_t sensor_id, uint16_t ceiling) {
@@ -142,10 +156,71 @@ void apply_calibration_changes_rgb(void) {
     rgblight_set();
     calibration_changes_pending = false;
 }
+
 void end_calibration_visual(void) {
-    // Restore default RGB settings
-    rgblight_reload_from_eeprom();
+    // Restore previous RGB settings
+    rgblight_mode_noeeprom(saved_calibration_mode);
+    rgblight_sethsv_noeeprom(saved_calibration_hsv.h, saved_calibration_hsv.s, saved_calibration_hsv.v);
+    rgblight_set();
 }
+
+
+void start_slider_visualization(uint8_t value) {
+    if (!slider_visualization_active) {
+        saved_calibration_mode = rgblight_get_mode();
+        saved_calibration_hsv = rgblight_get_hsv();
+        slider_visualization_active = true;
+    }
+    slider_timeout_timer = timer_read();
+    update_slider_visualization(value);
+}
+
+// Add a debounce interval (in milliseconds)
+
+void update_slider_visualization(uint8_t value) {
+    static uint8_t last_leds_lit = 0xFF; // Initialize to invalid value
+    static uint16_t last_update_time = 0;
+
+    if (!slider_visualization_active) return;
+    
+    // Check if enough time has passed since the last update
+    uint16_t current_time = timer_read();
+    if (current_time - last_update_time < SLIDER_UPDATE_INTERVAL) {
+        return;
+    }
+
+    uint8_t leds_to_light = (value * TOP_ROW_LED_COUNT) / 90;
+
+    // Only update if the number of LEDs to light has changed
+    if (leds_to_light != last_leds_lit) {
+        for (uint8_t i = 0; i < TOP_ROW_LED_COUNT; i++) {
+            if (i <= leds_to_light) {
+                rgblight_sethsv_at(0, 0, 255, i);  // Purple for lit LEDs
+            } else {
+                rgblight_sethsv_at(0, 0, 0, i);  // Off for unlit LEDs
+            }
+        }
+        rgblight_set();
+        last_leds_lit = leds_to_light;
+    }
+    
+    last_update_time = current_time;
+    slider_timeout_timer = current_time;
+}
+
+
+void end_slider_visualization(void) {
+    if (!slider_visualization_active) return;
+    
+    // Restore previous RGB settings
+    rgblight_mode_noeeprom(saved_calibration_mode);
+    rgblight_sethsv_noeeprom(saved_calibration_hsv.h, saved_calibration_hsv.s, saved_calibration_hsv.v);
+    rgblight_set();
+    
+    slider_visualization_active = false;
+}
+
+
 
 
 void handle_rgb_notification(uint8_t notification_type) {

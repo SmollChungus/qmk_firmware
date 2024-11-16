@@ -22,7 +22,18 @@
 #define FLASH_DURATION 250
 #define FLASH_COUNT 5
 
+// via slider viz
+#define SLIDER_UPDATE_DELAY 50  // 50ms delay between updates
+#define TOP_ROW_LED_COUNT 16    // Number of LEDs in top row
+#define SLIDER_TIMEOUT 3000  // Revert after 1 second of no updates
+#define SLIDER_UPDATE_INTERVAL 20
+
+
+
 #define MAX_WARNING_LEDS SENSOR_COUNT
+
+extern uint8_t saved_calibration_mode;
+extern HSV saved_calibration_hsv;
 
 void calibration_warning(void);
 void flash_rgb_warning(uint8_t sensor_id, uint8_t notification_type);
@@ -38,3 +49,10 @@ void start_calibration_rgb(void);
 void update_calibration_rgb(uint8_t sensor_id, uint16_t ceiling);
 void apply_calibration_changes_rgb(void);
 void end_calibration_visual(void);
+
+//via slider viz
+void start_slider_visualization(uint8_t value);
+void update_slider_visualization(uint8_t value);
+void end_slider_visualization(void);
+extern bool slider_visualization_active;
+extern uint16_t slider_timeout_timer;

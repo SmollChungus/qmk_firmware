@@ -74,15 +74,16 @@ void via_he_config_set_value(uint8_t *data) {
                 for (int i = 0; i < SENSOR_COUNT; i++) {
                     if (value_data > via_he_key_configs[i].he_release_threshold) {
                         via_he_key_configs[i].he_actuation_threshold = value_data;
-                        uprintf("[SYSTEM]: Actuation threshold for sensor %d set to: %d\n", i, value_data);
+                        //uprintf("[SYSTEM]: Actuation threshold for sensor %d set to: %d\n", i, value_data);
                     } else {
-                        uprintf("[SYSTEM]: Invalid actuation threshold value: %d for sensor %d. It must be greater than release threshold %d.\n",
-                                value_data, i, via_he_key_configs[i].he_release_threshold);
+                        //uprintf("[SYSTEM]: Invalid actuation threshold value: %d for sensor %d. It must be greater than release threshold %d.\n",
+                        //        value_data, i, via_he_key_configs[i].he_release_threshold);
                         via_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_release_threshold + 1;
-                        uprintf("[SYSTEM]: Actuation threshold for sensor %d adjusted to: %d\n",
-                                i, via_he_key_configs[i].he_actuation_threshold);
+                        //uprintf("[SYSTEM]: Actuation threshold for sensor %d adjusted to: %d\n",
+                        //        i, via_he_key_configs[i].he_actuation_threshold);
                     }
                 }
+                start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;
             } else {
@@ -95,15 +96,16 @@ void via_he_config_set_value(uint8_t *data) {
                 for (int i = 0; i < SENSOR_COUNT; i++) {
                     if (value_data < via_he_key_configs[i].he_actuation_threshold) {
                         via_he_key_configs[i].he_release_threshold = value_data;
-                        uprintf("[SYSTEM]: Release threshold for sensor %d set to: %d\n", i, value_data);
+                        //uprintf("[SYSTEM]: Release threshold for sensor %d set to: %d\n", i, value_data);
                     } else {
-                        uprintf("[SYSTEM]: Invalid release threshold value: %d for sensor %d. It must be less than actuation threshold %d.\n",
-                                value_data, i, via_he_key_configs[i].he_actuation_threshold);
+                        //uprintf("[SYSTEM]: Invalid release threshold value: %d for sensor %d. It must be less than actuation threshold %d.\n",
+                                //value_data, i, via_he_key_configs[i].he_actuation_threshold);
                         via_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_actuation_threshold - 1;
-                        uprintf("[SYSTEM]: Release threshold for sensor %d adjusted to: %d\n",
-                                i, via_he_key_configs[i].he_release_threshold);
+                        //uprintf("[SYSTEM]: Release threshold for sensor %d adjusted to: %d\n",
+                                //i, via_he_key_configs[i].he_release_threshold);
                     }
                 }
+                start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;
             } else {
@@ -111,7 +113,7 @@ void via_he_config_set_value(uint8_t *data) {
             }
             break;
         }
-        case id_save_threshold_data: {
+        case id_save_threshold_data: { //delete this? VIA changes get saved with eeprom_save_timer!
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 uprintf("saving eeprom for sensor %d from via %d to eeprom %d", i, via_he_key_configs[i].he_actuation_threshold, eeprom_he_key_configs[i].he_actuation_threshold);
                 eeprom_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
@@ -124,7 +126,7 @@ void via_he_config_set_value(uint8_t *data) {
             print("[SYSTEM]: Actuation Settings Saved!\n");
             break;
         }
-        case id_start_calibration: {
+        case id_start_calibration: { //when RGB is turned off, the calibration LEDS wont fire, maybe check and turn on, then return to rgb off on save
             print("[SYSTEM]: Calibration started, fully press each key on the board!\nBe sure to end the calibration in VIA with the button once you're done.\n");
             he_config.he_calibration_mode = true; // Enable calibration mode
             for (int i = 0; i < SENSOR_COUNT; i++) {
@@ -159,21 +161,28 @@ void via_he_config_set_value(uint8_t *data) {
                 he_key_rapid_trigger_configs[i].deadzone = value_data;
                 eeconfig_update_user_datablock(&eeprom_he_key_configs);
             }
-            uprintf("[SYSTEM]: Rapid Trigger Deadzone set to: %d\n", he_key_rapid_trigger_configs[0].deadzone);
+
+            start_slider_visualization(value_data);
+            //uprintf("[SYSTEM]: Rapid Trigger Deadzone set to: %d\n", he_key_rapid_trigger_configs[0].deadzone);
             break;
         }
         case id_set_rapid_trigger_engage_distance: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_rapid_trigger_configs[i].engage_distance = value_data;
             }
-            uprintf("[SYSTEM]: Rapid Trigger Engage Distance set to: %d\n", he_key_rapid_trigger_configs[0].engage_distance);
+            start_slider_visualization(value_data);
+
+            //uprintf("[SYSTEM]: Rapid Trigger Engage Distance set to: %d\n", he_key_rapid_trigger_configs[0].engage_distance);
             break;
         }
         case id_set_rapid_trigger_disengage_distance: {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_rapid_trigger_configs[i].disengage_distance = value_data;
             }
-            uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n", he_key_rapid_trigger_configs[0].disengage_distance);
+
+            start_slider_visualization(value_data);
+
+            //uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n", he_key_rapid_trigger_configs[0].disengage_distance);
             break;
         }
     }
