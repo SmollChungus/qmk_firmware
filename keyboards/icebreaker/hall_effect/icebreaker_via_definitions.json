@@ -64,13 +64,13 @@
                 {
                     "label": "Rapid Trigger Engage Distance",
                     "type": "range",
-                    "options": [2, 20],
+                    "options": [5, 20],
                     "content": ["id_set_rapid_trigger_engage_distance", 0, 8]
                 },
                 {
                     "label": "Rapid Trigger Disengage Distance",
                     "type": "range",
-                    "options": [2, 20],
+                    "options": [5, 20],
                     "content": ["id_set_rapid_trigger_disengage_distance", 0, 9]
                 }
             ]

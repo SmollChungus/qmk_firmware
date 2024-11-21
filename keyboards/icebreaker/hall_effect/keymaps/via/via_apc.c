@@ -83,6 +83,8 @@ void via_he_config_set_value(uint8_t *data) {
                         //        i, via_he_key_configs[i].he_actuation_threshold);
                     }
                 }
+                last_moved_slider = SLIDER_TYPE_ACTUATION;
+                slider_animation_active = true;
                 start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;
@@ -105,6 +107,8 @@ void via_he_config_set_value(uint8_t *data) {
                                 //i, via_he_key_configs[i].he_release_threshold);
                     }
                 }
+                last_moved_slider = SLIDER_TYPE_RELEASE;
+                slider_animation_active = true;
                 start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;

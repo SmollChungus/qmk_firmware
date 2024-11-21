@@ -187,7 +187,6 @@ void matrix_scan_user(void) {
                 rgblight_sethsv_noeeprom(saved_hsv.h, saved_hsv.s, saved_hsv.v);
                 rgblight_set();
             }
-
         }
     }
     if (eeprom_save_pending && timer_elapsed(eeprom_save_timer) > EEPROM_SAVE_DELAY) {
@@ -198,9 +197,13 @@ void matrix_scan_user(void) {
         he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
     }
     eeconfig_update_user_datablock(&eeprom_he_key_configs);
-
     eeprom_save_pending = false;
     uprintf("[SYSTEM]: Settings auto-saved to EEPROM\n");
+    }
+    if (slider_animation_active && timer_elapsed(slider_timeout_timer) > SLIDER_TIMEOUT) {
+        end_slider_visualization();
+        slider_animation_active = false;
+        last_moved_slider = -1;
     }
 }
 

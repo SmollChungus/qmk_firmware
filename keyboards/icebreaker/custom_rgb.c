@@ -36,7 +36,8 @@ HSV saved_calibration_hsv;
 bool slider_visualization_active = false;
 uint16_t slider_timeout_timer = 0;
 
-
+int8_t last_moved_slider = -1; // -1 means no slider active
+bool slider_animation_active = false;
 
 void calibration_warning(void) {
     warning_led_count = 0;
