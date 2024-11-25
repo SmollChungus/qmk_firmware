@@ -9,16 +9,13 @@
 #define RGB_NOTIFICATION_MODE_RAPID_TRIGGER 2
 #define RGB_NOTIFICATION_MODE_KEY_CANCEL 3
 
-// VIA slider tracking
-#define SLIDER_TYPE_ACTUATION 0
-#define SLIDER_TYPE_RELEASE 1
-#define SLIDER_TYPE_DEADZONE 2
+
 
 #define LED_STATE_UNCALIBRATED 0
 #define LED_STATE_PARTIAL 1
 #define LED_STATE_CALIBRATED 2
 extern int8_t last_moved_slider;
-extern bool slider_animation_active;
+extern bool slider_active;
 
 // Calibration thresholds
 #define CEILING_LOW 600    // Below this is red
@@ -35,6 +32,14 @@ extern bool slider_animation_active;
 #define SLIDER_TIMEOUT 3000  // Revert after 1 second of no updates
 #define SLIDER_UPDATE_INTERVAL 20
 
+typedef enum {
+    SLIDER_TYPE_ACTUATION,
+    SLIDER_TYPE_RELEASE,
+    SLIDER_TYPE_RTP_DEADZONE, // Rapid Trigger Deadzone
+    SLIDER_TYPE_MAX
+} slider_type_t;
+
+extern slider_type_t current_slider_type;
 
 
 #define MAX_WARNING_LEDS SENSOR_COUNT

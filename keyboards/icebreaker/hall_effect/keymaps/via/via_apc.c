@@ -28,6 +28,8 @@
 uint16_t eeprom_save_timer = 0;
 bool eeprom_save_pending = false;
 
+extern void start_slider_visualization(uint8_t value);
+
 // Declaring enums for VIA config menu
 enum via_he_enums {
     // clang-format off
@@ -84,7 +86,8 @@ void via_he_config_set_value(uint8_t *data) {
                     }
                 }
                 last_moved_slider = SLIDER_TYPE_ACTUATION;
-                slider_animation_active = true;
+                current_slider_type = SLIDER_TYPE_ACTUATION; // Set current slider type
+                slider_active = true;
                 start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;
@@ -108,7 +111,8 @@ void via_he_config_set_value(uint8_t *data) {
                     }
                 }
                 last_moved_slider = SLIDER_TYPE_RELEASE;
-                slider_animation_active = true;
+                current_slider_type = SLIDER_TYPE_RELEASE; // Set current slider type
+                slider_active = true;
                 start_slider_visualization(value_data);
                 eeprom_save_timer = timer_read();
                 eeprom_save_pending = true;

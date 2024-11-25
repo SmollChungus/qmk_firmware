@@ -37,7 +37,25 @@ bool slider_visualization_active = false;
 uint16_t slider_timeout_timer = 0;
 
 int8_t last_moved_slider = -1; // -1 means no slider active
-bool slider_animation_active = false;
+bool slider_active = false;
+
+//sliderdebug
+typedef struct {
+    slider_type_t type;
+    uint8_t min;
+    uint8_t max;
+} slider_range_t;
+
+// Array holding range information for each slider type
+const slider_range_t slider_ranges[SLIDER_TYPE_MAX] = {
+    [SLIDER_TYPE_ACTUATION] = {SLIDER_TYPE_ACTUATION, 10, 90},
+    [SLIDER_TYPE_RELEASE] = {SLIDER_TYPE_RELEASE, 10, 90},
+    [SLIDER_TYPE_RTP_DEADZONE] = {SLIDER_TYPE_RTP_DEADZONE, 15, 60},
+};
+
+slider_type_t current_slider_type = SLIDER_TYPE_MAX;
+static uint8_t last_leds_lit = 0xFF; // Initialize to an invalid value
+static uint16_t last_update_time = 0;
 
 void calibration_warning(void) {
     warning_led_count = 0;
@@ -167,60 +185,92 @@ void end_calibration_visual(void) {
 
 
 void start_slider_visualization(uint8_t value) {
+    uprintf("[DEBUG]: Starting slider visualization with value: %d\n", value);
     if (!slider_visualization_active) {
         saved_calibration_mode = rgblight_get_mode();
         saved_calibration_hsv = rgblight_get_hsv();
         slider_visualization_active = true;
+        uprintf("[DEBUG]: Slider visualization activated. Saved RGB mode: %d, HSV: (%d, %d, %d)\n",
+                saved_calibration_mode, saved_calibration_hsv.h, saved_calibration_hsv.s, saved_calibration_hsv.v);
     }
     slider_timeout_timer = timer_read();
+    uprintf("[DEBUG]: slider_timeout_timer set to %u\n", slider_timeout_timer);
     update_slider_visualization(value);
 }
 
 // Add a debounce interval (in milliseconds)
 
 void update_slider_visualization(uint8_t value) {
-    static uint8_t last_leds_lit = 0xFF; // Initialize to invalid value
-    static uint16_t last_update_time = 0;
-
-    if (!slider_visualization_active) return;
-    
-    // Check if enough time has passed since the last update
-    uint16_t current_time = timer_read();
-    if (current_time - last_update_time < SLIDER_UPDATE_INTERVAL) {
+    if (!slider_visualization_active) {
+        uprintf("[DEBUG]: Slider visualization is not active. Exiting update_slider_visualization.\n");
         return;
     }
 
-    uint8_t leds_to_light = (value * TOP_ROW_LED_COUNT) / 90;
+    // Use timer_elapsed to correctly calculate elapsed time
+    uint16_t elapsed = timer_elapsed(last_update_time);
+    if (elapsed < SLIDER_UPDATE_INTERVAL) {
+        uprintf("[DEBUG]: Slider visualization update skipped. Time since last update: %u ms\n",
+                elapsed);
+        return; // Skip update to enforce rate limiting
+    }
+
+    uprintf("[DEBUG]: Updating slider visualization with value: %d\n", value);
+
+    // Validate current_slider_type
+    if (current_slider_type >= SLIDER_TYPE_MAX) {
+        uprintf("[ERROR]: Invalid slider type. Cannot update visualization.\n");
+        return;
+    }
+
+    // Retrieve min and max for the current slider
+    uint8_t min = slider_ranges[current_slider_type].min;
+    uint8_t max = slider_ranges[current_slider_type].max;
+
+    // Ensure value is within min and max
+    if (value < min) value = min;
+    if (value > max) value = max;
+
+    // Calculate the proportion of LEDs to light based on slider range
+    uint8_t leds_to_light = ((value - min) * TOP_ROW_LED_COUNT) / (max - min);
+
+    uprintf("[DEBUG]: Calculated leds_to_light: %d (value: %d, min: %d, max: %d)\n",
+            leds_to_light, value, min, max);
 
     // Only update if the number of LEDs to light has changed
     if (leds_to_light != last_leds_lit) {
+        uprintf("[DEBUG]: leds_to_light changed from %d to %d. Updating LEDs.\n",
+                last_leds_lit, leds_to_light);
         for (uint8_t i = 0; i < TOP_ROW_LED_COUNT; i++) {
             if (i <= leds_to_light) {
                 rgblight_sethsv_at(0, 0, 255, i);  // Purple for lit LEDs
+                uprintf("[DEBUG]: LED %d set to Purple.\n", i);
             } else {
-                rgblight_sethsv_at(0, 0, 0, i);  // Off for unlit LEDs
+                rgblight_sethsv_at(0, 0, 0, i);    // Off for unlit LEDs
+                uprintf("[DEBUG]: LED %d turned OFF.\n", i);
             }
         }
         rgblight_set();
         last_leds_lit = leds_to_light;
+        uprintf("[DEBUG]: rgblight_set() called. Slider visualization updated.\n");
     }
-    
-    last_update_time = current_time;
-    slider_timeout_timer = current_time;
+
+    // Update the last_update_time using timer_read
+    last_update_time = timer_read();
+    slider_timeout_timer = last_update_time;
+    uprintf("[DEBUG]: last_update_time and slider_timeout_timer set to %u\n",
+            last_update_time);
 }
 
-
 void end_slider_visualization(void) {
-    if (!slider_visualization_active) return;
-    
+    uprintf("[DEBUG]: Ending slider visualization.\n");
     // Restore previous RGB settings
     rgblight_mode_noeeprom(saved_calibration_mode);
     rgblight_sethsv_noeeprom(saved_calibration_hsv.h, saved_calibration_hsv.s, saved_calibration_hsv.v);
     rgblight_set();
-    
+    uprintf("[DEBUG]: Restored RGB mode to %d and HSV to (%d, %d, %d)\n",
+            saved_calibration_mode, saved_calibration_hsv.h, saved_calibration_hsv.s, saved_calibration_hsv.v);
     slider_visualization_active = false;
 }
-
 
 
 

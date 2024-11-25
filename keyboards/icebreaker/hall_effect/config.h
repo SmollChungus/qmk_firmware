@@ -34,7 +34,7 @@
 
 //debug stuff
 #define CONSOLE_VERBOSITY 1 //undef to turn of
-#define DEBUG_MATRIX_SCAN_RATE
+//#define DEBUG_MATRIX_SCAN_RATE
 
 
 //

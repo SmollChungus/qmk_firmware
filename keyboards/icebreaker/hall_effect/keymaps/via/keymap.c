@@ -63,6 +63,9 @@ static uint8_t blink_leds[] = {28, 32, 33, 34}; // LEDs to blink (adjust indices
 static uint8_t saved_mode;
 static HSV saved_hsv;
 
+
+static uint16_t last_eeprom_write_timer = 0;
+
 void start_mode_blink(uint8_t hue) {
     // Save current RGB settings using API functions
     saved_mode = rgblight_get_mode();
@@ -161,27 +164,33 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 void matrix_scan_user(void) {
+
+    // Handle blinking
     if (is_blinking) {
         if (timer_elapsed(blink_timer) > 200) { // Adjust timing as needed
-            // Toggle LEDs
+            uprintf("[DEBUG]: Handling blinking. Blink count: %d\n", blink_count);
             bool leds_on = (blink_count % 2 == 0);
             for (uint8_t i = 0; i < sizeof(blink_leds); i++) {
                 uint8_t led_index = blink_leds[i];
                 if (leds_on) {
                     // Turn on LED with specified hue
                     rgblight_sethsv_at(blink_hue, 255, 255, led_index);
+                    uprintf("[DEBUG]: LED %d turned ON with hue %d\n", led_index, blink_hue);
                 } else {
                     // Turn off LED
                     rgblight_sethsv_at(0, 0, 0, led_index);
+                    uprintf("[DEBUG]: LED %d turned OFF\n", led_index);
                 }
             }
             rgblight_set();
             blink_count--;
             blink_timer = timer_read();
+            uprintf("[DEBUG]: Decremented blink_count to %d\n", blink_count);
 
             if (blink_count == 0) {
                 // Blinking finished
                 is_blinking = false;
+                uprintf("[DEBUG]: Blinking finished. Restoring previous RGB settings.\n");
                 // Restore previous RGB settings
                 rgblight_mode_noeeprom(saved_mode);
                 rgblight_sethsv_noeeprom(saved_hsv.h, saved_hsv.s, saved_hsv.v);
@@ -189,22 +198,41 @@ void matrix_scan_user(void) {
             }
         }
     }
+
+    // Handle EEPROM save with debounce
     if (eeprom_save_pending && timer_elapsed(eeprom_save_timer) > EEPROM_SAVE_DELAY) {
-    for (int i = 0; i < SENSOR_COUNT; i++) {
-        eeprom_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
-        eeprom_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
-        he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
-        he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+        uprintf("[DEBUG]: EEPROM save pending detected.\n");
+        // Check if minimum interval has passed since last EEPROM write
+        if (timer_elapsed(last_eeprom_write_timer) > EEPROM_SAVE_DELAY) {
+            uprintf("[DEBUG]: Minimum EEPROM write interval passed. Proceeding with save.\n");
+            for (int i = 0; i < SENSOR_COUNT; i++) {
+                eeprom_he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
+                eeprom_he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+                he_key_configs[i].he_actuation_threshold = via_he_key_configs[i].he_actuation_threshold;
+                he_key_configs[i].he_release_threshold = via_he_key_configs[i].he_release_threshold;
+                uprintf("[DEBUG]: Sensor %d thresholds set. Actuation: %d, Release: %d\n",
+                        i,
+                        eeprom_he_key_configs[i].he_actuation_threshold,
+                        eeprom_he_key_configs[i].he_release_threshold);
+            }
+            eeconfig_update_user_datablock(&eeprom_he_key_configs);
+            eeprom_save_pending = false;
+            uprintf("[SYSTEM]: Settings auto-saved to EEPROM\n");
+            last_eeprom_write_timer = timer_read(); // Reset the debounce timer
+            uprintf("[DEBUG]: Updated last_eeprom_write_timer to %u\n", last_eeprom_write_timer);
+        } else {
+            uprintf("[DEBUG]: EEPROM save deferred. Minimum interval not yet passed.\n");
+            // Optionally, you can reschedule the save by uncommenting the next line
+            // eeprom_save_timer = timer_read();
+        }
     }
-    eeconfig_update_user_datablock(&eeprom_he_key_configs);
-    eeprom_save_pending = false;
-    uprintf("[SYSTEM]: Settings auto-saved to EEPROM\n");
-    }
-    if (slider_animation_active && timer_elapsed(slider_timeout_timer) > SLIDER_TIMEOUT) {
+
+    // Handle slider animation timeout
+    if (slider_active && timer_elapsed(slider_timeout_timer) > SLIDER_TIMEOUT) {
+        uprintf("[DEBUG]: Slider animation timeout reached. Ending visualization.\n");
         end_slider_visualization();
-        slider_animation_active = false;
+        slider_active = false;
         last_moved_slider = -1;
     }
+
 }
-
-
