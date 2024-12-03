@@ -222,8 +222,6 @@ void matrix_scan_user(void) {
             uprintf("[DEBUG]: Updated last_eeprom_write_timer to %u\n", last_eeprom_write_timer);
         } else {
             uprintf("[DEBUG]: EEPROM save deferred. Minimum interval not yet passed.\n");
-            // Optionally, you can reschedule the save by uncommenting the next line
-            // eeprom_save_timer = timer_read();
         }
     }
 
@@ -234,5 +232,8 @@ void matrix_scan_user(void) {
         slider_active = false;
         last_moved_slider = -1;
     }
-
+    if (slider_active && final_slider_update_pending && timer_elapsed(slider_timeout_timer) > 500) {
+        uprintf("[DEBUG]: final update slider RGB\n");
+        handle_final_led_update();
+    }
 }

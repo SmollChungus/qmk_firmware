@@ -28,6 +28,8 @@
 uint16_t eeprom_save_timer = 0;
 bool eeprom_save_pending = false;
 
+
+//sliders
 extern void start_slider_visualization(uint8_t value);
 
 // Declaring enums for VIA config menu
@@ -169,7 +171,8 @@ void via_he_config_set_value(uint8_t *data) {
                 he_key_rapid_trigger_configs[i].deadzone = value_data;
                 eeconfig_update_user_datablock(&eeprom_he_key_configs);
             }
-
+            last_moved_slider = SLIDER_TYPE_RTP_DEADZONE;
+            current_slider_type = SLIDER_TYPE_RTP_DEADZONE;
             start_slider_visualization(value_data);
             //uprintf("[SYSTEM]: Rapid Trigger Deadzone set to: %d\n", he_key_rapid_trigger_configs[0].deadzone);
             break;
@@ -178,6 +181,8 @@ void via_he_config_set_value(uint8_t *data) {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_rapid_trigger_configs[i].engage_distance = value_data;
             }
+            last_moved_slider = SLIDER_TYPE_RTP_ENGAGE;
+            current_slider_type = SLIDER_TYPE_RTP_ENGAGE;
             start_slider_visualization(value_data);
 
             //uprintf("[SYSTEM]: Rapid Trigger Engage Distance set to: %d\n", he_key_rapid_trigger_configs[0].engage_distance);
@@ -187,13 +192,15 @@ void via_he_config_set_value(uint8_t *data) {
             for (int i = 0; i < SENSOR_COUNT; i++) {
                 he_key_rapid_trigger_configs[i].disengage_distance = value_data;
             }
-
+            last_moved_slider = SLIDER_TYPE_RTP_ENGAGE;
+            current_slider_type = SLIDER_TYPE_RTP_ENGAGE;
             start_slider_visualization(value_data);
 
             //uprintf("[SYSTEM]: Rapid Trigger Release Distance set to: %d\n", he_key_rapid_trigger_configs[0].disengage_distance);
             break;
         }
     }
+    latest_slider_value = value_data;
 }
 
 void via_he_config_get_value(uint8_t *data) {

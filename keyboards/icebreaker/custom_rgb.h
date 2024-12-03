@@ -36,6 +36,7 @@ typedef enum {
     SLIDER_TYPE_ACTUATION,
     SLIDER_TYPE_RELEASE,
     SLIDER_TYPE_RTP_DEADZONE, // Rapid Trigger Deadzone
+    SLIDER_TYPE_RTP_ENGAGE,
     SLIDER_TYPE_MAX
 } slider_type_t;
 
@@ -49,7 +50,6 @@ extern HSV saved_calibration_hsv;
 
 void calibration_warning(void);
 void flash_rgb_warning(uint8_t sensor_id, uint8_t notification_type);
-void handle_rgb_notification(uint8_t notification_type);
 
 
 typedef struct {
@@ -66,5 +66,11 @@ void end_calibration_visual(void);
 void start_slider_visualization(uint8_t value);
 void update_slider_visualization(uint8_t value);
 void end_slider_visualization(void);
+void handle_final_led_update(void);
+
 extern bool slider_visualization_active;
 extern uint16_t slider_timeout_timer;
+
+// New global variables for final update handling
+extern uint8_t latest_slider_value;
+extern bool final_slider_update_pending;
