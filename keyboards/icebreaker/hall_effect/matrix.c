@@ -30,8 +30,6 @@ void matrix_init(void) {
     noise_floor_calibration_init();
 
     rgblight_init();
-    rgblight_mode(1); // solid, no timer, can ditch?
-
 
     matrix_scan_kb(); //
 }

@@ -37,6 +37,7 @@ typedef enum {
     SLIDER_TYPE_RELEASE,
     SLIDER_TYPE_RTP_DEADZONE, // Rapid Trigger Deadzone
     SLIDER_TYPE_RTP_ENGAGE,
+    SLIDER_TYPE_RTP_DISENGAGE,
     SLIDER_TYPE_MAX
 } slider_type_t;
 

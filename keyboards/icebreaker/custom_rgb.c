@@ -50,6 +50,7 @@ const slider_range_t slider_ranges[SLIDER_TYPE_MAX] = {
     [SLIDER_TYPE_RELEASE] = {SLIDER_TYPE_RELEASE, 10, 90},
     [SLIDER_TYPE_RTP_DEADZONE] = {SLIDER_TYPE_RTP_DEADZONE, 15, 60},
     [SLIDER_TYPE_RTP_ENGAGE] = {SLIDER_TYPE_RTP_ENGAGE, 5, 20},
+    [SLIDER_TYPE_RTP_DISENGAGE] = {SLIDER_TYPE_RTP_DISENGAGE, 5, 20},
 };
 
 slider_type_t current_slider_type = SLIDER_TYPE_MAX;
@@ -259,6 +260,9 @@ void update_slider_visualization(uint8_t value) {
             current_color = warning_color;
             break;
         case SLIDER_TYPE_RTP_ENGAGE:
+            current_color = rapid_color;
+            break;
+        case SLIDER_TYPE_RTP_DISENGAGE:
             current_color = rapid_color;
             break;
         default:
