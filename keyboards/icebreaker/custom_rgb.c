@@ -15,8 +15,8 @@ static const HSV rapid_color = {191, 255, 255};      // Purple
 static const HSV cancel_color = {0, 255, 255};       // Red
 
 static const HSV uncalibrated_color = {0, 255, 255};     // Red
-static const HSV partial_color = {28, 255, 255};         // Orange
-static const HSV calibrated_color = {85, 255, 255};      // Green
+static const HSV partial_color = {45, 255, 255};         // Orange
+static const HSV calibrated_color = {90, 255, 255};      // Green
 
 typedef struct {
     uint8_t sensor_id;

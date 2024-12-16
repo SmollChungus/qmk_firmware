@@ -18,9 +18,9 @@ extern int8_t last_moved_slider;
 extern bool slider_active;
 
 // Calibration thresholds
-#define CEILING_LOW 600    // Below this is red
-#define CEILING_MEDIUM 630 // Below this is orange
-#define CEILING_GOOD 680   // Above this is green
+#define CEILING_LOW 570    // Below this is red
+#define CEILING_MEDIUM 600 // Below this is orange
+#define CEILING_GOOD 650   // Above this is green
 
 // Flash settings
 #define FLASH_DURATION 250
