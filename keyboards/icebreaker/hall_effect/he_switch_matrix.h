@@ -175,3 +175,5 @@ typedef struct {
     uint8_t index;
 } sensor_data_t;
 
+bool he_update_encoder_handle(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
+bool he_encoder_read(void);

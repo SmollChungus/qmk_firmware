@@ -4,6 +4,8 @@
 #include "wait.h"
 #include "print.h"
 #include "rgblight.h"
+#include "encoder.h"
+#include "gpio.h"
 
 /* matrix state(1:on, 0:off) */
 matrix_row_t raw_matrix[MATRIX_ROWS]; // raw values
@@ -31,6 +33,16 @@ void matrix_init(void) {
 
     rgblight_init();
 
+    encoder_driver_init(); // Initialize the rotary encoder driver
+
+    setPinOutput(ENCODER_CLICK_PIN_A);
+    writePinHigh(ENCODER_CLICK_PIN_A);
+
+    palSetPadMode(GPIOB, 12, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPad(GPIOB, 12); // writePinHigh
+
+    // Configure PB15 as input with pull-down
+    palSetPadMode(GPIOB, 15, PAL_MODE_INPUT_PULLDOWN);
     matrix_scan_kb(); //
 }
 
@@ -76,6 +88,8 @@ uint8_t matrix_scan(void) {
     else if (console_output == 5) { //0,0 escape key algorithm debug
         he_matrix_print_rapid_trigger_debug();
     }
+
+    encoder_driver_task(); // Process encoder events
 
     matrix_scan_kb(); //to call matrix_scan_user i suppose
 

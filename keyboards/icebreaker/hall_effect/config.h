@@ -42,7 +42,7 @@
 #define MATRIX_COLS 16
 
 // Multiplexer setup
-#define SENSOR_COUNT 68
+#define SENSOR_COUNT 69
 #define MUX_EN_PINS \
     { B0, A7, A6, A5, A4 }
 
@@ -78,5 +78,7 @@
 
 
 
-
+//encoder setup
+#define ENCODER_CLICK_PIN_A B12
+#define ENCODER_CLICK_PIN_B B15
 

@@ -54,26 +54,3 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 #endif
 };
-
-#ifdef matrix_shenanigans
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-        case ACT_MODE_0:
-            if (record->event.pressed) {
-                he_config.he_actuation_mode = 0;
-                uprintf("Actuation Mode set to 0\n");
-            }
-            return false;
-
-        case ACT_MODE_1:
-            if (record->event.pressed) {
-                he_config.he_actuation_mode = 1;
-                uprintf("Actuation Mode set to 1\n");
-            }
-            return false;
-
-        default:
-            return true;
-    }
-}
-#endif
