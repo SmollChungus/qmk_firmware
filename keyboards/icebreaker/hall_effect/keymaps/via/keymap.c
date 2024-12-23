@@ -22,15 +22,16 @@
 extern uint8_t console_output;
 
 enum custom_keycodes {
-    VERB0 = SAFE_RANGE,
-    VERB1,
-    VERB2,
-    VERB3,
-    VERB4,
-    VERB5,
-    APCM,
+    APCM = QK_KB_0,
     RTM,
-    KCM
+    KCM,
+    DEBUG0,
+    DEBUG1,
+    DEBUG2,
+    DEBUG3,
+    DEBUG4,
+    DEBUG5,
+
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -44,11 +45,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LCTL,  KC_LGUI,  KC_LALT,  KC_SPC,                                          KC_RALT,   KC_RCTL,                              KC_LEFT,   KC_DOWN,  KC_RGHT, KC_MPLY
     ),
     [1] = LAYOUT(
-        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12,   _______,  _______,  QK_BOOT,
-        _______,  APCM,     RTM,      KCM,      _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  KC_PGUP,
-        _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            KC_PGDN,
-        _______,  VERB1,    VERB5,    VERB0,    VERB2,   _______,  _______,  _______,  _______,  _______,  _______,  KC_MPLY,             RGB_HUI,  _______,
-        _______,  _______,  _______,  _______,                                         _______,  _______,                       RGB_TOG,  RGB_HUD,  KC_MNXT, _______
+        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,   KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,    KC_F12,   _______,  _______,  RGB_TOG,
+        _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  RGB_VAI,
+        _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   KC_MPLY,            RGB_VAD,
+        MO(2),    _______,  _______,  _______,  _______, _______,  _______,  RGB_HUD,  RGB_HUI,  RGB_SAD,  RGB_SAI,  KC_MUTE,   KC_VOLU,  _______,
+        _______,  _______,  _______,  _______,                                         _______,  _______,                       KC_MPRV,  KC_VOLD,  KC_MNXT, _______
+    ),
+        [2] = LAYOUT(
+        QK_BOOT,  _______,    _______,    _______,    _______,   _______,    _______,    _______,    _______,    _______,    _______,   _______,    _______,   _______,  _______,  _______,
+        _______,  APCM,     RTM,      KCM,      _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,            _______,
+        _______,  DEBUG1,    DEBUG5,    DEBUG0,    DEBUG2,   _______,  _______,  _______,  _______,  _______,  _______,  _______,             _______,  _______,
+        _______,  _______,  _______,  _______,                                         _______,  _______,                       _______,  _______,  _______, _______
     )
 
 };
@@ -82,48 +90,6 @@ void start_mode_blink(uint8_t hue) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case VERB0:
-            if (record->event.pressed) {
-                console_output = 0;
-                uprintf("[SYSTEM]: Logging Mode set to 0\n");
-            }
-            return false;
-
-        case VERB1:
-            if (record->event.pressed) {
-                console_output = 1;
-                uprintf("[SYSTEM]: Logging Mode set to 1\n");
-            }
-            return false;
-
-        case VERB2:
-            if (record->event.pressed) {
-                console_output = 2;
-                uprintf("[SYSTEM]: Logging Mode set to 2 (blocking keystrokes)\n");
-            }
-            return false;
-
-        case VERB3:
-            if (record->event.pressed) {
-                console_output = 3;
-                uprintf("[SYSTEM]: Logging Mode set to 3(none)\n");
-            }
-            return false;
-
-        case VERB4:
-            if (record->event.pressed) {
-                console_output = 4;
-                uprintf("[SYSTEM]: Logging Mode set to 4\n");
-            }
-            return false;
-
-        case VERB5:
-            if (record->event.pressed) {
-                console_output = 5;
-                uprintf("[SYSTEM]: Logging Mode set to 5\n");
-            }
-            return false;
-
         case APCM:
             if (record->event.pressed) {
                 uprintf("[SYSTEM]: Actuation Point Control Mode set\n");
@@ -157,6 +123,50 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 eeconfig_update_kb_datablock(&eeprom_he_config);
             }
             return false;
+
+        case DEBUG0:
+            if (record->event.pressed) {
+                console_output = 0;
+                uprintf("[SYSTEM]: Logging Mode set to 0\n");
+            }
+            return false;
+
+        case DEBUG1:
+            if (record->event.pressed) {
+                console_output = 1;
+                uprintf("[SYSTEM]: Logging Mode set to 1\n");
+            }
+            return false;
+
+        case DEBUG2:
+            if (record->event.pressed) {
+                console_output = 2;
+                uprintf("[SYSTEM]: Logging Mode set to 2 (blocking keystrokes)\n");
+            }
+            return false;
+
+        case DEBUG3:
+            if (record->event.pressed) {
+                console_output = 3;
+                uprintf("[SYSTEM]: Logging Mode set to 3(none)\n");
+            }
+            return false;
+
+        case DEBUG4:
+            if (record->event.pressed) {
+                console_output = 4;
+                uprintf("[SYSTEM]: Logging Mode set to 4\n");
+            }
+            return false;
+
+        case DEBUG5:
+            if (record->event.pressed) {
+                console_output = 5;
+                uprintf("[SYSTEM]: Logging Mode set to 5\n");
+            }
+            return false;
+
+
 
         default:
             return true;
@@ -241,15 +251,12 @@ void matrix_scan_user(void) {
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [0] =   { ENCODER_CCW_CW(KC_VOLD, KC_VOLU)  },
-    [1] =  { ENCODER_CCW_CW(RM_SATD, RM_SATU)  },
+    [1] =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI)  },
+    [2] =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI)  },
 };
 #endif
 
-void keyboard_post_init_user(void) {
-    debug_enable = true;
-    print("Encoder debug enabled\n");
-    calibration_warning();
-}
+
 
 bool encoder_update_user(uint8_t index, bool clockwise) {
     print("Encoder event: ");

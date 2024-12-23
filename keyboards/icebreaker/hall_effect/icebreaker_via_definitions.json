@@ -3,6 +3,18 @@
   "vendorId": "0x5363",
   "productId": "0x0010",
   "keycodes": ["qmk_lighting"],
+  "customKeycodes": [
+    {"name": "APCM", "title": "Actuation Point Mode", "shortName": "APCM"},
+    {"name": "RTM", "title": "Rapid Trigger Mode", "shortName": "RTM"},
+    {"name": "KCM", "title": "Key Cancel Mode", "shortName": "KCM"},
+    {"name": "DEBUG0", "title": "Verbosity 0", "shortName": "Debug0"},
+    {"name": "DEBUG1", "title": "Verbosity 1", "shortName": "Debug1"},
+    {"name": "DEBUG2", "title": "Verbosity 2", "shortName": "Debug2"},
+    {"name": "DEBUG3", "title": "Verbosity 3", "shortName": "Debug3"},
+    {"name": "DEBUG4", "title": "Verbosity 4", "shortName": "Debug4"},
+    {"name": "DEBUG5", "title": "Verbosity 5", "shortName": "Debug5"}
+
+  ],
   "menus": [
       "qmk_rgblight",
       {

@@ -6,7 +6,7 @@ static const uint8_t sensor_to_led_map[SENSOR_COUNT] = {
     30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16,      // Row 1
     31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,          // Row 2
     58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45,          // Row 3
-    59, 60, 61, 62, 63, 64, 65, 66, 67                               // Row 4
+    59, 60, 61, 62, 63, 64, 65, 66, 67                         // Row 4
 };
 
 static const HSV warning_color = {28, 255, 255};     // Orange
@@ -144,6 +144,7 @@ void start_calibration_rgb(void) {
 
 void update_calibration_rgb(uint8_t sensor_id, uint16_t ceiling) {
     uint8_t new_state;
+    if(sensor_id == 68) return; //encoder
     
     if (ceiling >= CEILING_GOOD) {
         new_state = LED_STATE_CALIBRATED;
@@ -163,6 +164,8 @@ void apply_calibration_changes_rgb(void) {
     if (!calibration_changes_pending) return;
 
     for (int i = 0; i < SENSOR_COUNT; i++) {
+        if (i == 68) continue; // Skip encoder
+
         HSV color;
         switch (calibration_leds[i].state) {
             case LED_STATE_CALIBRATED:
