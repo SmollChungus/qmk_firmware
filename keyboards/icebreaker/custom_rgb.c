@@ -69,7 +69,7 @@ void calibration_warning(void) {
     // First collect all warnings
     for (int i = 0; i < SENSOR_COUNT; i++) {
         uint16_t ceiling = eeprom_he_key_configs[i].noise_ceiling;
-        if (ceiling < 650) {
+        if (ceiling < CEILING_GOOD) {
             warning_leds[warning_led_count].sensor_id = i;
             warning_led_count++;
             uprintf("Warning: Sensor %d has low ceiling value: %d\n", i, ceiling);
