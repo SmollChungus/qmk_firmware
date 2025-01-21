@@ -1,4 +1,4 @@
-#include "custom_rgb.h"
+#include "icebreaker_rgb.h"
 #include "he_switch_matrix.h"
 
 static const uint8_t sensor_to_led_map[SENSOR_COUNT] = {

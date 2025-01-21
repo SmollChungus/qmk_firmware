@@ -21,7 +21,7 @@
 #include "math.h"
 #include "timer.h" // Debugging
 #include "raw_hid.h"
-#include "custom_rgb.h"
+#include "icebreaker_rgb.h"
 
 
 #ifdef VIA_ENABLE

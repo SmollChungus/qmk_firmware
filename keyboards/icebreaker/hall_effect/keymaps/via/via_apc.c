@@ -21,7 +21,7 @@
 #include "config.h"
 #include "print.h"
 #include "eeprom.h"
-#include "custom_rgb.h"
+#include "icebreaker.h"
 
 #ifdef VIA_ENABLE
 
