@@ -21,8 +21,7 @@
 #include "config.h"
 #include "print.h"
 #include "eeprom.h"
-#include "icebreaker.h"
-
+#include "icebreaker_rgb.h"
 #ifdef VIA_ENABLE
 
 uint16_t eeprom_save_timer = 0;
