@@ -31,7 +31,7 @@
 #define RGBLIGHT_DEFAULT_HUE 0
 #define RGBLIGHT_DEFAULT_SAT 0
 #define RGBLIGHT_DEFAULT_VAL 100
-
+#define RGBLIGHT_SLEEP
 //debug stuff
 #define CONSOLE_VERBOSITY 1 //undef to turn of
 //#define DEBUG_MATRIX_SCAN_RATE
