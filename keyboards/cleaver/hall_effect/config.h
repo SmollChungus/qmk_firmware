@@ -1,0 +1,84 @@
+// config.h
+
+#pragma once
+
+
+// PWM + DMA setup on PA8
+#define WS2812_DI_PIN A8
+
+#define WS2812_PWM_DRIVER PWMD1
+#define WS2812_PWM_CHANNEL 1
+#define WS2812_PWM_PAL_MODE 1
+#define WS2812_PWM_DMA_STREAM STM32_DMA2_STREAM5
+#define WS2812_PWM_DMA_CHANNEL 6
+//#define WS2812_PWM_COMPLEMENTARY_OUTPUT
+
+/* PWM + DMA setup on PB1 -- setup works after jumping to B1
+#define WS2812_DI_PIN B1
+
+#define WS2812_PWM_DRIVER PWMD3
+#define WS2812_PWM_CHANNEL 4
+#define WS2812_PWM_PAL_MODE 2
+#define WS2812_DMA_STREAM STM32_DMA1_STREAM2
+#define WS2812_DMA_CHANNEL 5
+*/
+
+
+
+
+// RGB Defaults
+#define RGBLIGHT_DEFAULT_MODE RGBLIGHT_MODE_STATIC_LIGHT
+#define RGBLIGHT_DEFAULT_HUE 0
+#define RGBLIGHT_DEFAULT_SAT 0
+#define RGBLIGHT_DEFAULT_VAL 100
+#define RGBLIGHT_SLEEP
+//debug stuff
+#define CONSOLE_VERBOSITY 1 //undef to turn of
+//#define DEBUG_MATRIX_SCAN_RATE
+
+
+//
+#define MATRIX_ROWS 5
+#define MATRIX_COLS 16
+
+// Multiplexer setup
+#define SENSOR_COUNT 67
+#define MUX_EN_PINS \
+    { B0, A7, A6, A5, A4 }
+
+#define MUX_SEL_PINS \
+    { B3, B4, B6, B5 }
+
+#define ANALOG_PORT A3
+#define EECONFIG_KB_DATA_SIZE 3 //
+#define WEAR_LEVELING_LOGICAL_SIZE 2048
+#define WEAR_LEVELING_BACKING_SIZE 16384
+
+// User config
+#define DEFAULT_ACTUATION_LEVEL 50
+#define DEFAULT_RELEASE_LEVEL 30
+#define DEBOUNCE_THRESHOLD 5
+
+
+// Rapid Trigger config
+#define DEFAULT_DEADZONE_RT 15
+#define DEFAULT_RELEASE_DISTANCE_RT 10
+
+//
+#define GEON_RAW_HE
+#ifdef GEON_RAW_HE
+#define EXPECTED_NOISE_FLOOR 540
+#define EXPECTED_NOISE_CEILING 700
+#endif
+
+#define FORCE_NKRO
+
+// Calibration setup
+#define NOISE_FLOOR_SAMPLE_COUNT 10
+
+
+
+//encoder setup
+#define ENCODER_CLICK_PIN_A B12
+#define ENCODER_CLICK_PIN_B B15
+
