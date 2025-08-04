@@ -25,12 +25,12 @@
         "driver": "ws2812",
         "layout": [
             {"matrix": [0, 0], "x": 0, "y": 0, "flags": 8}
-        ],
-        "ws2812": {
-            "driver": "vendor",
-            "pin": "GP29"
-        }
+        ]
     },
+    "ws2812": {
+            "driver": "vendor",
+            "pin": "GP17"
+        },
     "bootloader": "rp2040",
     "layouts": {
         "LAYOUT": {
