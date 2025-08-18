@@ -2,11 +2,12 @@
 #include "he_switch_matrix.h"
 
 static const uint8_t sensor_to_led_map[SENSOR_COUNT] = {
-    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,  // Row 0
-    30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16,      // Row 1
-    31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,          // Row 2
-    58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45,          // Row 3
-    59, 60, 61, 62, 63, 64, 65, 66                        // Row 4
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 
+    
+    29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15,     // Row 1
+    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 
+    57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44,          // Row 3
+    58, 59, 60, 61, 62, 63, 64, 65, 66, 67                                   // Row 4
 };
 
 static const HSV warning_color = {28, 255, 255};     // Orange
@@ -69,11 +70,12 @@ void calibration_warning(void) {
     // First collect all warnings
     for (int i = 0; i < SENSOR_COUNT; i++) {
         uint16_t ceiling = eeprom_he_key_configs[i].noise_ceiling;
-        if (ceiling < CEILING_GOOD) {
+        if (ceiling > CEILING_LOW) {
             warning_leds[warning_led_count].sensor_id = i;
             warning_led_count++;
-            uprintf("Warning: Sensor %d has low ceiling value: %d\n", i, ceiling);
+            uprintf("Warning: Sensor %d has HIGH ceiling value: %d\n", i, ceiling);
         }
+        
     }
 
     // If we have warnings, flash all affected LEDs together
@@ -139,19 +141,18 @@ void start_calibration_rgb(void) {
         rgblight_sethsv_at(uncalibrated_color.h, uncalibrated_color.s, uncalibrated_color.v, sensor_to_led_map[i]);
     }
     rgblight_set();
-    calibration_changes_pending = false;  // Since we've already applied the changes
+    calibration_changes_pending = false;  // 
 }
 
 void update_calibration_rgb(uint8_t sensor_id, uint16_t ceiling) {
     uint8_t new_state;
-    if(sensor_id == 68) return; //encoder
-    
-    if (ceiling >= CEILING_GOOD) {
-        new_state = LED_STATE_CALIBRATED;
-    } else if (ceiling >= CEILING_MEDIUM) {
-        new_state = LED_STATE_PARTIAL;
+
+    if (ceiling <= CEILING_GOOD) {
+        new_state = LED_STATE_CALIBRATED;   // small = good
+    } else if (ceiling <= CEILING_MEDIUM) {
+        new_state = LED_STATE_PARTIAL;      // mid = warning
     } else {
-        new_state = LED_STATE_UNCALIBRATED;
+        new_state = LED_STATE_UNCALIBRATED; // high = bad
     }
 
     if (calibration_leds[sensor_id].state != new_state) {
@@ -160,11 +161,11 @@ void update_calibration_rgb(uint8_t sensor_id, uint16_t ceiling) {
     }
 }
 
+
 void apply_calibration_changes_rgb(void) {
     if (!calibration_changes_pending) return;
 
     for (int i = 0; i < SENSOR_COUNT; i++) {
-        if (i == 68) continue; // Skip encoder
 
         HSV color;
         switch (calibration_leds[i].state) {

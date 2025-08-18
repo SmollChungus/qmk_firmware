@@ -4,7 +4,6 @@
 #include "wait.h"
 #include "print.h"
 #include "rgblight.h"
-#include "encoder.h"
 #include "gpio.h"
 
 /* matrix state(1:on, 0:off) */
@@ -16,7 +15,7 @@ __attribute__((weak)) void matrix_scan_kb(void) { matrix_scan_user(); }
 __attribute__((weak)) void matrix_init_user(void) {}
 __attribute__((weak)) void matrix_scan_user(void) {}
 
-uint8_t console_output = 0; //empty, turn on for debugging
+uint8_t console_output = 2; //empty, turn on for debugging
 
 void matrix_print(void) {
     he_matrix_print();
@@ -33,16 +32,7 @@ void matrix_init(void) {
 
     rgblight_init();
 
-    encoder_driver_init(); // Initialize the rotary encoder driver
 
-    setPinOutput(ENCODER_CLICK_PIN_A);
-    writePinHigh(ENCODER_CLICK_PIN_A);
-
-    palSetPadMode(GPIOB, 12, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPad(GPIOB, 12); // writePinHigh
-
-    // Configure PB15 as input with pull-down
-    palSetPadMode(GPIOB, 15, PAL_MODE_INPUT_PULLDOWN);
     matrix_scan_kb(); //
 }
 
@@ -89,7 +79,6 @@ uint8_t matrix_scan(void) {
         he_matrix_print_rapid_trigger_debug();
     }
 
-    encoder_driver_task(); // Process encoder events
 
     matrix_scan_kb(); //to call matrix_scan_user i suppose
 

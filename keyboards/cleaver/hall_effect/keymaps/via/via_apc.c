@@ -139,7 +139,7 @@ void via_he_config_set_value(uint8_t *data) {
             print("[SYSTEM]: Calibration started, fully press each key on the board!\nBe sure to end the calibration in VIA with the button once you're done.\n");
             he_config.he_calibration_mode = true; // Enable calibration mode
             for (int i = 0; i < SENSOR_COUNT; i++) {
-                he_key_configs[i].noise_ceiling = 570;
+                he_key_configs[i].noise_ceiling = 490; // refactorflag
             }
             start_calibration_rgb(); // Add this line
             noise_ceiling_calibration();

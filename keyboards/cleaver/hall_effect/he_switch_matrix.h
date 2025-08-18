@@ -137,8 +137,8 @@ extern uint16_t eeprom_save_timer;
 extern bool eeprom_save_pending;
 #define EEPROM_SAVE_DELAY 2000
 
-//_Static_assert(sizeof(eeprom_he_config) >= EECONFIG_KB_DATA_SIZE, "Mismatch in EECONFIG_KB_DATA_SIZE");
-//_Static_assert(sizeof(eeprom_he_key_configs)  >= EECONFIG_USER_DATA_SIZE, "Mismatch in EECONFIG_USER_DATA_SIZE");
+_Static_assert(sizeof(eeprom_he_config) == EECONFIG_KB_DATA_SIZE, "Mismatch in EECONFIG_KB_DATA_SIZE");
+_Static_assert(sizeof(eeprom_he_key_configs)  == EECONFIG_USER_DATA_SIZE, "Mismatch in EECONFIG_USER_DATA_SIZE");
 
 
 int       he_init(he_key_config_t he_key_configs[], size_t count);;
@@ -174,6 +174,3 @@ typedef struct {
     uint16_t samples[SAMPLE_COUNT];
     uint8_t index;
 } sensor_data_t;
-
-bool he_update_encoder_handle(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value);
-bool he_encoder_read(void);

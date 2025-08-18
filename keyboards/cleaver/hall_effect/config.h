@@ -30,7 +30,7 @@
 #define RGBLIGHT_DEFAULT_MODE RGBLIGHT_MODE_STATIC_LIGHT
 #define RGBLIGHT_DEFAULT_HUE 0
 #define RGBLIGHT_DEFAULT_SAT 0
-#define RGBLIGHT_DEFAULT_VAL 100
+#define RGBLIGHT_DEFAULT_VAL 50
 #define RGBLIGHT_SLEEP
 //debug stuff
 #define CONSOLE_VERBOSITY 1 //undef to turn of
@@ -42,9 +42,9 @@
 #define MATRIX_COLS 16
 
 // Multiplexer setup
-#define SENSOR_COUNT 67
+#define SENSOR_COUNT 68
 #define MUX_EN_PINS \
-    { B0, A7, A6, A5, A4 }
+    { A5, A4, A7, B0, A6 }
 
 #define MUX_SEL_PINS \
     { B3, B4, B6, B5 }
@@ -67,8 +67,8 @@
 //
 #define GEON_RAW_HE
 #ifdef GEON_RAW_HE
-#define EXPECTED_NOISE_FLOOR 540
-#define EXPECTED_NOISE_CEILING 700
+#define EXPECTED_NOISE_FLOOR 510 // unpressed state
+#define EXPECTED_NOISE_CEILING 10 // fully pressed state (with 10 margin)
 #endif
 
 #define FORCE_NKRO
@@ -76,9 +76,4 @@
 // Calibration setup
 #define NOISE_FLOOR_SAMPLE_COUNT 10
 
-
-
-//encoder setup
-#define ENCODER_CLICK_PIN_A B12
-#define ENCODER_CLICK_PIN_B B15
 

@@ -34,11 +34,11 @@ via_he_key_config_t via_he_key_configs[SENSOR_COUNT];
 
 //data = row,col,sensor_id,mux_id,mux_channel
 const sensor_to_matrix_map_t sensor_to_matrix_map[] = {
-    {0,0,0,0,2},  {0,1,1,0,3},  {0,2,2,0,4},  {0,3,3,0,5},  {0,4,4,0,6},  {0,5,5,1,11},  {0,6,6,1,10},  {0,7,7,1,9},  {0,8,8,2,6},  {0,9,9,2,7},  {0,10,10,2,9},{0,11,11,2,10}, {0,12,12,2,11}, {0,13,13,2,12},{0,14,14,2,13},
-    {1,0,15,0,1}, {1,1,16,0,7}, {1,2,17,0,8}, {1,3,18,0,9}, {1,4,19,0,10}, {1,5,20,0,11}, {1,6,21,2,2}, {1,7,22,2,3}, {1,8,23,2,14}, {1,9,24,3,1}, {1,10,25,3,2},{1,11,26,3,3}, {1,12,27,4,15}, {1,13,28,4,0},{1,14,29,4,1},
-    {2,0,30,0,0}, {2,1,31,0,12},{2,2,32,1,6},{2,3,33,1,13}, {2,4,34,1,12},{2,5,35,1,8},{2,6,36,2,4},{2,7,37,2,5}, {2,8,38,3,0}, {2,9,39,3,4},{2,10,40,3,5},{2,11,41,3,6}, {2,12,42,3,7},{2,13,43,4,3},
-    {3,0,44,0,15}, {3,1,45,1,5},{3,2,46,1,7},{3,3,47,1,14},{3,4,48,1,3},{3,5,49,2,1},{3,6,50,2,8},{3,7,51,2,15},{3,8,52,3,8},{3,9,53,3,9},{3,10,54,4,5},{3,11,55,4,2},{3,12,56,4,4},
-    {4,0,57,0,14},{4,1,58,0,13},{4,2,59,1,4}, {4,3,60,2,0},{4,4,61,3,15},{4,5,62,3,14},{4,6,63,3,13}, {4,7,64,3,12},{4,8,65,3,11},{4,9,66,3,10} //sensor 68 is dummy for encoder
+    {0,0,0,0,2},  {0,1,1,0,3},  {0,2,2,0,4},  {0,3,3,0,5},  {0,4,4,0,6},  {0,5,5,1,11}, {0,6,6,1,10}, {0,7,7,1,9},  {0,8,8,2,6},  {0,9,9,2,7}, {0,10,10,2,9},{0,11,11,2,10},{0,12,12,2,11},{0,13,13,2,12},{0,14,14,2,13},
+    {1,0,15,0,1}, {1,1,16,0,7}, {1,2,17,0,8}, {1,3,18,0,9}, {1,4,19,0,10},{1,5,20,0,11},{1,6,21,2,2}, {1,7,22,2,3}, {1,8,23,2,14},{1,9,24,3,1},{1,10,25,3,2},{1,11,26,3,3}, {1,12,27,4,15},{1,13,28,4,0}, {1,14,29,4,1},
+    {2,0,30,0,0}, {2,1,31,0,12},{2,2,32,1,6}, {2,3,33,1,13},{2,4,34,1,12},{2,5,35,1,8}, {2,6,36,2,4}, {2,7,37,2,5}, {2,8,38,3,0}, {2,9,39,3,4},{2,10,40,3,5},{2,11,41,3,6}, {2,12,42,3,7}, {2,13,43,4,3},
+    {3,0,44,0,15}, {3,1,45,1,5},{3,2,46,1,7}, {3,3,47,1,14},{3,4,48,1,3}, {3,5,49,2,1}, {3,6,50,2,8}, {3,7,51,2,15},{3,8,52,3,8}, {3,9,53,3,9},{3,10,54,4,5},{3,11,55,4,14},{3,12,56,4,2}, {3,13,57,4,4},
+    {4,0,58,0,14},{4,1,59,0,13},{4,2,60,1,4}, {4,3,61,2,0}, {4,4,62,3,15},{4,5,63,3,14},{4,6,64,3,13},{4,7,65,3,12},{4,8,66,3,11},{4,9,67,3,10} 
 };
 
 
@@ -80,10 +80,10 @@ uint8_t rescale(uint16_t sensor_value, uint8_t sensor_id) {
     uint16_t noise_floor = he_key_configs[sensor_id].noise_floor; //raw read
     uint16_t noise_ceiling = he_key_configs[sensor_id].noise_ceiling; //raw read
 
-    if (noise_ceiling > noise_floor) {
-        if (sensor_value <= noise_floor) return 0;
-        if (sensor_value >= noise_ceiling) return 100;
-        return (uint8_t)(((uint32_t)(sensor_value - noise_floor) * 100) / (noise_ceiling - noise_floor));
+    if (noise_ceiling < noise_floor) {
+        if (sensor_value >= noise_floor) return 0;
+        if (sensor_value <= noise_ceiling) return 100;
+        return (uint8_t)(((uint32_t)(noise_floor - sensor_value) * 100u) / ( noise_floor - noise_ceiling));
     }
     return 0;
 }
@@ -147,27 +147,28 @@ void noise_ceiling_calibration(void) {
         print("exiting calibration mode");
         return;
     }
+
     const uint8_t NUM_READINGS = 5;  // todo move to config.h
     bool led_trigger = false;
 
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
-        uint16_t range = he_key_configs[i].noise_ceiling - he_key_configs[i].noise_floor;
-        uint16_t ceiling_range = he_key_configs[i].noise_ceiling - (range * 0.02);
         uint16_t sum = 0;
-        uint16_t average_value = 0;
 
         // Take multiple readings and calculate their average
         for (uint8_t j = 0; j < NUM_READINGS; j++) {
             sum += he_readkey_raw(i);
         }
-        average_value = sum / NUM_READINGS;
+        uint16_t average_value = sum / NUM_READINGS;
 
-        // Update ceiling if the average reading is above the ceiling range
-        if (average_value > ceiling_range) {
+        // For inverted sensors: smaller values = more pressed
+        // So update ceiling if we found a new *lower* value
+        if (average_value < he_key_configs[i].noise_ceiling) {
             he_key_configs[i].noise_ceiling = average_value;
+            eeprom_he_key_configs[i].noise_ceiling = average_value;
+
             update_calibration_rgb(i, average_value);
-            led_trigger  = true;
-            printf("Updated ceiling for sensor %d to %d\n", i, average_value);
+            led_trigger = true;
+            printf("Updated ceiling for sensor %d to %u\n", i, average_value);
         }
     }
 
@@ -175,6 +176,7 @@ void noise_ceiling_calibration(void) {
         apply_calibration_changes_rgb();
     }
 }
+
 
 int he_init(he_key_config_t he_key_configs[], size_t count) {
     palSetLineMode(ANALOG_PORT, PAL_MODE_INPUT_ANALOG);
@@ -244,6 +246,22 @@ static inline void select_mux(uint8_t sensor_id) {
             writePinHigh(mux_sel_pins[j]);
         } else {
             writePinLow(mux_sel_pins[j]);
+        }
+    }
+
+    // Debug output for sensor 45 mux selection
+    if (sensor_id == 45) {
+        static uint16_t mux_debug_counter = 0;
+        if (mux_debug_counter++ % 1000 == 0) {
+            uprintf("Sensor 45 mux select: mux_id=%u, channel=%u, EN pins state: ", mux_id, mux_channel);
+            for (int i = 0; i < 5; i++) {
+                uprintf("%d", readPin(mux_en_pins[i]) ? 1 : 0);
+            }
+            uprintf(", SEL pins: ");
+            for (int j = 0; j < 4; j++) {
+                uprintf("%d", readPin(mux_sel_pins[j]) ? 1 : 0);
+            }
+            uprintf("\n");
         }
     }
 }
@@ -399,42 +417,8 @@ bool he_update_key_keycancel(matrix_row_t* current_matrix, uint8_t row, uint8_t 
     return false;
 }
 
-bool he_encoder_read(void) {
-    // Drive pin A high every time we read the switch
-    setPinOutput(ENCODER_CLICK_PIN_A);
-    writePinHigh(ENCODER_CLICK_PIN_A);
 
-    // Now read pin B (pull-down) to see if it’s high (pressed)
-    bool pressed = readPin(ENCODER_CLICK_PIN_B);
-    //uprintf("Encoder Press State: %d\n", pressed);
 
-    return pressed;
-}
-
-bool he_update_encoder_handle(matrix_row_t* current_matrix, uint8_t row, uint8_t col, uint8_t sensor_id, uint16_t sensor_value) {
-    key_debounce_t *key_info = &debounce_matrix[row][col];
-    bool previously_pressed = key_info->debounced_state;
-    bool currently_pressed = he_encoder_read(); 
-
-    if (currently_pressed && !previously_pressed) {
-        if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-            key_info->debounced_state = true;
-            current_matrix[row] |= (1UL << col);
-            key_info->debounce_counter = 0;
-            return true;
-        }
-    } else if (!currently_pressed && previously_pressed) {
-        if (++key_info->debounce_counter >= DEBOUNCE_THRESHOLD) {
-            key_info->debounced_state = false;
-            current_matrix[row] &= ~(1UL << col);
-            key_info->debounce_counter = 0;
-            return true;
-        }
-    } else {
-        key_info->debounce_counter = 0;
-    }
-    return false;
-}
 
 
 
@@ -454,13 +438,6 @@ bool he_matrix_scan(void) {
         uint8_t col = sensor_to_matrix_map[i].col;
         uint16_t sensor_value = he_readkey_raw(sensor_id);
 
-        // Check if this sensor is the encoder click
-        if (sensor_id == 68) { // Encoder Click Sensor
-            if (he_update_encoder_handle(matrix, row, col, sensor_id, sensor_value)) {
-                updated = true;
-            }
-            continue; // Skip normal processing for this sensor
-        }
 
         if (he_config.he_actuation_mode == 0) {
             if (he_update_key(matrix, row, col, sensor_id, sensor_value)) {
