@@ -1,0 +1,8 @@
+//copyright by je boi
+
+#pragma once
+
+#define RGBLIGHT_DEFAULT_MODE   RGBLIGHT_MODE_STATIC_LIGHT
+#define RGBLIGHT_DEFAULT_HUE    0
+#define RGBLIGHT_DEFAULT_SAT    0
+#define RGBLIGHT_DEFAULT_VAL    70
