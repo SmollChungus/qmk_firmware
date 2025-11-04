@@ -39,7 +39,7 @@
 
 //
 #define MATRIX_ROWS 5
-#define MATRIX_COLS 16
+#define MATRIX_COLS 15
 
 // Multiplexer setup
 #define SENSOR_COUNT 68
