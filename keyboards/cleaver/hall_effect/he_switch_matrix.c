@@ -249,7 +249,7 @@ static inline void select_mux(uint8_t sensor_id) {
         }
     }
 
-    // Debug output for sensor 45 mux selection
+    /* Debug output for sensor 45 mux selection
     if (sensor_id == 45) {
         static uint16_t mux_debug_counter = 0;
         if (mux_debug_counter++ % 1000 == 0) {
@@ -263,7 +263,7 @@ static inline void select_mux(uint8_t sensor_id) {
             }
             uprintf("\n");
         }
-    }
+    }*/
 }
 
 // TODO scale and map to calibrated implementation
