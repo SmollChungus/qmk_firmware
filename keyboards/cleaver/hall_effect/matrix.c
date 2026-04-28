@@ -15,7 +15,7 @@ __attribute__((weak)) void matrix_scan_kb(void) { matrix_scan_user(); }
 __attribute__((weak)) void matrix_init_user(void) {}
 __attribute__((weak)) void matrix_scan_user(void) {}
 
-uint8_t console_output = 2; //empty, turn on for debugging
+uint8_t console_output = 0; //empty, turn on for debugging
 
 void matrix_print(void) {
     he_matrix_print();
