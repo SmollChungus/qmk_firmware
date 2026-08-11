@@ -12,8 +12,11 @@
         "bootmagic": true,
         "extrakey": true,
         "mousekey": true,
-        "nkro": true,
-        "rgb_matrix": true
+        "nkro": true
+    },
+    "indicators": {
+        "caps_lock": "GP17",
+        "on_state": 1
     },
     "matrix_pins": {
         "cols": ["GP4", "GP3", "GP2", "GP26", "GP25", "GP24", "GP23", "GP20", "GP19", "GP18", "GP29", "GP28", "GP27", "GP14", "GP1", "GP5", "GP9"],
@@ -21,16 +24,6 @@
     },
     "diode_direction": "COL2ROW",
     "processor": "RP2040",
-    "rgb_matrix": {
-        "driver": "ws2812",
-        "layout": [
-            {"matrix": [0, 0], "x": 0, "y": 0, "flags": 8}
-        ]
-    },
-    "ws2812": {
-            "driver": "vendor",
-            "pin": "GP17"
-        },
     "bootloader": "rp2040",
     "layouts": {
         "LAYOUT": {

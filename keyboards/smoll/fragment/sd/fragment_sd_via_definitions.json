@@ -3,8 +3,6 @@
     "vendorId": "0x5363",
     "productId": "0x8802",
     "matrix": {"rows": 6, "cols": 17},
-    "keycodes": ["qmk_lighting"],
-    "menus": ["qmk_rgb_matrix"],
     "layouts": {
       "labels": [
         "Split Backspace",
